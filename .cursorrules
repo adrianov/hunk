@@ -1,0 +1,37 @@
+# Hunk
+
+Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
+
+## Layout
+
+- `src/main.cpp` — process entry
+- `src/Smoke.cpp` / `Smoke.hpp` — offscreen `--smoke` check
+- `src/MainWindow.cpp` / `MainWindow.hpp` — window lifecycle
+- `src/MainActions.cpp` — menus and toolbar
+- `src/MainChrome.cpp` — file pane and review dock
+- `src/MainTree.cpp` — folder tree
+- `src/MainNotes.cpp` — review list
+- `src/MainReview.cpp` — comment and copy
+- `src/MainLoad.cpp` — git result applied to the window
+- `src/MainDetail.hpp` — theme and note label
+- `src/Theme.cpp` — dark palette
+- `src/DiffCanvas.cpp` / `DiffCanvas.hpp` — diff view state
+- `src/DiffScroll.cpp` — scroll and sticky file tracking
+- `src/DiffInput.cpp` — gutter clicks
+- `src/DiffHeader.cpp` — file header and labels
+- `src/DiffPaint.cpp` — row paint
+- `src/DiffSide.cpp` — one pane, word highlights
+- `src/DiffColors.cpp` / `DiffColors.hpp` — diff colors
+- `src/DiffDoc.cpp` / `DiffDoc.hpp` — file and row model
+- `src/DiffParse.cpp` / `DiffParse.hpp` — unified diff walk
+- `src/DiffPath.cpp` / `DiffDetail.hpp` — paths and headers
+- `src/WordDiff.cpp` — word highlights
+- `src/DiffZip.cpp` — paired delete and add lines
+- `src/GitRepo.cpp` / `GitRepo.hpp` — background git load
+- `src/GitCmd.cpp` / `GitDetail.hpp` — git process and base refs
+- `src/ReviewStore.cpp` / `ReviewStore.hpp` — comments in QSettings
+- `src/ReviewNote.hpp` — one comment
+- `src/ReviewExport.cpp` / `ReviewExport.hpp` — agent markdown
+- `tests/parse_test.cpp` — parser and export checks
+- `CMakeLists.txt` — Qt 6 Widgets app and test
+- `README.md` — build and review format

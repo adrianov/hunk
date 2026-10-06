@@ -1,0 +1,129 @@
+#include "MainWindow.hpp"
+
+#include "DiffCanvas.hpp"
+#include "ReviewStore.hpp"
+
+#include <QComboBox>
+#include <QDockWidget>
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QMenuBar>
+#include <QPlainTextEdit>
+#include <QPushButton>
+#include <QSplitter>
+#include <QTreeWidget>
+#include <QVBoxLayout>
+
+QWidget *MainWindow::makeFilePane()
+{
+    m_filter = new QLineEdit(this);
+    m_filter->setPlaceholderText(QStringLiteral("Filter files"));
+    m_filter->setClearButtonEnabled(true);
+    m_tree = new QTreeWidget(this);
+    m_tree->setHeaderHidden(true);
+    m_tree->setIndentation(14);
+    auto *left = new QWidget(this);
+    auto *layout = new QVBoxLayout(left);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    layout->addWidget(m_filter);
+    layout->addWidget(m_tree, 1);
+    return left;
+}
+
+void MainWindow::buildDiffPane()
+{
+    m_diff = new DiffCanvas(this);
+    auto *split = new QSplitter(this);
+    split->addWidget(makeFilePane());
+    split->addWidget(m_diff);
+    split->setStretchFactor(0, 0);
+    split->setStretchFactor(1, 1);
+    split->setSizes({280, 1000});
+    setCentralWidget(split);
+}
+
+namespace {
+
+QPlainTextEdit *makeEditor(QWidget *parent)
+{
+    auto *editor = new QPlainTextEdit(parent);
+    editor->setPlaceholderText(QStringLiteral("Click a line number in the diff, then write a review comment."));
+    editor->setEnabled(false);
+    return editor;
+}
+
+QPushButton *makeDelete(QWidget *parent)
+{
+    auto *button = new QPushButton(QStringLiteral("Delete"), parent);
+    button->setEnabled(false);
+    return button;
+}
+
+QHBoxLayout *reviewButtons(QPushButton *button)
+{
+    auto *buttons = new QHBoxLayout();
+    buttons->addWidget(button);
+    buttons->addStretch();
+    return buttons;
+}
+
+} // namespace
+
+QWidget *MainWindow::reviewPanel()
+{
+    m_notes = new QListWidget(this);
+    m_editor = makeEditor(this);
+    m_delete = makeDelete(this);
+    auto *panel = new QWidget(this);
+    auto *layout = new QVBoxLayout(panel);
+    layout->setContentsMargins(8, 8, 8, 8);
+    layout->addWidget(m_notes, 1);
+    layout->addWidget(m_editor, 1);
+    layout->addLayout(reviewButtons(m_delete));
+    return panel;
+}
+
+void MainWindow::buildReviews()
+{
+    m_dock = new QDockWidget(QStringLiteral("Reviews"), this);
+    m_dock->setWidget(reviewPanel());
+    addDockWidget(Qt::BottomDockWidgetArea, m_dock);
+    menuBar()->addMenu(QStringLiteral("View"))->addAction(m_dock->toggleViewAction());
+}
+
+void MainWindow::openTreeItem(QTreeWidgetItem *item)
+{
+    if (!item)
+        return;
+    const int index = item->data(0, Qt::UserRole).toInt();
+    if (index < 0)
+        return;
+    m_navLock = true;
+    m_diff->showFile(index);
+    m_navLock = false;
+}
+
+void MainWindow::wireTree()
+{
+    connect(m_filter, &QLineEdit::textChanged, this, &MainWindow::rebuildTree);
+    connect(m_tree, &QTreeWidget::itemClicked, this, &MainWindow::openTreeItem);
+    connect(m_diff, &DiffCanvas::fileScrolled, this, &MainWindow::selectTreeFile);
+    connect(m_diff, &DiffCanvas::commentRequested, this, &MainWindow::commentAt);
+}
+
+void MainWindow::wireNotes()
+{
+    connect(m_notes, &QListWidget::currentRowChanged, this, &MainWindow::showNote);
+    connect(m_editor, &QPlainTextEdit::textChanged, this, &MainWindow::saveNote);
+    connect(m_delete, &QPushButton::clicked, this, [this]() { m_store->removeAt(m_notes->currentRow()); });
+}
+
+void MainWindow::wireMode()
+{
+    connect(m_mode, &QComboBox::currentIndexChanged, this, &MainWindow::reloadFresh);
+    connect(m_base, &QComboBox::activated, this, &MainWindow::reloadIfBaseChanged);
+    if (m_base->lineEdit())
+        connect(m_base->lineEdit(), &QLineEdit::editingFinished, this, &MainWindow::reloadIfBaseChanged);
+}

@@ -1,0 +1,113 @@
+#include "MainWindow.hpp"
+
+#include <QAction>
+#include <QComboBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMenuBar>
+#include <QToolBar>
+
+QAction *MainWindow::makeOpen()
+{
+    auto *action = new QAction(QStringLiteral("Open"), this);
+    action->setShortcut(QKeySequence::Open);
+    connect(action, &QAction::triggered, this, &MainWindow::chooseRepo);
+    return action;
+}
+
+QAction *MainWindow::makeRefresh()
+{
+    auto *action = new QAction(QStringLiteral("Refresh"), this);
+    action->setShortcut(QKeySequence::Refresh);
+    connect(action, &QAction::triggered, this, [this]() { reload(true); });
+    return action;
+}
+
+QAction *MainWindow::makeComment()
+{
+    auto *action = new QAction(QStringLiteral("Comment"), this);
+    action->setShortcut(Qt::CTRL | Qt::Key_Return);
+    action->setShortcutContext(Qt::WindowShortcut);
+    action->setToolTip(QStringLiteral("Comment on the selected line"));
+    connect(action, &QAction::triggered, this, &MainWindow::commentSelection);
+    return action;
+}
+
+QAction *MainWindow::makeCopy()
+{
+    auto *action = new QAction(QStringLiteral("Copy reviews"), this);
+    action->setShortcut(Qt::CTRL | Qt::SHIFT | Qt::Key_C);
+    action->setShortcutContext(Qt::WindowShortcut);
+    action->setToolTip(QStringLiteral("Copy review comments for an LLM agent"));
+    connect(action, &QAction::triggered, this, &MainWindow::copyReviews);
+    return action;
+}
+
+QAction *MainWindow::makeQuit()
+{
+    auto *action = new QAction(QStringLiteral("Quit"), this);
+    action->setMenuRole(QAction::QuitRole);
+    action->setShortcut(QKeySequence::Quit);
+    connect(action, &QAction::triggered, this, &QWidget::close);
+    return action;
+}
+
+void MainWindow::addMenus(QAction *openAct, QAction *refreshAct, QAction *quitAct, QAction *commentAct, QAction *copyAct)
+{
+    auto *fileMenu = menuBar()->addMenu(QStringLiteral("File"));
+    fileMenu->addAction(openAct);
+    fileMenu->addAction(refreshAct);
+    fileMenu->addSeparator();
+    fileMenu->addAction(quitAct);
+    auto *reviewMenu = menuBar()->addMenu(QStringLiteral("Review"));
+    reviewMenu->addAction(commentAct);
+    reviewMenu->addAction(copyAct);
+}
+
+void MainWindow::addModeBox(QToolBar *bar)
+{
+    m_mode = new QComboBox(this);
+    m_mode->addItem(QStringLiteral("Merge request"));
+    m_mode->addItem(QStringLiteral("Uncommitted"));
+    m_mode->addItem(QStringLiteral("Staged"));
+    m_mode->setItemData(0, QStringLiteral("Three-dot diff, base...HEAD"), Qt::ToolTipRole);
+    m_mode->setItemData(1, QStringLiteral("Staged and unstaged changes against HEAD"), Qt::ToolTipRole);
+    m_mode->setItemData(2, QStringLiteral("Staged changes only"), Qt::ToolTipRole);
+    bar->addWidget(m_mode);
+}
+
+void MainWindow::addBaseBox(QToolBar *bar)
+{
+    m_base = new QComboBox(this);
+    m_base->setEditable(true);
+    m_base->setMinimumWidth(180);
+    m_base->setToolTip(QStringLiteral("Base ref for the merge request"));
+    bar->addWidget(m_base);
+}
+
+void MainWindow::fillBar(QToolBar *bar, QAction *openAct, QAction *refreshAct, QAction *commentAct, QAction *copyAct)
+{
+    bar->addAction(openAct);
+    addModeBox(bar);
+    addBaseBox(bar);
+    bar->addAction(refreshAct);
+    bar->addAction(commentAct);
+    bar->addAction(copyAct);
+    bar->addSeparator();
+    bar->addWidget(m_repoLabel);
+    addAction(commentAct);
+    addAction(copyAct);
+}
+
+void MainWindow::buildChrome()
+{
+    auto *openAct = makeOpen();
+    auto *refreshAct = makeRefresh();
+    auto *commentAct = makeComment();
+    auto *copyAct = makeCopy();
+    addMenus(openAct, refreshAct, makeQuit(), commentAct, copyAct);
+    m_repoLabel = new QLabel(QStringLiteral("No repository"), this);
+    auto *bar = addToolBar(QStringLiteral("Main"));
+    bar->setMovable(false);
+    fillBar(bar, openAct, refreshAct, commentAct, copyAct);
+}
