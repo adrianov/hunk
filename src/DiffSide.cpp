@@ -1,8 +1,8 @@
 #include "DiffCanvas.hpp"
 
 #include "DiffColors.hpp"
+#include "DiffSyntax.hpp"
 
-#include <QFontMetrics>
 #include <QPainter>
 
 namespace {
@@ -25,26 +25,6 @@ SideColors colorsFor(SideStyle style)
     else if (style == SideStyle::Del)
         colors = SideColors{kDelBg, kDelFg, kDelWord, kDelFg, true};
     return colors;
-}
-
-void paintSpans(QPainter &painter, int x, int baseline, int top, int height, const QString &text,
-                const QList<WordSpan> &spans, const QColor &color, const QColor &wordBg)
-{
-    const QFontMetrics metrics(painter.font());
-    if (spans.isEmpty()) {
-        painter.setPen(color);
-        painter.drawText(x, baseline, text);
-        return;
-    }
-    for (const WordSpan &span : spans) {
-        const QString fragment = text.mid(span.start, span.end - span.start);
-        const int width = metrics.horizontalAdvance(fragment);
-        if (span.changed)
-            painter.fillRect(x, top, width, height, wordBg);
-        painter.setPen(color);
-        painter.drawText(x, baseline, fragment);
-        x += width;
-    }
 }
 
 void fillCell(QPainter &painter, int cellX, int cellW, int top, int height, int gutterW, const SideColors &colors)
@@ -72,20 +52,27 @@ void paintNumber(QPainter &painter, const QFont &font, int cellX, int top, int h
     painter.drawText(QRect(cellX + 14, top, gutterW - 20, height), Qt::AlignRight | Qt::AlignVCenter, QString::number(number));
 }
 
+void paintWrapped(QPainter &painter, const QFont &font, int cellX, int cellW, int gutter, int top, int height,
+                  int lineH, const QString &text, const QList<Piece> &pieces, const QColor &color, const QColor &word)
+{
+    const int codeW = cellW - gutter;
+    painter.save();
+    painter.setClipRect(cellX + gutter, top, codeW > 0 ? codeW : 1, height);
+    painter.setFont(font);
+    paintCode(painter, cellX + gutter + 8, top, lineH, text, pieces, color, word);
+    painter.restore();
+}
+
 } // namespace
 
 void DiffCanvas::paintOneSide(QPainter &painter, int cellX, int cellW, SideStyle style, const QString &text, int number,
-                              const QList<WordSpan> &spans, bool note, int top, int height, int baseline, int scrollX)
+                              const QList<Piece> &pieces, bool note, int top, int height)
 {
     const SideColors colors = colorsFor(style);
     fillCell(painter, cellX, cellW, top, height, m_gutterW, colors);
     if (note)
-        paintNoteDot(painter, cellX, top, height);
-    paintNumber(painter, m_mono, cellX, top, height, m_gutterW, number);
-    painter.save();
-    painter.setClipRect(cellX + m_gutterW, top, qMax(1, cellW - m_gutterW), height);
-    painter.setFont(m_mono);
-    paintSpans(painter, cellX + m_gutterW + 8 - scrollX, baseline, top, height, text, spans, colors.fg,
-               colors.mark ? colors.word : QColor());
-    painter.restore();
+        paintNoteDot(painter, cellX, top, m_rowH);
+    paintNumber(painter, m_mono, cellX, top, m_rowH, m_gutterW, number);
+    paintWrapped(painter, m_mono, cellX, cellW, m_gutterW, top, height, m_rowH, text, pieces, colors.fg,
+                 colors.mark ? colors.word : QColor());
 }

@@ -21,6 +21,8 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/DiffHeader.cpp` — file header and labels
 - `src/DiffPaint.cpp` — row paint
 - `src/DiffSide.cpp` — one pane, word highlights
+- `src/DiffSyntax.cpp` / `DiffSyntax.hpp` — paint syntax colors
+- `src/Syntax.hpp` / `SyntaxRule.hpp` / `SyntaxLang.cpp` / `SyntaxScan.cpp` / `SyntaxText.cpp` / `SyntaxWord.cpp` — language tokens
 - `src/DiffColors.cpp` / `DiffColors.hpp` — diff colors
 - `src/DiffDoc.cpp` / `DiffDoc.hpp` — file and row model
 - `src/DiffParse.cpp` / `DiffParse.hpp` — unified diff walk
@@ -33,5 +35,8 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/ReviewNote.hpp` — one comment
 - `src/ReviewExport.cpp` / `ReviewExport.hpp` — agent markdown
 - `tests/parse_test.cpp` — parser and export checks
+- `tests/syntax_test.cpp` — syntax color checks
 - `CMakeLists.txt` — Qt 6 Widgets app and test
 - `README.md` — build and review format
+- `features/*.feature` — Gherkin UX reference
+- `.cursor/rules/gherkin-features.mdc` — keep those scenarios current

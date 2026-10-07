@@ -44,25 +44,23 @@ void DiffCanvas::updateVertical(int viewH)
     verticalScrollBar()->setRange(0, qMax(0, m_docH - viewH));
 }
 
-void DiffCanvas::updateHorizontal()
-{
-    const int textW = qMax(40, qMax(1, viewport()->width()) / 2 - m_gutterW - 16);
-    horizontalScrollBar()->setPageStep(textW);
-    horizontalScrollBar()->setSingleStep(40);
-    horizontalScrollBar()->setRange(0, qMax(0, m_maxAdvance - textW));
-}
-
 void DiffCanvas::updateScroll()
 {
     updateVertical(qMax(1, viewport()->height()));
-    updateHorizontal();
 }
 
 void DiffCanvas::resizeEvent(QResizeEvent *event)
 {
     QAbstractScrollArea::resizeEvent(event);
-    updateScroll();
-    viewport()->update();
+    const int width = viewport()->width();
+    const bool same = width == m_viewW;
+    m_viewW = width;
+    if (same || m_doc.files.isEmpty()) {
+        updateScroll();
+        viewport()->update();
+        return;
+    }
+    rebuild();
 }
 
 int DiffCanvas::fileAt(int y) const

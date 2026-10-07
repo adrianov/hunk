@@ -10,7 +10,7 @@ class QPainter;
 
 enum class SideStyle { Empty, Plain, Add, Del };
 
-// Side-by-side diff. Both panes stay on screen; long lines scroll horizontally.
+// Side-by-side diff. Both panes stay on screen; long lines wrap inside the pane.
 class DiffCanvas : public QAbstractScrollArea {
     Q_OBJECT
 public:
@@ -49,24 +49,24 @@ private:
     void ensureFont();
     void rebuild();
     void addFileBands(int fileIndex, int *y);
-    void trackLine(const QString &text);
+    void wrapRow(DiffRow *row, bool single);
+    int rowHeight(const DiffRow &row, bool single) const;
     void updateScroll();
     void updateVertical(int viewH);
-    void updateHorizontal();
     void paintContents();
     void paintDoc(QPainter &painter);
-    void paintVisible(QPainter &painter, int scrollX, int scrollY);
+    void paintVisible(QPainter &painter, int scrollY);
     void paintSticky(QPainter &painter, int scrollY);
-    void paintBand(QPainter &painter, const Band &band, int scrollX);
+    void paintBand(QPainter &painter, const Band &band);
     void paintHeaderBand(QPainter &painter, const Band &band, const FileDiff &file, int viewW);
     void paintLabels(QPainter &painter, const Band &band, const FileDiff &file, int viewW);
     void paintNoteBand(QPainter &painter, const Band &band, const FileDiff &file, int viewW);
-    void paintRow(QPainter &painter, const Band &band, const FileDiff &file, int viewW, int scrollX);
-    void paintSingle(QPainter &painter, const Band &band, const FileDiff &file, const DiffRow &row, int viewW, int baseline, int scrollX);
-    void paintPair(QPainter &painter, const Band &band, const FileDiff &file, const DiffRow &row, int viewW, int baseline, int scrollX);
+    void paintRow(QPainter &painter, const Band &band, const FileDiff &file, int viewW);
+    void paintSingle(QPainter &painter, const Band &band, const FileDiff &file, const DiffRow &row, int viewW);
+    void paintPair(QPainter &painter, const Band &band, const FileDiff &file, const DiffRow &row, int viewW);
     void paintSelection(QPainter &painter, const Band &band, int viewW);
     void paintOneSide(QPainter &painter, int cellX, int cellW, SideStyle style, const QString &text, int number,
-                      const QList<WordSpan> &spans, bool note, int top, int height, int baseline, int scrollX);
+                      const QList<Piece> &pieces, bool note, int top, int height);
     void paintFileHeader(QPainter &painter, const QRect &rect, const FileDiff &file, const QFont &font);
     bool pressIgnored(QMouseEvent *mouse) const;
     void chooseRow(const Band &band, int x);
@@ -79,7 +79,6 @@ private:
     void emitVisibleFile();
     int fileAt(int y) const;
     bool headerStuck(int scrollY) const;
-    int rowBaseline(const Band &band) const;
 
     DiffDoc m_doc;
     QString m_leftLabel;
@@ -93,7 +92,9 @@ private:
     int m_labelH = 24;
     int m_gutterW = 56;
     int m_docH = 0;
-    int m_maxAdvance = 0;
+    int m_viewW = -1;
+    bool m_rebuilding = false;
+    bool m_again = false;
     int m_selFile = -1;
     int m_selRow = -1;
     bool m_selOld = false;

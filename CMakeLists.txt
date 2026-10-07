@@ -13,6 +13,10 @@ add_library(hunk_core STATIC
   src/DiffPath.cpp
   src/WordDiff.cpp
   src/DiffZip.cpp
+  src/SyntaxLang.cpp
+  src/SyntaxScan.cpp
+  src/SyntaxText.cpp
+  src/SyntaxWord.cpp
   src/ReviewExport.cpp
 )
 target_include_directories(hunk_core PUBLIC ${CMAKE_SOURCE_DIR}/src)
@@ -35,6 +39,7 @@ add_executable(hunk
   src/DiffHeader.cpp
   src/DiffPaint.cpp
   src/DiffSide.cpp
+  src/DiffSyntax.cpp
   src/DiffColors.cpp
   src/GitRepo.cpp
   src/GitCmd.cpp
@@ -45,11 +50,16 @@ target_link_libraries(hunk PRIVATE hunk_core Qt6::Widgets Qt6::Concurrent)
 add_executable(hunk_test tests/parse_test.cpp)
 target_link_libraries(hunk_test PRIVATE hunk_core Qt6::Core)
 
+add_executable(hunk_syntax tests/syntax_test.cpp)
+target_link_libraries(hunk_syntax PRIVATE hunk_core Qt6::Core)
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   target_compile_options(hunk_core PRIVATE -Wall -Wextra -Wpedantic)
   target_compile_options(hunk PRIVATE -Wall -Wextra -Wpedantic)
   target_compile_options(hunk_test PRIVATE -Wall -Wextra -Wpedantic)
+  target_compile_options(hunk_syntax PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
 enable_testing()
 add_test(NAME parse COMMAND hunk_test)
+add_test(NAME syntax COMMAND hunk_syntax)
