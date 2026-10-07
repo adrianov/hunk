@@ -57,6 +57,7 @@ void DiffCanvas::setMessage(const QString &text)
     m_wrapTimer.stop();
     m_message = text;
     m_doc = {};
+    m_open.clear();
     m_bands.clear();
     m_docH = 0;
     m_selFile = m_selRow = m_hoverFile = m_hoverRow = m_lastFile = -1;
@@ -69,6 +70,7 @@ void DiffCanvas::setDoc(const DiffDoc &doc, const QString &leftLabel, const QStr
     m_wrapTimer.stop();
     m_message.clear();
     m_doc = doc;
+    m_open = QVector<QSet<int>>(m_doc.files.size());
     highlightDoc(&m_doc);
     m_leftLabel = leftLabel;
     m_rightLabel = rightLabel;
@@ -78,8 +80,13 @@ void DiffCanvas::setDoc(const DiffDoc &doc, const QString &leftLabel, const QStr
 
 void DiffCanvas::setNoteKeys(const QSet<QString> &keys)
 {
+    if (m_notes == keys)
+        return;
     m_notes = keys;
-    viewport()->update();
+    if (m_doc.files.isEmpty())
+        viewport()->update();
+    else
+        rebuild();
 }
 
 void DiffCanvas::wrapRow(DiffRow *row, bool single)
@@ -104,7 +111,7 @@ int DiffCanvas::rowHeight(const DiffRow &row, bool single) const
 
 void DiffCanvas::addFileBands(int fileIndex, int *y)
 {
-    FileDiff &file = m_doc.files[fileIndex];
+    const FileDiff &file = m_doc.files.at(fileIndex);
     m_bands.push_back(Band{Band::Header, fileIndex, -1, *y, m_headerH});
     *y += m_headerH;
     m_bands.push_back(Band{Band::Labels, fileIndex, -1, *y, m_labelH});
@@ -113,14 +120,7 @@ void DiffCanvas::addFileBands(int fileIndex, int *y)
         m_bands.push_back(Band{Band::Note, fileIndex, -1, *y, m_rowH});
         *y += m_rowH;
     } else {
-        const bool single = file.singlePane();
-        for (int rowIndex = 0; rowIndex < file.rows.size(); ++rowIndex) {
-            DiffRow &row = file.rows[rowIndex];
-            wrapRow(&row, single);
-            const int height = rowHeight(row, single);
-            m_bands.push_back(Band{Band::Row, fileIndex, rowIndex, *y, height});
-            *y += height;
-        }
+        addRowBands(fileIndex, y);
     }
     *y += 16;
 }

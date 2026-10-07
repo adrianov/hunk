@@ -42,14 +42,19 @@ void DiffCanvas::chooseRow(const Band &band, int x)
         emit commentRequested(band.file, band.row, oldSide);
 }
 
+void DiffCanvas::pressBand(const Band *band, int x)
+{
+    if (!band || openFold(band, x) || band->kind != Band::Row)
+        return;
+    chooseRow(*band, x);
+}
+
 void DiffCanvas::onPress(QMouseEvent *mouse)
 {
     if (pressIgnored(mouse))
         return;
-    const Band *band = bandAt(int(mouse->position().y()) + verticalScrollBar()->value());
-    if (!band || band->kind != Band::Row)
-        return;
-    chooseRow(*band, int(mouse->position().x()));
+    const int y = int(mouse->position().y()) + verticalScrollBar()->value();
+    pressBand(bandAt(y), int(mouse->position().x()));
 }
 
 void DiffCanvas::clearHover()
@@ -68,14 +73,27 @@ void DiffCanvas::setHover(int file, int row)
     viewport()->update();
 }
 
-void DiffCanvas::onMove(QMouseEvent *mouse)
+void DiffCanvas::hoverRow(const Band *band)
 {
-    const Band *band = bandAt(int(mouse->position().y()) + verticalScrollBar()->value());
     const int file = band && band->kind == Band::Row ? band->file : -1;
     const int row = band && band->kind == Band::Row ? band->row : -1;
     setHover(file, row);
-    const bool hand = file >= 0 && inGutter(m_doc.files.at(file), int(mouse->position().x()), nullptr);
-    viewport()->setCursor(hand ? Qt::PointingHandCursor : Qt::ArrowCursor);
+}
+
+void DiffCanvas::hoverCursor(const Band *band, int x)
+{
+    const int file = band && band->kind == Band::Row ? band->file : -1;
+    const bool gutter = file >= 0 && inGutter(m_doc.files.at(file), x, nullptr);
+    const bool fold = band && band->kind == Band::Fold;
+    viewport()->setCursor(gutter || fold ? Qt::PointingHandCursor : Qt::ArrowCursor);
+}
+
+void DiffCanvas::onMove(QMouseEvent *mouse)
+{
+    const int y = int(mouse->position().y()) + verticalScrollBar()->value();
+    const Band *band = bandAt(y);
+    hoverRow(band);
+    hoverCursor(band, int(mouse->position().x()));
 }
 
 bool DiffCanvas::viewportEvent(QEvent *event)

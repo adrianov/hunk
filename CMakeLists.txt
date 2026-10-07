@@ -13,6 +13,7 @@ add_library(hunk_core STATIC
   src/DiffPath.cpp
   src/WordDiff.cpp
   src/DiffZip.cpp
+  src/DiffFold.cpp
   src/SyntaxLang.cpp
   src/SyntaxScan.cpp
   src/SyntaxText.cpp
@@ -38,6 +39,7 @@ add_executable(hunk
   src/DiffInput.cpp
   src/DiffHeader.cpp
   src/DiffPaint.cpp
+  src/DiffFoldView.cpp
   src/DiffSide.cpp
   src/DiffSyntax.cpp
   src/DiffColors.cpp

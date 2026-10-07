@@ -86,6 +86,8 @@ void DiffCanvas::paintBand(QPainter &painter, const Band &band)
         paintLabels(painter, band, file, viewW);
     else if (band.kind == Band::Note)
         paintNoteBand(painter, band, file, viewW);
+    else if (band.kind == Band::Fold)
+        paintFold(painter, band, viewW);
     else
         paintRow(painter, band, file, viewW);
 }

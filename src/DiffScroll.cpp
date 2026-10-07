@@ -18,6 +18,7 @@ void DiffCanvas::showRow(int file, int row, bool oldSide)
     m_selFile = file;
     m_selRow = row;
     m_selOld = oldSide;
+    revealRow(file, row);
     for (const Band &band : m_bands) {
         if (band.file == file && band.kind == Band::Row && band.row == row) {
             verticalScrollBar()->setValue(qMax(0, band.y - m_headerH - 8));

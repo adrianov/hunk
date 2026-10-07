@@ -5,7 +5,8 @@ Local merge-request diff for macOS and Linux. Qt 6, side-by-side, with review co
 ## Features
 
 - Open a git repository and read the branch like a pull request
-- File list grouped by folder, two panes, wrapped lines, syntax colors, word highlights, sticky file header
+- File list grouped by folder, two panes, wrapped lines, syntax colors (keywords, methods, variables, strings, comments), word highlights, sticky file header
+- Long unchanged stretches collapse. Click the bar to show them, or the side arrows to show 20 lines
 - New files use one pane
 - Compare **merge request** (`base...HEAD`), **uncommitted** (`git diff HEAD`), or **staged**
 - Click a line number to comment. Comments stay in app settings, not in the repo

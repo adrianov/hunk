@@ -1,3 +1,4 @@
+#include "DiffFold.hpp"
 #include "DiffParse.hpp"
 #include "ReviewExport.hpp"
 
@@ -151,6 +152,53 @@ void testExport()
     CHECK(reviewMarkdown(QStringLiteral("t"), {ReviewNote{}}).isEmpty());
 }
 
+QList<DiffRow> rowsOf(const QString &kinds)
+{
+    QList<DiffRow> rows;
+    for (const QChar kind : kinds) {
+        DiffRow row;
+        row.kind = kind == QLatin1Char('c') ? RowKind::Context : RowKind::Add;
+        rows.push_back(row);
+    }
+    return rows;
+}
+
+void testFoldShort()
+{
+    CHECK(foldSpans(rowsOf(QStringLiteral("accccca")), {}).isEmpty());
+}
+
+void testFoldMiddle()
+{
+    const QString pattern = QStringLiteral("a") + QString(20, QLatin1Char('c')) + QStringLiteral("a");
+    const QList<FoldSpan> spans = foldSpans(rowsOf(pattern), {});
+    CHECK(spans.size() == 1);
+    CHECK(spans.at(0).first == 4);
+    CHECK(spans.at(0).last == 17);
+}
+
+void testFoldEdge()
+{
+    const QList<FoldSpan> spans = foldSpans(rowsOf(QString(20, QLatin1Char('c')) + QStringLiteral("a")), {});
+    CHECK(spans.size() == 1);
+    CHECK(spans.at(0).first == 0);
+    CHECK(spans.at(0).last == 16);
+}
+
+void testFoldOpen()
+{
+    const QString pattern = QStringLiteral("a") + QString(20, QLatin1Char('c')) + QStringLiteral("a");
+    const QList<FoldSpan> spans = foldSpans(rowsOf(pattern), {10});
+    CHECK(spans.size() == 2);
+    CHECK(spans.at(0).last == 9);
+    CHECK(spans.at(1).first == 11);
+}
+
+void testFoldPlain()
+{
+    CHECK(foldSpans(rowsOf(QString(30, QLatin1Char('c'))), {}).isEmpty());
+}
+
 } // namespace
 
 int main(int argc, char **argv)
@@ -158,6 +206,11 @@ int main(int argc, char **argv)
     QCoreApplication app(argc, argv);
     testParse();
     testExport();
+    testFoldShort();
+    testFoldMiddle();
+    testFoldEdge();
+    testFoldOpen();
+    testFoldPlain();
     Q_UNUSED(app);
     return g_fails == 0 ? 0 : 1;
 }

@@ -1,10 +1,12 @@
 #pragma once
 
 #include "DiffDoc.hpp"
+#include "DiffFold.hpp"
 
 #include <QAbstractScrollArea>
 #include <QSet>
 #include <QTimer>
+#include <QVector>
 
 class QMouseEvent;
 class QPainter;
@@ -39,17 +41,24 @@ protected:
 
 private:
     struct Band {
-        enum Kind { Header, Labels, Row, Note };
+        enum Kind { Header, Labels, Row, Note, Fold };
         Kind kind = Row;
         int file = -1;
         int row = -1;
         int y = 0;
         int h = 0;
+        int end = -1;
     };
 
     void ensureFont();
     void rebuild();
     void addFileBands(int fileIndex, int *y);
+    void addRowBands(int fileIndex, int *y);
+    void addFoldBand(int fileIndex, const FoldSpan &span, int *y);
+    void addCodeBand(int fileIndex, int rowIndex, bool single, int *y);
+    QSet<int> pinnedRows(int fileIndex) const;
+    void showHidden(int file, int first, int last);
+    void revealRow(int file, int row);
     void wrapRow(DiffRow *row, bool single);
     int rowHeight(const DiffRow &row, bool single) const;
     void updateScroll();
@@ -63,6 +72,7 @@ private:
     void paintLabels(QPainter &painter, const Band &band, const FileDiff &file, int viewW);
     void paintNoteBand(QPainter &painter, const Band &band, const FileDiff &file, int viewW);
     void paintRow(QPainter &painter, const Band &band, const FileDiff &file, int viewW);
+    void paintFold(QPainter &painter, const Band &band, int viewW);
     void paintSingle(QPainter &painter, const Band &band, const FileDiff &file, const DiffRow &row, int viewW);
     void paintPair(QPainter &painter, const Band &band, const FileDiff &file, const DiffRow &row, int viewW);
     void paintSelection(QPainter &painter, const Band &band, int viewW);
@@ -71,6 +81,10 @@ private:
     void paintFileHeader(QPainter &painter, const QRect &rect, const FileDiff &file, const QFont &font);
     bool pressIgnored(QMouseEvent *mouse) const;
     void chooseRow(const Band &band, int x);
+    void pressBand(const Band *band, int x);
+    void hoverRow(const Band *band);
+    void hoverCursor(const Band *band, int x);
+    bool openFold(const Band *band, int x);
     void setHover(int file, int row);
     void onPress(QMouseEvent *mouse);
     void onMove(QMouseEvent *mouse);
@@ -87,6 +101,7 @@ private:
     QString m_message;
     QList<Band> m_bands;
     QSet<QString> m_notes;
+    QVector<QSet<int>> m_open;
     QFont m_mono;
     int m_rowH = 20;
     int m_headerH = 34;

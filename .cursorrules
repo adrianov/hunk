@@ -29,12 +29,14 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/DiffPath.cpp` / `DiffDetail.hpp` — paths and headers
 - `src/WordDiff.cpp` — word highlights
 - `src/DiffZip.cpp` — paired delete and add lines
+- `src/DiffFold.cpp` / `DiffFold.hpp` — which unchanged lines collapse
+- `src/DiffFoldView.cpp` — fold bar paint and clicks
 - `src/GitRepo.cpp` / `GitRepo.hpp` — background git load
 - `src/GitCmd.cpp` / `GitDetail.hpp` — git process and base refs
 - `src/ReviewStore.cpp` / `ReviewStore.hpp` — comments in QSettings
 - `src/ReviewNote.hpp` — one comment
 - `src/ReviewExport.cpp` / `ReviewExport.hpp` — agent markdown
-- `tests/parse_test.cpp` — parser and export checks
+- `tests/parse_test.cpp` — parser, fold, and export checks
 - `tests/syntax_test.cpp` — syntax color checks
 - `CMakeLists.txt` — Qt 6 Widgets app and test
 - `README.md` — build and review format
