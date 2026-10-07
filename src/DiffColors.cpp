@@ -16,3 +16,27 @@ const QColor kDelWord(248, 81, 73, 110);
 const QColor kEmpty(QStringLiteral("#1a1a1a"));
 const QColor kLine(QStringLiteral("#333333"));
 const QColor kNote(QStringLiteral("#c586c0"));
+const QColor kSynComment(QStringLiteral("#6a9955"));
+const QColor kSynString(QStringLiteral("#ce9178"));
+const QColor kSynNumber(QStringLiteral("#b5cea8"));
+const QColor kSynKeyword(QStringLiteral("#569cd6"));
+const QColor kSynType(QStringLiteral("#4ec9b0"));
+
+QColor synColor(SynKind kind)
+{
+    switch (kind) {
+    case SynKind::Comment:
+        return kSynComment;
+    case SynKind::String:
+        return kSynString;
+    case SynKind::Number:
+        return kSynNumber;
+    case SynKind::Keyword:
+        return kSynKeyword;
+    case SynKind::Type:
+        return kSynType;
+    case SynKind::Plain:
+        return kText;
+    }
+    return kText;
+}

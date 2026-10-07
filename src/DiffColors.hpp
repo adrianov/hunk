@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DiffDoc.hpp"
+
 #include <QColor>
 
 extern const QColor kBg;
@@ -18,3 +20,10 @@ extern const QColor kDelWord;
 extern const QColor kEmpty;
 extern const QColor kLine;
 extern const QColor kNote;
+extern const QColor kSynComment;
+extern const QColor kSynString;
+extern const QColor kSynNumber;
+extern const QColor kSynKeyword;
+extern const QColor kSynType;
+
+QColor synColor(SynKind kind);

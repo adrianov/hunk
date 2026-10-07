@@ -10,6 +10,30 @@ struct WordSpan {
     bool changed = false;
 };
 
+enum class SynKind { Plain, Comment, String, Number, Keyword, Type };
+
+// One syntax-colored range inside a diff line.
+struct SynSpan {
+    int start = 0;
+    int end = 0;
+    SynKind kind = SynKind::Plain;
+};
+
+// One visual line after a row is wrapped to the pane width.
+struct WrapSpan {
+    int start = 0;
+    int end = 0;
+};
+
+// One painted run: syntax color, word change, and a wrap break.
+struct Piece {
+    int start = 0;
+    int end = 0;
+    SynKind kind = SynKind::Plain;
+    bool changed = false;
+    bool newLine = false;
+};
+
 enum class RowKind { Context, Add, Del, Mod };
 
 // One visual row. A modification pairs an old line with a new line.
@@ -21,6 +45,10 @@ struct DiffRow {
     QString rightText;
     QList<WordSpan> leftSpans;
     QList<WordSpan> rightSpans;
+    QList<SynSpan> leftSyn;
+    QList<SynSpan> rightSyn;
+    QList<Piece> leftPiece;
+    QList<Piece> rightPiece;
 };
 
 // One file from a unified diff.
