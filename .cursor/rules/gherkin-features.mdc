@@ -1,0 +1,26 @@
+---
+description: Document user-visible features as Gherkin scenarios
+alwaysApply: true
+---
+
+# Features in Gherkin
+
+When a user-visible behavior is added or changed, update a scenario under `features/`. Gherkin is the UX reference. Do not add Cucumber, step definitions, or CI for these files unless asked.
+
+## Shape
+
+- One `features/<name>.feature` per area (`review.feature`, `diff.feature`)
+- `Feature`, `Scenario`, and `Given` / `When` / `Then` in plain English
+- Name the screen, file, and outcome the user sees
+- Keep an existing scenario and edit it when the behavior changes
+- Remove a scenario when the behavior is removed
+
+```gherkin
+Feature: Review comments
+
+  Scenario: Copy a line comment for an agent
+    Given a diff of "src/app.rb"
+    When I comment on line 1
+    And I copy reviews
+    Then the clipboard contains "`src/app.rb:1`"
+```
