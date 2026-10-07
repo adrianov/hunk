@@ -14,13 +14,52 @@ bool listed(const char *const *words, QStringView word, bool fold)
     return false;
 }
 
-SynKind wordKind(QStringView word, const Rule &rule)
+const char *kDefs[] = {"def ", "defp ", "fn ", "fun ", "func ", "function ", "sub ", nullptr};
+
+bool afterDef(const QString &text, int start)
 {
+    const QStringView head = QStringView(text).left(start);
+    for (const char *const *word = kDefs; *word; ++word) {
+        const QLatin1String key(*word);
+        if (!head.endsWith(key))
+            continue;
+        const int at = int(head.size() - key.size());
+        if (at == 0)
+            return true;
+        const QChar prev = head.at(at - 1);
+        if (!prev.isLetterOrNumber() && prev != QLatin1Char('_'))
+            return true;
+    }
+    return false;
+}
+
+bool leadCall(const QString &text, int start)
+{
+    return afterDef(text, start) || (start > 0 && text.at(start - 1) == '.');
+}
+
+bool methodAt(const QString &text, int start, int end)
+{
+    if (start > 1 && text.at(start - 1) == ':' && text.at(start - 2) == ':')
+        return true;
+    return end < text.size() && text.at(end) == '(';
+}
+
+// A name after def, a dot, or before "(" is a method. Other names are variables.
+SynKind identKind(const QString &text, int start, int end, const Rule &rule)
+{
+    const QStringView word = QStringView(text).sliced(start, end - start);
     if (listed(rule.words, word, (rule.flags & Fold) != 0))
         return SynKind::Keyword;
+    if ((rule.flags & Html) != 0)
+        return SynKind::Plain;
+    if (leadCall(text, start))
+        return SynKind::Method;
     if ((rule.flags & Caps) != 0 && word.at(0).isUpper())
         return SynKind::Type;
-    return SynKind::Plain;
+    if (methodAt(text, start, end))
+        return SynKind::Method;
+    return SynKind::Variable;
 }
 
 int afterSigil(const QString &text, int index, QChar ch)
@@ -68,7 +107,7 @@ int eatWord(const QString &text, int index, const Rule &rule, QList<SynSpan> *ou
     int cursor = index + 1;
     while (cursor < text.size() && wordChar(text.at(cursor), rule))
         ++cursor;
-    const SynKind kind = wordKind(QStringView(text).mid(index, cursor - index), rule);
+    const SynKind kind = identKind(text, index, cursor, rule);
     if (kind != SynKind::Plain)
         addSpan(out, index, cursor, kind);
     return cursor;
@@ -84,6 +123,7 @@ int eatMark(const QString &text, int index, const Rule &rule, QList<SynSpan> *ou
     const int end = markEnd(text, index, ch, rule);
     if (end == index)
         return index;
-    addSpan(out, index, end, SynKind::Type);
+    const SynKind kind = ch == QLatin1Char(':') ? SynKind::Type : SynKind::Variable;
+    addSpan(out, index, end, kind);
     return end;
 }

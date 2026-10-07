@@ -25,5 +25,7 @@ extern const QColor kSynString;
 extern const QColor kSynNumber;
 extern const QColor kSynKeyword;
 extern const QColor kSynType;
+extern const QColor kSynMethod;
+extern const QColor kSynVariable;
 
 QColor synColor(SynKind kind);

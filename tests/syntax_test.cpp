@@ -44,15 +44,49 @@ DiffDoc colorFile(const QString &path, const QStringList &lines)
 
 void testRubyDef()
 {
-    const DiffRow row = colorFile(QStringLiteral("lib/app.rb"), {QStringLiteral("def greet # hi")}).files.at(0).rows.at(0);
+    const DiffRow row = colorFile(QStringLiteral("lib/app.rb"), {QStringLiteral("def greet(name) # hi")}).files.at(0).rows.at(0);
     CHECK(hasText(row.rightSyn, SynKind::Keyword, row.rightText, QStringLiteral("def")));
+    CHECK(hasText(row.rightSyn, SynKind::Method, row.rightText, QStringLiteral("greet")));
     CHECK(hasText(row.rightSyn, SynKind::Comment, row.rightText, QStringLiteral("# hi")));
+}
+
+void testBareDef()
+{
+    const DiffRow row = colorFile(QStringLiteral("lib/app.rb"), {QStringLiteral("def wave")}).files.at(0).rows.at(0);
+    CHECK(hasText(row.rightSyn, SynKind::Method, row.rightText, QStringLiteral("wave")));
+}
+
+void testNotDef()
+{
+    const DiffRow row = colorFile(QStringLiteral("lib/app.rb"), {QStringLiteral("mydef wave")}).files.at(0).rows.at(0);
+    CHECK(hasText(row.rightSyn, SynKind::Variable, row.rightText, QStringLiteral("wave")));
+}
+
+void testScopeType()
+{
+    const DiffRow row = colorFile(QStringLiteral("src/app.cpp"), {QStringLiteral("Foo::Bar")}).files.at(0).rows.at(0);
+    CHECK(hasText(row.rightSyn, SynKind::Type, row.rightText, QStringLiteral("Foo")));
+    CHECK(hasText(row.rightSyn, SynKind::Type, row.rightText, QStringLiteral("Bar")));
+}
+
+void testRubyParam()
+{
+    const DiffRow row = colorFile(QStringLiteral("lib/app.rb"), {QStringLiteral("def greet(name)")}).files.at(0).rows.at(0);
+    CHECK(hasText(row.rightSyn, SynKind::Variable, row.rightText, QStringLiteral("name")));
+}
+
+void testRubyCall()
+{
+    const DiffRow row = colorFile(QStringLiteral("lib/app.rb"), {QStringLiteral("amount = ask_rate.zero?")}).files.at(0).rows.at(0);
+    CHECK(hasText(row.rightSyn, SynKind::Variable, row.rightText, QStringLiteral("amount")));
+    CHECK(hasText(row.rightSyn, SynKind::Variable, row.rightText, QStringLiteral("ask_rate")));
+    CHECK(hasText(row.rightSyn, SynKind::Method, row.rightText, QStringLiteral("zero?")));
 }
 
 void testRubyValue()
 {
     const DiffRow row = colorFile(QStringLiteral("lib/app.rb"), {QStringLiteral("  @name = \"Ada\"")}).files.at(0).rows.at(0);
-    CHECK(hasText(row.rightSyn, SynKind::Type, row.rightText, QStringLiteral("@name")));
+    CHECK(hasText(row.rightSyn, SynKind::Variable, row.rightText, QStringLiteral("@name")));
     CHECK(hasText(row.rightSyn, SynKind::String, row.rightText, QStringLiteral("\"Ada\"")));
 }
 
@@ -63,6 +97,12 @@ void testBlock()
     CHECK(hasText(rows.at(2).rightSyn, SynKind::Keyword, rows.at(2).rightText, QStringLiteral("int")));
 }
 
+void testCppName()
+{
+    const DiffRow row = colorFile(QStringLiteral("src/app.cpp"), {QStringLiteral("int x;")}).files.at(0).rows.at(0);
+    CHECK(hasText(row.rightSyn, SynKind::Variable, row.rightText, QStringLiteral("x")));
+}
+
 void testPlain()
 {
     CHECK(colorFile(QStringLiteral("notes.md"), {QStringLiteral("def not code")}).files.at(0).rows.at(0).rightSyn.isEmpty());
@@ -70,7 +110,9 @@ void testPlain()
 
 void testApos()
 {
-    CHECK(colorFile(QStringLiteral("lib/app.rb"), {QStringLiteral("name = don't")}).files.at(0).rows.at(0).rightSyn.isEmpty());
+    const DiffRow row = colorFile(QStringLiteral("lib/app.rb"), {QStringLiteral("name = don't")}).files.at(0).rows.at(0);
+    CHECK(hasText(row.rightSyn, SynKind::Variable, row.rightText, QStringLiteral("name")));
+    CHECK(!hasText(row.rightSyn, SynKind::String, row.rightText, QStringLiteral("'t")));
 }
 
 void testRename()
@@ -96,8 +138,14 @@ int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
     testRubyDef();
+    testBareDef();
+    testNotDef();
+    testScopeType();
+    testRubyParam();
+    testRubyCall();
     testRubyValue();
     testBlock();
+    testCppName();
     testPlain();
     testApos();
     testRename();

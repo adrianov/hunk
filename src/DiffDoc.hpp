@@ -10,7 +10,7 @@ struct WordSpan {
     bool changed = false;
 };
 
-enum class SynKind { Plain, Comment, String, Number, Keyword, Type };
+enum class SynKind { Plain, Comment, String, Number, Keyword, Type, Method, Variable };
 
 // One syntax-colored range inside a diff line.
 struct SynSpan {

@@ -21,6 +21,8 @@ const QColor kSynString(QStringLiteral("#ce9178"));
 const QColor kSynNumber(QStringLiteral("#b5cea8"));
 const QColor kSynKeyword(QStringLiteral("#569cd6"));
 const QColor kSynType(QStringLiteral("#4ec9b0"));
+const QColor kSynMethod(QStringLiteral("#dcdcaa"));
+const QColor kSynVariable(QStringLiteral("#9cdcfe"));
 
 QColor synColor(SynKind kind)
 {
@@ -35,6 +37,10 @@ QColor synColor(SynKind kind)
         return kSynKeyword;
     case SynKind::Type:
         return kSynType;
+    case SynKind::Method:
+        return kSynMethod;
+    case SynKind::Variable:
+        return kSynVariable;
     case SynKind::Plain:
         return kText;
     }
