@@ -26,7 +26,7 @@ int fitEnd(const QFontMetrics &metrics, const QString &text, int start, int widt
     int high = int(text.size());
     while (low < high) {
         const int mid = (low + high + 1) / 2;
-        if (metrics.horizontalAdvance(text.mid(start, mid - start)) <= width)
+        if (metrics.horizontalAdvance(QString::fromRawData(text.constData() + start, mid - start)) <= width)
             low = mid;
         else
             high = mid - 1;

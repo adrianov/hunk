@@ -52,15 +52,10 @@ void DiffCanvas::updateScroll()
 void DiffCanvas::resizeEvent(QResizeEvent *event)
 {
     QAbstractScrollArea::resizeEvent(event);
-    const int width = viewport()->width();
-    const bool same = width == m_viewW;
-    m_viewW = width;
-    if (same || m_doc.files.isEmpty()) {
-        updateScroll();
-        viewport()->update();
-        return;
-    }
-    rebuild();
+    updateScroll();
+    viewport()->update();
+    if (viewport()->width() != m_viewW && !m_doc.files.isEmpty())
+        m_wrapTimer.start();
 }
 
 int DiffCanvas::fileAt(int y) const

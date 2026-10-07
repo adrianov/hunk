@@ -4,6 +4,7 @@
 
 #include <QAbstractScrollArea>
 #include <QSet>
+#include <QTimer>
 
 class QMouseEvent;
 class QPainter;
@@ -93,8 +94,7 @@ private:
     int m_gutterW = 56;
     int m_docH = 0;
     int m_viewW = -1;
-    bool m_rebuilding = false;
-    bool m_again = false;
+    QTimer m_wrapTimer;
     int m_selFile = -1;
     int m_selRow = -1;
     bool m_selOld = false;

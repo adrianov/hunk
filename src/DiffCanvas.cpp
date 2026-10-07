@@ -34,6 +34,9 @@ DiffCanvas::DiffCanvas(QWidget *parent)
     viewport()->setAttribute(Qt::WA_OpaquePaintEvent);
     ensureFont();
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_wrapTimer.setSingleShot(true);
+    m_wrapTimer.setInterval(100);
+    connect(&m_wrapTimer, &QTimer::timeout, this, &DiffCanvas::rebuild);
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, [this]() {
         viewport()->update();
         emitVisibleFile();
@@ -51,6 +54,7 @@ void DiffCanvas::ensureFont()
 
 void DiffCanvas::setMessage(const QString &text)
 {
+    m_wrapTimer.stop();
     m_message = text;
     m_doc = {};
     m_bands.clear();
@@ -62,6 +66,7 @@ void DiffCanvas::setMessage(const QString &text)
 
 void DiffCanvas::setDoc(const DiffDoc &doc, const QString &leftLabel, const QString &rightLabel)
 {
+    m_wrapTimer.stop();
     m_message.clear();
     m_doc = doc;
     highlightDoc(&m_doc);
@@ -122,23 +127,14 @@ void DiffCanvas::addFileBands(int fileIndex, int *y)
 
 void DiffCanvas::rebuild()
 {
-    if (m_rebuilding) {
-        m_again = true;
-        return;
-    }
-    m_rebuilding = true;
     ensureFont();
     m_bands.clear();
     int y = 8;
     for (int fileIndex = 0; fileIndex < m_doc.files.size(); ++fileIndex)
         addFileBands(fileIndex, &y);
+    m_viewW = viewport()->width();
     m_docH = y + 12;
     updateScroll();
     viewport()->update();
     emitVisibleFile();
-    m_rebuilding = false;
-    if (!m_again)
-        return;
-    m_again = false;
-    rebuild();
 }
