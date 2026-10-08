@@ -13,6 +13,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/MainNotes.cpp` — review list
 - `src/MainReview.cpp` — comment and copy
 - `src/MainLoad.cpp` — git result applied to the window
+- `src/MainWatch.cpp` — quiet reload on focus and while files change
 - `src/MainDetail.hpp` — theme and note label
 - `src/Theme.cpp` — dark palette
 - `src/DiffCanvas.cpp` / `DiffCanvas.hpp` — diff view state

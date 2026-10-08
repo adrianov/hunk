@@ -6,6 +6,7 @@
 #include "ReviewStore.hpp"
 
 #include <QCloseEvent>
+#include <QGuiApplication>
 #include <QComboBox>
 #include <QDir>
 #include <QDragEnterEvent>
@@ -50,9 +51,24 @@ MainWindow::MainWindow(bool smoke, QWidget *parent)
 
 void MainWindow::wireStore()
 {
+    m_watch.setSingleShot(true);
+    m_watch.setInterval(1000);
+    connect(&m_watch, &QTimer::timeout, this, &MainWindow::reloadQuiet);
+    connect(qApp, &QGuiApplication::applicationStateChanged, this, &MainWindow::watchApp);
     connect(m_git, &GitRepo::ready, this, &MainWindow::onReady);
     connect(m_store, &ReviewStore::structureChanged, this, &MainWindow::notesChanged);
     connect(m_store, &ReviewStore::bodyEdited, this, &MainWindow::noteBodyEdited);
+}
+
+void MainWindow::watchApp(Qt::ApplicationState state)
+{
+    if (state != Qt::ApplicationActive) {
+        m_watch.stop();
+        return;
+    }
+    if (m_seenLoad)
+        m_appliedStamp.clear();
+    reloadQuiet();
 }
 
 void MainWindow::notesChanged()
@@ -114,6 +130,10 @@ void MainWindow::openAt(const QString &path)
     m_root.clear();
     m_startPath = path;
     m_scrollKeep = 0;
+    m_appliedStamp.clear();
+    m_appliedDiff.clear();
+    m_title.clear();
+    m_watch.stop();
     reload(false);
 }
 

@@ -20,6 +20,9 @@ struct GitResult {
     QString title;
     QString diffText;
     QString error;
+    QString diskStamp;
+    QString stamp;
+    bool unchanged = false;
 };
 
 // Runs git on a background thread and emits `ready` on the GUI thread.
@@ -27,7 +30,8 @@ class GitRepo : public QObject {
     Q_OBJECT
 public:
     explicit GitRepo(QObject *parent = nullptr);
-    void load(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef);
+    void load(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef,
+              const QString &stamp, bool quiet);
 
 signals:
     void ready(const GitResult &result);

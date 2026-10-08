@@ -13,27 +13,6 @@
 #include <QStatusBar>
 #include <QTreeWidget>
 
-void MainWindow::startLoad(const QString &path)
-{
-    const auto mode = static_cast<DiffMode>(m_mode->currentIndex());
-    const bool merge = mode == DiffMode::MergeRequest;
-    m_base->setEnabled(merge);
-    m_head->setEnabled(merge);
-    m_git->load(path, mode, m_base->currentText().trimmed(), m_head->currentText().trimmed());
-}
-
-void MainWindow::reload(bool keepScroll)
-{
-    const QString path = m_root.isEmpty() ? m_startPath : m_root;
-    if (path.isEmpty())
-        return;
-    m_scrollKeep = keepScroll ? m_diff->scrollTop() : 0;
-    m_repoLabel->setText(QStringLiteral("Loading…"));
-    m_diff->setMessage(QStringLiteral("Loading…"));
-    statusBar()->showMessage(QStringLiteral("Loading…"));
-    startLoad(path);
-}
-
 void MainWindow::reloadIfRangeChanged()
 {
     if (m_base->currentText().trimmed() == m_appliedBase && m_head->currentText().trimmed() == m_appliedHead)
@@ -58,8 +37,21 @@ void setBaseBlocked(QComboBox *base, bool blocked)
         base->lineEdit()->blockSignals(blocked);
 }
 
+bool sameRef(const QComboBox *box, const QStringList &items, const QString &selected)
+{
+    if (box->count() != items.size() || box->currentText() != selected)
+        return false;
+    for (int index = 0; index < items.size(); ++index) {
+        if (box->itemText(index) != items.at(index))
+            return false;
+    }
+    return true;
+}
+
 void selectRef(QComboBox *box, const QStringList &items, const QString &selected)
 {
+    if (sameRef(box, items, selected))
+        return;
     const QString typed = box->currentText();
     box->clear();
     box->addItems(items);
@@ -97,6 +89,7 @@ void MainWindow::showLoadError(const GitResult &result)
 
 void MainWindow::showLoadedDiff(const GitResult &result)
 {
+    const int scroll = m_quiet ? m_diff->scrollTop() : m_scrollKeep;
     m_title = result.title;
     m_doc = parseDiff(result.diffText);
     m_store->sync(m_doc);
@@ -105,7 +98,7 @@ void MainWindow::showLoadedDiff(const GitResult &result)
         m_diff->setMessage(QStringLiteral("No changes."));
     else {
         m_diff->setDoc(m_doc, result.leftLabel, result.rightLabel);
-        m_diff->setScrollTop(m_scrollKeep);
+        m_diff->setScrollTop(scroll);
     }
     pushNoteKeys();
     showLoadedTitle();
@@ -120,15 +113,46 @@ void MainWindow::showLoadedTitle()
     emit loaded(true);
 }
 
+bool MainWindow::keepQuiet(const GitResult &result)
+{
+    if (result.unchanged)
+        return true;
+    if (!m_quiet || !result.error.isEmpty() || result.diffText != m_appliedDiff || result.title != m_title)
+        return false;
+    m_appliedStamp = result.stamp;
+    return true;
+}
+
+bool MainWindow::stopForError(const GitResult &result)
+{
+    if (result.error.isEmpty())
+        return false;
+    if (!m_quiet) {
+        m_appliedStamp.clear();
+        showLoadError(result);
+    }
+    finishWatch();
+    return true;
+}
+
 void MainWindow::onReady(const GitResult &result)
 {
+    m_loading = false;
+    if (!result.root.isEmpty())
+        m_seenLoad = true;
+    if (keepQuiet(result)) {
+        finishWatch();
+        return;
+    }
+    if (stopForError(result))
+        return;
     if (!result.root.isEmpty())
         rememberRoot(result.root);
     applyBases(result);
     m_appliedBase = result.baseRef;
     m_appliedHead = result.headRef;
-    if (!result.error.isEmpty())
-        showLoadError(result);
-    else
-        showLoadedDiff(result);
+    m_appliedStamp = result.stamp;
+    m_appliedDiff = result.diffText;
+    showLoadedDiff(result);
+    finishWatch();
 }

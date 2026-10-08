@@ -33,6 +33,7 @@ add_executable(hunk
   src/MainNotes.cpp
   src/MainReview.cpp
   src/MainLoad.cpp
+  src/MainWatch.cpp
   src/Theme.cpp
   src/DiffCanvas.cpp
   src/DiffScroll.cpp

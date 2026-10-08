@@ -9,6 +9,7 @@ Local merge-request diff for macOS and Linux. Qt 6, side-by-side, with review co
 - Long unchanged stretches collapse. Click the bar to show them, or the side arrows to show 20 lines
 - New files use one pane
 - Compare **merge request** (three-dot from the base, including uncommitted changes on the current branch; base defaults to the branching point), **uncommitted** (`git diff HEAD`), or **staged**
+- Switching back reloads the diff, and saves from other programs show up while Hunk stays open. An unchanged diff stays put, including the scroll position
 - Click a line number to comment. Comments stay in app settings, not in the repo
 - **Copy reviews** writes markdown with `` `path:line` `` and the line text
 - Diff flags match a review diff: `-w -W --no-prefix --diff-algorithm=histogram`

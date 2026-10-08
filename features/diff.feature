@@ -11,6 +11,18 @@ Feature: Diff view
     And the diff is a merge request between them
     And uncommitted changes on the current branch are included
 
+  Scenario: Switching back leaves an unchanged diff still
+    Given the merge request is on screen
+    When I switch back to hunk and the files are unchanged
+    Then the diff stays as it was
+    And the scroll position stays
+
+  Scenario: A save in another program updates the diff
+    Given the merge request is on screen
+    When another program saves a tracked file
+    Then the diff updates
+    And the scroll position stays
+
   Scenario: Unchanged lines collapse between changes
     Given a diff with a long stretch of unchanged lines
     Then those lines are hidden

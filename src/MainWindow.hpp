@@ -3,6 +3,7 @@
 #include "DiffDoc.hpp"
 
 #include <QMainWindow>
+#include <QTimer>
 
 class DiffCanvas;
 class GitRepo;
@@ -70,10 +71,17 @@ private:
     void reloadFresh();
     void openAt(const QString &path);
     void reload(bool keepScroll);
+    void reloadQuiet();
+    void askLoad(bool keepScroll, bool quiet);
     void startLoad(const QString &path);
+    void scheduleWatch();
+    void finishWatch();
+    void watchApp(Qt::ApplicationState state);
     void reloadIfRangeChanged();
     void chooseRepo();
     void onReady(const GitResult &result);
+    bool keepQuiet(const GitResult &result);
+    bool stopForError(const GitResult &result);
     void rememberRoot(const QString &root);
     void applyBases(const GitResult &result);
     void showLoadError(const GitResult &result);
@@ -108,7 +116,14 @@ private:
     QString m_title;
     QString m_appliedBase;
     QString m_appliedHead;
+    QString m_appliedStamp;
+    QString m_appliedDiff;
+    QTimer m_watch;
     int m_scrollKeep = 0;
+    bool m_loading = false;
+    bool m_quiet = false;
+    bool m_seenLoad = false;
+    bool m_watchAgain = false;
     bool m_noteLock = false;
     bool m_navLock = false;
     bool m_smoke = false;

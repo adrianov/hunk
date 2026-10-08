@@ -93,6 +93,24 @@ bool runDiff(GitResult &result, const QStringList &args)
     return true;
 }
 
+QString stampKey(DiffMode mode, const QString &baseRef, const QString &headRef, const QString &disk)
+{
+    return QString::number(static_cast<int>(mode)) + QLatin1Char('\n') + baseRef + QLatin1Char('\n') + headRef
+        + QLatin1Char('\n') + disk;
+}
+
+bool reuseDiff(GitResult &result, DiffMode mode, const QString &baseRef, const QString &headRef, const QString &previous,
+               bool quiet)
+{
+    result.diskStamp = workStamp(result.root);
+    result.stamp = stampKey(mode, baseRef.trimmed(), headRef.trimmed(), result.diskStamp);
+    if (!quiet)
+        return false;
+    if (result.diskStamp.isEmpty())
+        return true;
+    return !previous.isEmpty() && result.stamp == previous;
+}
+
 void pickRefs(GitResult &result, const QString &baseRef, const QString &headRef)
 {
     result.bases = baseChoices(result.root);
@@ -101,7 +119,8 @@ void pickRefs(GitResult &result, const QString &baseRef, const QString &headRef)
     result.baseRef = baseRef.trimmed().isEmpty() ? branchPointName() : baseRef.trimmed();
 }
 
-GitResult loadGit(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef)
+GitResult loadGit(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef,
+                   const QString &previous, bool quiet)
 {
     GitResult result;
     QString cwd;
@@ -111,7 +130,12 @@ GitResult loadGit(const QString &startPath, DiffMode mode, const QString &baseRe
     QString headShort;
     if (!readHead(result, &headShort))
         return result;
+    if (reuseDiff(result, mode, baseRef, headRef, previous, quiet)) {
+        result.unchanged = true;
+        return result;
+    }
     pickRefs(result, baseRef, headRef);
+    result.stamp = stampKey(mode, result.baseRef, result.headRef, result.diskStamp);
     QStringList args = diffFlags();
     if (!applyMode(result, mode, headShort, &args))
         return result;
@@ -126,7 +150,8 @@ GitRepo::GitRepo(QObject *parent)
 {
 }
 
-void GitRepo::load(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef)
+void GitRepo::load(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef,
+                    const QString &stamp, bool quiet)
 {
     const int token = ++generation;
     auto *watcher = new QFutureWatcher<GitResult>(this);
@@ -137,7 +162,7 @@ void GitRepo::load(const QString &startPath, DiffMode mode, const QString &baseR
             return;
         emit ready(result);
     });
-    watcher->setFuture(QtConcurrent::run([startPath, mode, baseRef, headRef]() {
-        return loadGit(startPath, mode, baseRef, headRef);
+    watcher->setFuture(QtConcurrent::run([startPath, mode, baseRef, headRef, stamp, quiet]() {
+        return loadGit(startPath, mode, baseRef, headRef, stamp, quiet);
     }));
 }
