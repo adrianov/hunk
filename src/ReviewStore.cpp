@@ -97,8 +97,12 @@ bool syncNote(QList<ReviewNote> *notes, int index, const DiffDoc &doc, bool drop
 {
     ReviewNote &note = (*notes)[index];
     const LineHit hit = findLine(doc, note.path, note.oldSide, note.line);
-    if (hit.file < 0)
-        return markMissing(&note);
+    if (hit.file < 0) {
+        if (!dropChanged)
+            return markMissing(&note);
+        notes->removeAt(index);
+        return true;
+    }
     const QString text = lineText(doc, hit, note.oldSide);
     if (dropChanged && !note.snippet.isEmpty() && text != note.snippet) {
         notes->removeAt(index);

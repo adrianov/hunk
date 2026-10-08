@@ -16,8 +16,20 @@ Feature: Review comments
     When that line's text changes
     Then the review is removed
 
+  Scenario: A line that leaves the diff drops its review
+    Given auto cleanup is on
+    And a review comments on a diff line
+    When that line leaves the diff
+    Then the review is removed
+
   Scenario: Auto cleanup can stay off
     Given auto cleanup is off
     And a review comments on a diff line
     When that line's text changes
+    Then the review stays
+
+  Scenario: A line that leaves the diff can stay
+    Given auto cleanup is off
+    And a review comments on a diff line
+    When that line leaves the diff
     Then the review stays

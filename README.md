@@ -72,7 +72,7 @@ File references are `path:line` on the new side. `(old)` means the line number b
 The nil check is missing when the user is blank.
 ```
 
-Comment with ⌘↩ / Ctrl+Enter on the selected line, or click the line number. One comment per line. Each review line has its own delete control. Auto cleanup, on by default, removes a review when that line's text changes.
+Comment with ⌘↩ / Ctrl+Enter on the selected line, or click the line number. One comment per line. Each review line has its own delete control. Auto cleanup, on by default, removes a review when that line's text changes or the line leaves the diff.
 
 ## Layout
 
