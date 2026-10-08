@@ -132,4 +132,5 @@ void MainWindow::buildChrome()
     auto *bar = addToolBar(QStringLiteral("Main"));
     bar->setMovable(false);
     fillBar(bar, openAct, refreshAct, commentAct, copyAct);
+    prepareStat();
 }

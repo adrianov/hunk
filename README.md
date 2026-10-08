@@ -12,7 +12,7 @@ Copyright © 2026 Peter Adrianov. Licensed under the [MIT License](LICENSE).
 - New files use one pane
 - Compare **merge request** (three-dot from the base, including uncommitted changes on the current branch; base defaults to the branching point), **uncommitted** (`git diff HEAD`), or **staged**. The status bar names the target when the merge request would conflict with it
 - Switching back reloads the diff. Saves of tracked files from other programs, and a base that moves, show up while Hunk stays open. Ignored files are left alone. An unchanged diff stays put, including the scroll position
-- The status bar says when local `main` or `master` is ahead of or behind its origin
+- The status bar keeps the total added and removed lines, and says when local `main` or `master` is ahead of or behind its origin
 - Click a line number to comment. Comments stay in app settings, not in the repo
 - Select text in either pane and copy it from the pane menu or with Ctrl+C
 - **Copy reviews** writes markdown with `` `path:line` `` and the line text

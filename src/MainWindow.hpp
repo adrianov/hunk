@@ -130,6 +130,8 @@ private:
     bool commentLine(int file, int row, bool *oldSide, int *line, QString *snippet) const;
     void copyReviews();
     void showStatus(const QString &text);
+    void prepareStat();
+    void showLineStat();
     void updateStatus();
     void pushNoteKeys();
     void selectTreeFile(int file);
@@ -143,6 +145,7 @@ private:
     QComboBox *m_base = nullptr;
     QComboBox *m_head = nullptr;
     QLabel *m_repoLabel = nullptr;
+    QLabel *m_stat = nullptr;
     QListWidget *m_notes = nullptr;
     QPlainTextEdit *m_editor = nullptr;
     QPushButton *m_copy = nullptr;

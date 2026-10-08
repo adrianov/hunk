@@ -25,6 +25,10 @@ Feature: Diff view
     And the diff is a merge request between them
     And uncommitted changes on the current branch are included
 
+  Scenario: The status bar shows added and removed lines
+    Given a diff is on screen
+    Then the status bar shows the total added lines in green and the total removed lines in red
+
   Scenario: The main branch differs from its origin
     Given local main or master is ahead of or behind its origin
     Then the status bar says how far ahead or behind it is

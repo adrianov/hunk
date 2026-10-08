@@ -25,6 +25,7 @@ void MainWindow::repaintTheme()
     if (!m_diff)
         return;
     m_diff->update();
+    showLineStat();
     showRepoPath();
     rebuildTree();
     refreshNotes();

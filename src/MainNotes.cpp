@@ -149,18 +149,32 @@ void MainWindow::showStatus(const QString &text)
     statusBar()->showMessage(line);
 }
 
-void MainWindow::updateStatus()
+void MainWindow::prepareStat()
 {
+    m_stat = new QLabel(this);
+    m_stat->setTextFormat(Qt::RichText);
+    statusBar()->addPermanentWidget(m_stat);
+}
+
+void MainWindow::showLineStat()
+{
+    if (!m_stat)
+        return;
     int adds = 0;
     int dels = 0;
     for (const FileDiff &file : m_doc.files) {
         adds += file.adds;
         dels += file.dels;
     }
-    showStatus(QStringLiteral("%1 files    +%2  −%3    %4 comments")
+    m_stat->setText(QStringLiteral("<span style=\"color:%1\">+%2</span>  <span style=\"color:%3\">−%4</span>")
+                        .arg(kAddFg.name(), QString::number(adds), kDelFg.name(), QString::number(dels)));
+}
+
+void MainWindow::updateStatus()
+{
+    showLineStat();
+    showStatus(QStringLiteral("%1 files    %2 comments")
                    .arg(m_doc.files.size())
-                   .arg(adds)
-                   .arg(dels)
                    .arg(filledNotes(m_store->notes())));
 }
 
