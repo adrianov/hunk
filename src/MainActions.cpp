@@ -139,6 +139,7 @@ void MainWindow::buildChrome()
     auto *copyAct = makeCopy();
     addMenus(openAct, refreshAct, makeQuit(), commentAct, copyAct);
     m_repoLabel = new QLabel(QStringLiteral("No repository"), this);
+    prepareRepoLabel();
     auto *bar = addToolBar(QStringLiteral("Main"));
     bar->setMovable(false);
     fillBar(bar, openAct, refreshAct, commentAct, copyAct);

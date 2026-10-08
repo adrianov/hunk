@@ -3,6 +3,7 @@ Feature: Diff view
   Scenario: Run hunk in a repository
     Given I run hunk in a git repository
     Then the window shows that repository's merge request
+    And the toolbar shows the path to that repository
 
   Scenario: Opening another repository watches that one
     Given a repository is on screen

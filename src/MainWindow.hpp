@@ -49,6 +49,7 @@ protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     bool eventFilter(QObject *object, QEvent *event) override;
+    bool noteEvents(QObject *object, QEvent *event);
 
 private:
     void wireStore();
@@ -109,6 +110,9 @@ private:
     void showLoadError(const GitResult &result);
     void showLoadedDiff(const GitResult &result);
     void showLoadedTitle();
+    void prepareRepoLabel();
+    void showRepoPath();
+    void tintRepoLabel();
     void rebuildTree();
     void loadSeen();
     void markSeenFile(int file);

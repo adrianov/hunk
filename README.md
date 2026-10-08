@@ -4,7 +4,7 @@ Local merge-request diff for macOS and Linux. Qt 6, side-by-side, with review co
 
 ## Features
 
-- Open a git repository and read the branch like a pull request
+- Open a git repository and read the branch like a pull request. The toolbar shows the repository path
 - File list grouped by folder, two panes, wrapped lines, syntax colors (keywords, methods, variables, strings, comments), word highlights, sticky file header. A file you already reviewed is highlighted when its diff changes again
 - Long unchanged stretches collapse. Click the bar to show them, or the side arrows to show 20 lines
 - New files use one pane

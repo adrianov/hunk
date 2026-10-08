@@ -45,6 +45,7 @@ add_executable(hunk
   src/MainNoteList.cpp
   src/MainReview.cpp
   src/MainLoad.cpp
+  src/MainPath.cpp
   src/MainRef.cpp
   src/MainWatch.cpp
   src/MainDisk.cpp

@@ -89,7 +89,14 @@ void MainWindow::showLoadError(const GitResult &result)
     m_title.clear();
     m_diff->setMessage(result.error);
     m_tree->clear();
-    m_repoLabel->setText(result.root.isEmpty() ? result.error : QDir(result.root).dirName());
+    tintRepoLabel();
+    if (result.root.isEmpty()) {
+        m_repoLabel->setToolTip(result.error);
+        m_repoLabel->setText(result.error);
+    } else {
+        m_repoLabel->setToolTip(result.root);
+        m_repoLabel->setText(result.root);
+    }
     statusBar()->showMessage(result.error);
     emit loaded(false);
 }
@@ -113,9 +120,8 @@ void MainWindow::showLoadedDiff(const GitResult &result)
 
 void MainWindow::showLoadedTitle()
 {
-    const QString name = QDir(m_root).dirName();
-    m_repoLabel->setText(name + QStringLiteral("    ") + m_title);
-    setWindowTitle(QStringLiteral("Hunk — ") + name);
+    showRepoPath();
+    setWindowTitle(QStringLiteral("Hunk — ") + QDir(m_root).dirName());
     updateStatus();
     emit loaded(true);
 }

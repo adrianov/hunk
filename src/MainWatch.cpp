@@ -40,6 +40,7 @@ void MainWindow::askLoad(bool keepScroll, bool quiet)
     m_scrollKeep = keepScroll ? m_diff->scrollTop() : 0;
     m_quiet = quiet;
     if (!quiet) {
+        tintRepoLabel();
         m_repoLabel->setText(QStringLiteral("Loading…"));
         m_diff->setMessage(QStringLiteral("Loading…"));
         statusBar()->showMessage(QStringLiteral("Loading…"));

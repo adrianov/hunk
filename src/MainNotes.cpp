@@ -78,6 +78,13 @@ void MainWindow::placeNoteRows()
 
 bool MainWindow::eventFilter(QObject *object, QEvent *event)
 {
+    if (object == m_repoLabel && event->type() == QEvent::Resize)
+        showRepoPath();
+    return noteEvents(object, event);
+}
+
+bool MainWindow::noteEvents(QObject *object, QEvent *event)
+{
     if (!m_notes)
         return QMainWindow::eventFilter(object, event);
     const QEvent::Type type = event->type();
