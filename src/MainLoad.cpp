@@ -6,6 +6,7 @@
 #include "DiffCanvas.hpp"
 #include "DiffParse.hpp"
 #include "GitRepo.hpp"
+#include "MainSeen.hpp"
 #include "ReviewStore.hpp"
 
 #include <QCheckBox>
@@ -113,6 +114,7 @@ void MainWindow::showLoadedDiff(const GitResult &result)
     m_conflict = result.conflict;
     m_drift = result.drift;
     m_doc = parseDiff(result.diffText);
+    applySeen(&m_doc, m_seen);
     m_store->sync(m_doc, m_cleanup->isChecked());
     rebuildTree();
     if (m_doc.files.isEmpty())

@@ -39,6 +39,9 @@ struct Piece {
 
 enum class RowKind { Context, Add, Del, Mod };
 
+// How strongly a changed line is painted against the last review.
+enum class RowHeat { Open, Seen, Fresh };
+
 // One visual row. A modification pairs an old line with a new line.
 struct DiffRow {
     RowKind kind = RowKind::Context;
@@ -52,6 +55,7 @@ struct DiffRow {
     QList<SynSpan> rightSyn;
     QList<Piece> leftPiece;
     QList<Piece> rightPiece;
+    RowHeat heat = RowHeat::Open;
 };
 
 // One file from a unified diff.

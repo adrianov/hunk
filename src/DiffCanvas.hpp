@@ -99,8 +99,9 @@ private:
     void paintSingle(QPainter &painter, const Band &band, const FileDiff &file, const DiffRow &row, int viewW);
     void paintPair(QPainter &painter, const Band &band, const FileDiff &file, const DiffRow &row, int viewW);
     void paintSelection(QPainter &painter, const Band &band, int viewW);
-    void paintOneSide(QPainter &painter, int cellX, int cellW, SideStyle style, const QString &text, int number,
-                      const QList<Piece> &pieces, bool note, int top, int height, int file, int row, bool oldSide);
+    void paintOneSide(QPainter &painter, int cellX, int cellW, SideStyle style, RowHeat heat, const QString &text,
+                      int number, const QList<Piece> &pieces, bool note, int top, int height, int file, int row,
+                      bool oldSide);
     void paintTextMark(QPainter &painter, int cellX, int cellW, int top, int height, int file, int row, bool oldSide,
                        const QString &text, const QList<Piece> &pieces);
     void paintFileHeader(QPainter &painter, const QRect &rect, const FileDiff &file, const QFont &font);

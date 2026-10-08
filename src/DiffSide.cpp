@@ -19,15 +19,33 @@ struct SideColors {
     bool mark = false;
 };
 
-SideColors colorsFor(SideStyle style)
+QColor tone(QColor color, RowHeat heat)
+{
+    if (heat == RowHeat::Seen)
+        color.setAlpha(color.alpha() / 2);
+    else if (heat == RowHeat::Fresh)
+        color.setAlpha(qMin(160, color.alpha() * 3 / 2));
+    return color;
+}
+
+QColor barColor(const QColor &color, RowHeat heat)
+{
+    if (heat != RowHeat::Seen)
+        return color;
+    QColor bar = color;
+    bar.setAlpha(110);
+    return bar;
+}
+
+SideColors colorsFor(SideStyle style, RowHeat heat)
 {
     SideColors colors{kBg, kText, kAddWord, kAddFg, false};
     if (style == SideStyle::Empty)
         colors.bg = kEmpty;
     else if (style == SideStyle::Add)
-        colors = SideColors{kAddBg, kAddFg, kAddWord, kAddFg, true};
+        colors = SideColors{tone(kAddBg, heat), kAddFg, tone(kAddWord, heat), barColor(kAddFg, heat), true};
     else if (style == SideStyle::Del)
-        colors = SideColors{kDelBg, kDelFg, kDelWord, kDelFg, true};
+        colors = SideColors{tone(kDelBg, heat), kDelFg, tone(kDelWord, heat), barColor(kDelFg, heat), true};
     return colors;
 }
 
@@ -119,10 +137,11 @@ void DiffCanvas::paintTextMark(QPainter &painter, int cellX, int cellW, int top,
     painter.restore();
 }
 
-void DiffCanvas::paintOneSide(QPainter &painter, int cellX, int cellW, SideStyle style, const QString &text, int number,
-                              const QList<Piece> &pieces, bool note, int top, int height, int file, int row, bool oldSide)
+void DiffCanvas::paintOneSide(QPainter &painter, int cellX, int cellW, SideStyle style, RowHeat heat, const QString &text,
+                              int number, const QList<Piece> &pieces, bool note, int top, int height, int file, int row,
+                              bool oldSide)
 {
-    const SideColors colors = colorsFor(style);
+    const SideColors colors = colorsFor(style, heat);
     fillCell(painter, cellX, cellW, top, height, m_gutterW, colors);
     paintTextMark(painter, cellX, cellW, top, height, file, row, oldSide, text, pieces);
     if (note)

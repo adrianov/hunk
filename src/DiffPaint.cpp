@@ -42,8 +42,8 @@ void paintMessage(QPainter &painter, const QRect &rect, const QFont &font, const
 void DiffCanvas::paintSingle(QPainter &painter, const Band &band, const FileDiff &file, const DiffRow &row, int viewW)
 {
     const bool note = row.rightNum > 0 && m_notes.contains(noteKey(file.path(), false, row.rightNum));
-    paintOneSide(painter, 0, viewW, SideStyle::Add, row.rightText, row.rightNum, row.rightPiece, note, band.y, band.h,
-                 band.file, band.row, false);
+    paintOneSide(painter, 0, viewW, SideStyle::Add, row.heat, row.rightText, row.rightNum, row.rightPiece, note, band.y,
+                 band.h, band.file, band.row, false);
 }
 
 void DiffCanvas::paintPair(QPainter &painter, const Band &band, const FileDiff &file, const DiffRow &row, int viewW)
@@ -51,10 +51,10 @@ void DiffCanvas::paintPair(QPainter &painter, const Band &band, const FileDiff &
     const int paneW = viewW / 2;
     const bool leftNote = row.leftNum > 0 && m_notes.contains(noteKey(file.path(), true, row.leftNum));
     const bool rightNote = row.rightNum > 0 && m_notes.contains(noteKey(file.path(), false, row.rightNum));
-    paintOneSide(painter, 0, paneW, leftStyle(row.kind), row.leftText, row.leftNum, row.leftPiece, leftNote, band.y,
-                 band.h, band.file, band.row, true);
-    paintOneSide(painter, paneW, viewW - paneW, rightStyle(row.kind), row.rightText, row.rightNum, row.rightPiece,
-                 rightNote, band.y, band.h, band.file, band.row, false);
+    paintOneSide(painter, 0, paneW, leftStyle(row.kind), row.heat, row.leftText, row.leftNum, row.leftPiece, leftNote,
+                 band.y, band.h, band.file, band.row, true);
+    paintOneSide(painter, paneW, viewW - paneW, rightStyle(row.kind), row.heat, row.rightText, row.rightNum,
+                 row.rightPiece, rightNote, band.y, band.h, band.file, band.row, false);
     painter.setPen(kLine);
     painter.drawLine(paneW, band.y, paneW, band.y + band.h);
 }

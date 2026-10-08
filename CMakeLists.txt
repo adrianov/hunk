@@ -44,6 +44,7 @@ add_executable(hunk
   src/MainChrome.cpp
   src/MainTree.cpp
   src/MainSeen.cpp
+  src/MainHeat.cpp
   src/MainNotes.cpp
   src/MainNoteList.cpp
   src/MainNoteKeep.cpp

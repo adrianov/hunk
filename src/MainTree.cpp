@@ -102,7 +102,7 @@ void MainWindow::markSeenFile(int file)
     if (m_smoke || m_root.isEmpty() || file < 0 || file >= m_doc.files.size())
         return;
     const FileDiff &diff = m_doc.files.at(file);
-    const QString stamp = fileStamp(diff);
+    const QString stamp = changeStamp(diff);
     if (m_seen.value(diff.path()) == stamp)
         return;
     m_seen.insert(diff.path(), stamp);

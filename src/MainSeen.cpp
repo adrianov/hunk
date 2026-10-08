@@ -13,7 +13,7 @@
 
 namespace {
 
-constexpr int seenVersion = 2;
+constexpr int seenVersion = 3;
 
 QString seenKey(const QString &root)
 {
@@ -38,34 +38,7 @@ QHash<QString, QString> stampsFrom(const QByteArray &raw)
     return seen;
 }
 
-void addField(QCryptographicHash *hash, const QByteArray &bytes)
-{
-    hash->addData(bytes);
-    hash->addData(QByteArray(1, '\0'));
-}
-
-void hashRow(QCryptographicHash *hash, const DiffRow &row)
-{
-    if (row.kind == RowKind::Context)
-        return;
-    addField(hash, QByteArray::number(static_cast<int>(row.kind)));
-    addField(hash, row.leftText.toUtf8());
-    addField(hash, row.rightText.toUtf8());
-}
-
 } // namespace
-
-QString fileStamp(const FileDiff &file)
-{
-    QCryptographicHash hash(QCryptographicHash::Sha1);
-    addField(&hash, file.path().toUtf8());
-    addField(&hash, QByteArray::number(file.adds));
-    addField(&hash, QByteArray::number(file.dels));
-    addField(&hash, file.binary ? "1" : "0");
-    for (const DiffRow &row : file.rows)
-        hashRow(&hash, row);
-    return QString::fromLatin1(hash.result().toHex());
-}
 
 QHash<QString, QString> readSeen(const QString &root)
 {
@@ -97,13 +70,13 @@ void writeSeen(const QString &root, const QHash<QString, QString> &seen)
 bool staleFile(const FileDiff &file, const QHash<QString, QString> &seen)
 {
     const QString prior = seen.value(file.path());
-    return !prior.isEmpty() && prior != fileStamp(file);
+    return !prior.isEmpty() && prior != changeStamp(file);
 }
 
 QColor staleBg(const QWidget *tree)
 {
     const bool dark = tree->palette().color(QPalette::Base).lightness() < 128;
-    return dark ? QColor(92, 70, 32) : QColor(255, 236, 196);
+    return dark ? QColor(72, 58, 32) : QColor(255, 246, 220);
 }
 
 class SeenRow : public QStyledItemDelegate {
