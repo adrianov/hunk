@@ -6,6 +6,7 @@ Feature: Review comments
     And hovering that control highlights it
     And the line text is drawn once in the list color
     And that text stays readable when the line is selected
+    And the line shows as much of the comment as fits
 
   Scenario: Auto cleanup starts on
     Given the review list is open
@@ -18,11 +19,17 @@ Feature: Review comments
     When that line's text changes
     Then the review is removed
 
-  Scenario: A line that leaves the diff drops its review
+  Scenario: A line that leaves the file drops its review
     Given auto cleanup is on
     And a review comments on a diff line
-    When that line leaves the diff
+    When that line leaves the file
     Then the review is removed
+
+  Scenario: A shifted line keeps its review
+    Given auto cleanup is on
+    And a review comments on a diff line
+    When that line stays in the file at a new line
+    Then the review stays on the new line
 
   Scenario: Auto cleanup can stay off
     Given auto cleanup is off

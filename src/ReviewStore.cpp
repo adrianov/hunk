@@ -1,6 +1,7 @@
 #include "ReviewStore.hpp"
 
 #include "DiffParse.hpp"
+#include "ReviewShift.hpp"
 
 #include <QCryptographicHash>
 #include <QJsonArray>
@@ -93,22 +94,45 @@ bool adoptLine(ReviewNote *note, const QString &text)
     return true;
 }
 
-bool syncNote(QList<ReviewNote> *notes, int index, const DiffDoc &doc, bool dropChanged)
+bool followLine(ReviewNote *note, int line, const DiffDoc &doc)
+{
+    note->line = line;
+    const LineHit hit = findLine(doc, note->path, note->oldSide, line);
+    if (hit.file < 0) {
+        markMissing(note);
+        return true;
+    }
+    adoptLine(note, lineText(doc, hit, note->oldSide));
+    return true;
+}
+
+bool dropStale(QList<ReviewNote> *notes, int index, bool inDiff, const QString &text, bool dropChanged)
 {
     ReviewNote &note = (*notes)[index];
-    const LineHit hit = findLine(doc, note.path, note.oldSide, note.line);
-    if (hit.file < 0) {
+    if (!inDiff) {
         if (!dropChanged)
             return markMissing(&note);
         notes->removeAt(index);
         return true;
     }
-    const QString text = lineText(doc, hit, note.oldSide);
-    if (dropChanged && !note.snippet.isEmpty() && text != note.snippet) {
+    if (dropChanged && !note.snippet.isEmpty()) {
         notes->removeAt(index);
         return true;
     }
     return adoptLine(&note, text);
+}
+
+bool syncNote(QList<ReviewNote> *notes, int index, const DiffDoc &doc, const QString &root, bool dropChanged)
+{
+    ReviewNote &note = (*notes)[index];
+    const LineHit hit = findLine(doc, note.path, note.oldSide, note.line);
+    const QString text = hit.file >= 0 ? lineText(doc, hit, note.oldSide) : QString();
+    if (hit.file >= 0 && (note.snippet.isEmpty() || text == note.snippet))
+        return adoptLine(&note, text);
+    const int moved = shiftedLine(doc, root, note);
+    if (moved > 0)
+        return followLine(&note, moved, doc);
+    return dropStale(notes, index, hit.file >= 0, text, dropChanged);
 }
 
 } // namespace
@@ -117,7 +141,7 @@ void ReviewStore::sync(const DiffDoc &doc, bool dropChanged)
 {
     bool changed = false;
     for (int index = m_notes.size() - 1; index >= 0; --index)
-        changed = syncNote(&m_notes, index, doc, dropChanged) || changed;
+        changed = syncNote(&m_notes, index, doc, m_root, dropChanged) || changed;
     if (!changed)
         return;
     write();

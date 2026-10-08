@@ -41,6 +41,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/GitStamp.cpp` — head, worktree status, resolved base, and ignored directories
 - `src/GitRange.cpp` — merge-request range and branching point label
 - `src/ReviewStore.cpp` / `ReviewStore.hpp` — comments in QSettings
+- `src/ReviewShift.cpp` / `ReviewShift.hpp` — moved comment line
 - `src/ReviewNote.hpp` — one comment
 - `src/ReviewExport.cpp` / `ReviewExport.hpp` — agent markdown
 - `tests/parse_test.cpp` — parser, fold, and export checks

@@ -65,10 +65,11 @@ add_executable(hunk
   src/GitStamp.cpp
   src/GitRange.cpp
   src/ReviewStore.cpp
+  src/ReviewShift.cpp
 )
 target_link_libraries(hunk PRIVATE hunk_core Qt6::Widgets Qt6::Concurrent qlementine)
 
-add_executable(hunk_test tests/parse_test.cpp)
+add_executable(hunk_test tests/parse_test.cpp src/ReviewStore.cpp src/ReviewShift.cpp)
 target_link_libraries(hunk_test PRIVATE hunk_core Qt6::Core)
 
 add_executable(hunk_syntax tests/syntax_test.cpp)

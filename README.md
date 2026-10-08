@@ -13,7 +13,7 @@ Local merge-request diff for macOS and Linux. Qt 6, side-by-side, with review co
 - Click a line number to comment. Comments stay in app settings, not in the repo
 - **Copy reviews** writes markdown with `` `path:line` `` and the line text
 - Diff flags match a review diff: `-w -W --no-prefix --diff-algorithm=histogram`
-- **View → Theme** follows the system, or switches to dark or light. Controls use Qlementine, so they match on macOS and Linux. Diff code uses the theme monospace size; the rest of the window uses the theme text size
+- **View → Theme** follows the system, or switches to dark or light. Controls use Qlementine, so they match on macOS and Linux. Toolbar buttons use that filled button style. Diff code uses the theme monospace size; the rest of the window uses the theme text size
 
 Untracked files are not part of `git diff`.
 
@@ -73,7 +73,7 @@ File references are `path:line` on the new side. `(old)` means the line number b
 The nil check is missing when the user is blank.
 ```
 
-Comment with ⌘↩ / Ctrl+Enter on the selected line, or click the line number. One comment per line. Each review line has its own delete control. Auto cleanup, on by default, removes a review when that line's text changes or the line leaves the diff.
+Comment with ⌘↩ / Ctrl+Enter on the selected line, or click the line number. One comment per line. Each review line has its own delete control. Auto cleanup, on by default, removes a review when that line's text changes or the line leaves the file. A line that only moves keeps its review, and the comment follows the new line.
 
 ## Layout
 
