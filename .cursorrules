@@ -5,6 +5,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 ## Layout
 
 - `src/main.cpp` — process entry
+- `src/MacIcon.mm` / `MacIcon.hpp` — Dock icon on macOS
 - `icons/` — app icon for the macOS bundle and the Linux menu
 - `src/Smoke.cpp` / `Smoke.hpp` — offscreen `--smoke` check
 - `src/MainWindow.cpp` / `MainWindow.hpp` — window lifecycle
