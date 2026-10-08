@@ -123,7 +123,10 @@ void MainWindow::wireNotes()
 void MainWindow::wireMode()
 {
     connect(m_mode, &QComboBox::currentIndexChanged, this, &MainWindow::reloadFresh);
-    connect(m_base, &QComboBox::activated, this, &MainWindow::reloadIfBaseChanged);
+    connect(m_base, &QComboBox::activated, this, &MainWindow::reloadIfRangeChanged);
+    connect(m_head, &QComboBox::activated, this, &MainWindow::reloadIfRangeChanged);
     if (m_base->lineEdit())
-        connect(m_base->lineEdit(), &QLineEdit::editingFinished, this, &MainWindow::reloadIfBaseChanged);
+        connect(m_base->lineEdit(), &QLineEdit::editingFinished, this, &MainWindow::reloadIfRangeChanged);
+    if (m_head->lineEdit())
+        connect(m_head->lineEdit(), &QLineEdit::editingFinished, this, &MainWindow::reloadIfRangeChanged);
 }

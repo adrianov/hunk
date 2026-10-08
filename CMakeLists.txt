@@ -40,11 +40,13 @@ add_executable(hunk
   src/DiffHeader.cpp
   src/DiffPaint.cpp
   src/DiffFoldView.cpp
+  src/DiffLayout.cpp
   src/DiffSide.cpp
   src/DiffSyntax.cpp
   src/DiffColors.cpp
   src/GitRepo.cpp
   src/GitCmd.cpp
+  src/GitRange.cpp
   src/ReviewStore.cpp
 )
 target_link_libraries(hunk PRIVATE hunk_core Qt6::Widgets Qt6::Concurrent)

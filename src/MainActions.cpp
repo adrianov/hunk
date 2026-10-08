@@ -70,26 +70,34 @@ void MainWindow::addModeBox(QToolBar *bar)
     m_mode->addItem(QStringLiteral("Merge request"));
     m_mode->addItem(QStringLiteral("Uncommitted"));
     m_mode->addItem(QStringLiteral("Staged"));
-    m_mode->setItemData(0, QStringLiteral("Three-dot diff, base...HEAD"), Qt::ToolTipRole);
+    m_mode->setItemData(0, QStringLiteral("Three-dot diff from the base, including uncommitted changes"), Qt::ToolTipRole);
     m_mode->setItemData(1, QStringLiteral("Staged and unstaged changes against HEAD"), Qt::ToolTipRole);
     m_mode->setItemData(2, QStringLiteral("Staged changes only"), Qt::ToolTipRole);
     bar->addWidget(m_mode);
 }
 
-void MainWindow::addBaseBox(QToolBar *bar)
+void addRef(QToolBar *bar, QComboBox **box, const QString &label, const QString &tip)
 {
-    m_base = new QComboBox(this);
-    m_base->setEditable(true);
-    m_base->setMinimumWidth(180);
-    m_base->setToolTip(QStringLiteral("Base ref for the merge request"));
-    bar->addWidget(m_base);
+    bar->addWidget(new QLabel(label, bar));
+    *box = new QComboBox(bar);
+    (*box)->setEditable(true);
+    (*box)->setMinimumWidth(160);
+    (*box)->setToolTip(tip);
+    bar->addWidget(*box);
+}
+
+void MainWindow::addRefBoxes(QToolBar *bar)
+{
+    addRef(bar, &m_base, QStringLiteral("Base"),
+           QStringLiteral("Base of the merge request. Branching point is where this branch left the default branch."));
+    addRef(bar, &m_head, QStringLiteral("Branch"), QStringLiteral("Branch compared with the base"));
 }
 
 void MainWindow::fillBar(QToolBar *bar, QAction *openAct, QAction *refreshAct, QAction *commentAct, QAction *copyAct)
 {
     bar->addAction(openAct);
     addModeBox(bar);
-    addBaseBox(bar);
+    addRefBoxes(bar);
     bar->addAction(refreshAct);
     bar->addAction(commentAct);
     bar->addAction(copyAct);

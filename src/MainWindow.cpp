@@ -117,27 +117,6 @@ void MainWindow::openAt(const QString &path)
     reload(false);
 }
 
-void MainWindow::reload(bool keepScroll)
-{
-    const QString path = m_root.isEmpty() ? m_startPath : m_root;
-    if (path.isEmpty())
-        return;
-    m_scrollKeep = keepScroll ? m_diff->scrollTop() : 0;
-    m_repoLabel->setText(QStringLiteral("Loading…"));
-    m_diff->setMessage(QStringLiteral("Loading…"));
-    statusBar()->showMessage(QStringLiteral("Loading…"));
-    const auto mode = static_cast<DiffMode>(m_mode->currentIndex());
-    m_base->setEnabled(mode == DiffMode::MergeRequest);
-    m_git->load(path, mode, m_base->currentText().trimmed());
-}
-
-void MainWindow::reloadIfBaseChanged()
-{
-    if (m_base->currentText().trimmed() == m_appliedBase)
-        return;
-    reload(false);
-}
-
 void MainWindow::chooseRepo()
 {
     const QString dir = QFileDialog::getExistingDirectory(this, QStringLiteral("Open repository"),

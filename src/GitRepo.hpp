@@ -12,7 +12,9 @@ struct GitResult {
     QString root;
     QString branch;
     QString baseRef;
+    QString headRef;
     QStringList bases;
+    QStringList branches;
     QString leftLabel;
     QString rightLabel;
     QString title;
@@ -25,7 +27,7 @@ class GitRepo : public QObject {
     Q_OBJECT
 public:
     explicit GitRepo(QObject *parent = nullptr);
-    void load(const QString &startPath, DiffMode mode, const QString &baseRef);
+    void load(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef);
 
 signals:
     void ready(const GitResult &result);

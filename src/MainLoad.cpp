@@ -13,6 +13,34 @@
 #include <QStatusBar>
 #include <QTreeWidget>
 
+void MainWindow::startLoad(const QString &path)
+{
+    const auto mode = static_cast<DiffMode>(m_mode->currentIndex());
+    const bool merge = mode == DiffMode::MergeRequest;
+    m_base->setEnabled(merge);
+    m_head->setEnabled(merge);
+    m_git->load(path, mode, m_base->currentText().trimmed(), m_head->currentText().trimmed());
+}
+
+void MainWindow::reload(bool keepScroll)
+{
+    const QString path = m_root.isEmpty() ? m_startPath : m_root;
+    if (path.isEmpty())
+        return;
+    m_scrollKeep = keepScroll ? m_diff->scrollTop() : 0;
+    m_repoLabel->setText(QStringLiteral("Loading…"));
+    m_diff->setMessage(QStringLiteral("Loading…"));
+    statusBar()->showMessage(QStringLiteral("Loading…"));
+    startLoad(path);
+}
+
+void MainWindow::reloadIfRangeChanged()
+{
+    if (m_base->currentText().trimmed() == m_appliedBase && m_head->currentText().trimmed() == m_appliedHead)
+        return;
+    reload(false);
+}
+
 void MainWindow::rememberRoot(const QString &root)
 {
     m_root = root;
@@ -30,15 +58,15 @@ void setBaseBlocked(QComboBox *base, bool blocked)
         base->lineEdit()->blockSignals(blocked);
 }
 
-void selectBase(QComboBox *base, const GitResult &result)
+void selectRef(QComboBox *box, const QStringList &items, const QString &selected)
 {
-    const QString typed = base->currentText();
-    base->clear();
-    base->addItems(result.bases);
-    if (!result.baseRef.isEmpty())
-        base->setCurrentText(result.baseRef);
+    const QString typed = box->currentText();
+    box->clear();
+    box->addItems(items);
+    if (!selected.isEmpty())
+        box->setCurrentText(selected);
     else if (!typed.isEmpty())
-        base->setCurrentText(typed);
+        box->setCurrentText(typed);
 }
 
 } // namespace
@@ -46,9 +74,14 @@ void selectBase(QComboBox *base, const GitResult &result)
 void MainWindow::applyBases(const GitResult &result)
 {
     setBaseBlocked(m_base, true);
-    selectBase(m_base, result);
+    setBaseBlocked(m_head, true);
+    selectRef(m_base, result.bases, result.baseRef);
+    selectRef(m_head, result.branches, result.headRef);
     setBaseBlocked(m_base, false);
-    m_base->setEnabled(static_cast<DiffMode>(m_mode->currentIndex()) == DiffMode::MergeRequest);
+    setBaseBlocked(m_head, false);
+    const bool merge = static_cast<DiffMode>(m_mode->currentIndex()) == DiffMode::MergeRequest;
+    m_base->setEnabled(merge);
+    m_head->setEnabled(merge);
 }
 
 void MainWindow::showLoadError(const GitResult &result)
@@ -65,7 +98,6 @@ void MainWindow::showLoadError(const GitResult &result)
 void MainWindow::showLoadedDiff(const GitResult &result)
 {
     m_title = result.title;
-    m_appliedBase = result.baseRef;
     m_doc = parseDiff(result.diffText);
     m_store->sync(m_doc);
     rebuildTree();
@@ -93,6 +125,8 @@ void MainWindow::onReady(const GitResult &result)
     if (!result.root.isEmpty())
         rememberRoot(result.root);
     applyBases(result);
+    m_appliedBase = result.baseRef;
+    m_appliedHead = result.headRef;
     if (!result.error.isEmpty())
         showLoadError(result);
     else

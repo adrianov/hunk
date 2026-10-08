@@ -41,7 +41,7 @@ QString copyStatus(int count)
 
 void MainWindow::commentSelection()
 {
-    if (m_editor->hasFocus() || m_filter->hasFocus() || m_base->hasFocus())
+    if (m_editor->hasFocus() || m_filter->hasFocus() || m_base->hasFocus() || m_head->hasFocus())
         return;
     if (!m_diff->hasSelection()) {
         statusBar()->showMessage(QStringLiteral("Click a line number to comment"));

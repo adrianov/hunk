@@ -44,7 +44,8 @@ bool readHead(GitResult &result, QString *headShort)
     const GitCmd head = runGit(result.root, {QStringLiteral("rev-parse"), QStringLiteral("--short"), QStringLiteral("HEAD")});
     if (head.code != 0) {
         result.error = head.err.isEmpty() ? QStringLiteral("No commits yet") : head.err;
-        result.bases = baseRefs(result.root);
+        result.bases = baseChoices(result.root);
+        result.branches = branchRefs(result.root, result.branch);
         return false;
     }
     *headShort = head.out.trimmed();
@@ -56,33 +57,6 @@ QStringList diffFlags()
     return {QStringLiteral("diff"), QStringLiteral("-w"), QStringLiteral("-W"),
             QStringLiteral("--no-prefix"), QStringLiteral("--find-renames"),
             QStringLiteral("--diff-algorithm=histogram")};
-}
-
-bool mergeBase(GitResult &result, QString *leftShort)
-{
-    const GitCmd base = runGit(result.root, {QStringLiteral("merge-base"), result.baseRef, QStringLiteral("HEAD")});
-    if (base.code != 0) {
-        result.error = base.err.isEmpty() ? QStringLiteral("Cannot find merge base") : base.err;
-        return false;
-    }
-    *leftShort = runGit(result.root, {QStringLiteral("rev-parse"), QStringLiteral("--short"), base.out.trimmed()}).out.trimmed();
-    return true;
-}
-
-bool fillMerge(GitResult &result, const QString &headShort, QStringList *args)
-{
-    if (result.baseRef.isEmpty()) {
-        result.error = QStringLiteral("No base branch. Set upstream, or type main.");
-        return false;
-    }
-    QString leftShort;
-    if (!mergeBase(result, &leftShort))
-        return false;
-    result.leftLabel = leftShort;
-    result.rightLabel = headShort;
-    result.title = result.branch + QStringLiteral(" vs ") + result.baseRef;
-    *args << (result.baseRef + QStringLiteral("...HEAD"));
-    return true;
 }
 
 void fillWorktree(GitResult &result, const QString &headShort, bool staged, QStringList *args)
@@ -105,7 +79,7 @@ bool applyMode(GitResult &result, DiffMode mode, const QString &headShort, QStri
         fillWorktree(result, headShort, mode == DiffMode::Staged, args);
         return true;
     }
-    return fillMerge(result, headShort, args);
+    return fillMerge(result, args);
 }
 
 bool runDiff(GitResult &result, const QStringList &args)
@@ -119,7 +93,15 @@ bool runDiff(GitResult &result, const QStringList &args)
     return true;
 }
 
-GitResult loadGit(const QString &startPath, DiffMode mode, const QString &baseRef)
+void pickRefs(GitResult &result, const QString &baseRef, const QString &headRef)
+{
+    result.bases = baseChoices(result.root);
+    result.branches = branchRefs(result.root, result.branch);
+    result.headRef = headRef.trimmed().isEmpty() ? result.branch : headRef.trimmed();
+    result.baseRef = baseRef.trimmed().isEmpty() ? branchPointName() : baseRef.trimmed();
+}
+
+GitResult loadGit(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef)
 {
     GitResult result;
     QString cwd;
@@ -129,8 +111,7 @@ GitResult loadGit(const QString &startPath, DiffMode mode, const QString &baseRe
     QString headShort;
     if (!readHead(result, &headShort))
         return result;
-    result.bases = baseRefs(result.root);
-    result.baseRef = baseRef.trimmed().isEmpty() ? result.bases.value(0) : baseRef.trimmed();
+    pickRefs(result, baseRef, headRef);
     QStringList args = diffFlags();
     if (!applyMode(result, mode, headShort, &args))
         return result;
@@ -145,7 +126,7 @@ GitRepo::GitRepo(QObject *parent)
 {
 }
 
-void GitRepo::load(const QString &startPath, DiffMode mode, const QString &baseRef)
+void GitRepo::load(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef)
 {
     const int token = ++generation;
     auto *watcher = new QFutureWatcher<GitResult>(this);
@@ -156,7 +137,7 @@ void GitRepo::load(const QString &startPath, DiffMode mode, const QString &baseR
             return;
         emit ready(result);
     });
-    watcher->setFuture(QtConcurrent::run([startPath, mode, baseRef]() {
-        return loadGit(startPath, mode, baseRef);
+    watcher->setFuture(QtConcurrent::run([startPath, mode, baseRef, headRef]() {
+        return loadGit(startPath, mode, baseRef, headRef);
     }));
 }

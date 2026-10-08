@@ -53,7 +53,7 @@ private:
     void addMenus(QAction *openAct, QAction *refreshAct, QAction *quitAct, QAction *commentAct, QAction *copyAct);
     void fillBar(QToolBar *bar, QAction *openAct, QAction *refreshAct, QAction *commentAct, QAction *copyAct);
     void addModeBox(QToolBar *bar);
-    void addBaseBox(QToolBar *bar);
+    void addRefBoxes(QToolBar *bar);
     void buildDiffPane();
     QWidget *makeFilePane();
     void buildReviews();
@@ -70,7 +70,8 @@ private:
     void reloadFresh();
     void openAt(const QString &path);
     void reload(bool keepScroll);
-    void reloadIfBaseChanged();
+    void startLoad(const QString &path);
+    void reloadIfRangeChanged();
     void chooseRepo();
     void onReady(const GitResult &result);
     void rememberRoot(const QString &root);
@@ -95,6 +96,7 @@ private:
     QLineEdit *m_filter = nullptr;
     QComboBox *m_mode = nullptr;
     QComboBox *m_base = nullptr;
+    QComboBox *m_head = nullptr;
     QLabel *m_repoLabel = nullptr;
     QListWidget *m_notes = nullptr;
     QPlainTextEdit *m_editor = nullptr;
@@ -105,6 +107,7 @@ private:
     QString m_startPath;
     QString m_title;
     QString m_appliedBase;
+    QString m_appliedHead;
     int m_scrollKeep = 0;
     bool m_noteLock = false;
     bool m_navLock = false;

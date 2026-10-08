@@ -8,7 +8,7 @@ Local merge-request diff for macOS and Linux. Qt 6, side-by-side, with review co
 - File list grouped by folder, two panes, wrapped lines, syntax colors (keywords, methods, variables, strings, comments), word highlights, sticky file header
 - Long unchanged stretches collapse. Click the bar to show them, or the side arrows to show 20 lines
 - New files use one pane
-- Compare **merge request** (`base...HEAD`), **uncommitted** (`git diff HEAD`), or **staged**
+- Compare **merge request** (three-dot from the base, including uncommitted changes on the current branch; base defaults to the branching point), **uncommitted** (`git diff HEAD`), or **staged**
 - Click a line number to comment. Comments stay in app settings, not in the repo
 - **Copy reviews** writes markdown with `` `path:line` `` and the line text
 - Diff flags match a review diff: `-w -W --no-prefix --diff-algorithm=histogram`
@@ -52,7 +52,7 @@ cmake --build build
 
 A path opens that repository as a merge request. With no path, Hunk opens the last repository, or the current directory.
 
-The base box lists upstream, `origin/main`, `main`, `origin/master`, and `master` when they exist. Type another ref and press Return.
+The base box defaults to the branching point (where the branch left the default branch), then lists upstream, `origin/main`, `main`, `origin/master`, and `master` when they exist. The branch box lists local branches, with the current branch selected. Type another ref and press Return.
 
 Drop a repository folder on the window to open it.
 
