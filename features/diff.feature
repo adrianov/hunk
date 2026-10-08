@@ -43,6 +43,8 @@ Feature: Diff view
     Given I have reviewed a file in the list
     When that file changes
     Then that file is highlighted in the list
+    And lines I already reviewed are a lighter green and red
+    And lines that changed since then are a stronger green and red
     When I view that file again
     Then the highlight is gone
 

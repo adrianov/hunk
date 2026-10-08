@@ -7,7 +7,7 @@ Copyright © 2026 Peter Adrianov. Licensed under the [MIT License](LICENSE).
 ## Features
 
 - Open a git repository and read the branch like a pull request. The toolbar shows the repository path in the normal text color
-- File list grouped by folder, two panes, wrapped lines, syntax colors (keywords, methods, variables, strings, comments), word highlights, sticky file header. A file you already reviewed is highlighted when its diff changes again
+- File list grouped by folder, two panes, wrapped lines, syntax colors (keywords, methods, variables, strings, comments), word highlights, sticky file header. A file you already reviewed is highlighted when its diff changes again. Lines from that review stay a lighter green and red; lines changed since then are stronger
 - Long unchanged stretches collapse. Click the bar to show them, or the side arrows to show 20 lines
 - New files use one pane
 - Compare **merge request** (three-dot from the base, including uncommitted changes on the current branch; base defaults to the branching point), **uncommitted** (`git diff HEAD`), or **staged**. The status bar names the target when the merge request would conflict with it
