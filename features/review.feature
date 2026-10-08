@@ -11,6 +11,11 @@ Feature: Review comments
     And that stays true when the comment's line moves
     And a different comment with the same text is left alone
 
+  Scenario: Copy reviews explains old lines only when one is commented
+    Given every review comment is on the new side
+    When I copy reviews
+    Then the clipboard does not explain what `(old)` means
+
   Scenario: Each review line can be deleted
     Given the review list has a comment
     Then that line has its own delete control

@@ -35,16 +35,19 @@ QString reviewMarkdown(const QString &title, const QList<ReviewNote> &notes)
 {
     QString body;
     int count = 0;
+    bool old = false;
     for (const ReviewNote &note : notes) {
         const QString block = noteBlock(note);
         if (block.isEmpty())
             continue;
         body += block;
+        old = old || note.oldSide;
         ++count;
     }
     if (count == 0)
         return {};
-    return QStringLiteral("# Review: ") + title
-        + QStringLiteral("\n\nFile references are `path:line` on the new side. `(old)` means the line number before the change.\n")
-        + body;
+    QString lead = QStringLiteral("\n\nFile references are `path:line` on the new side.");
+    if (old)
+        lead += QStringLiteral(" `(old)` means the line number before the change.");
+    return QStringLiteral("# Review: ") + title + lead + QLatin1Char('\n') + body;
 }

@@ -133,7 +133,7 @@ void testParse()
     CHECK(trailing.files.at(0).rows.at(0).kind == RowKind::Mod);
 }
 
-void testExport()
+void testExportOld()
 {
     ReviewNote note;
     note.path = QStringLiteral("src/a.cpp");
@@ -146,18 +146,34 @@ void testExport()
     oldNote.line = 4;
     oldNote.snippet = QStringLiteral("old line");
     oldNote.body = QStringLiteral("Still used.");
-    const QString markdown = reviewMarkdown(QStringLiteral("main vs origin/main"), {note, oldNote});
-    const QString expected =
-        QStringLiteral("# Review: main vs origin/main\n")
-        + QStringLiteral("\nFile references are `path:line` on the new side. `(old)` means the line number before the change.\n")
-        + QStringLiteral("\n## `src/a.cpp:2`\n")
-        + QStringLiteral(">     return 2;\n")
-        + QStringLiteral("\nUse a named constant.\n")
-        + QStringLiteral("\n## `src/a.cpp:4` (old)\n")
-        + QStringLiteral("> old line\n")
-        + QStringLiteral("\nStill used.\n");
-    CHECK(markdown == expected);
+    CHECK(reviewMarkdown(QStringLiteral("main vs origin/main"), {note, oldNote}) == QStringLiteral(
+        "# Review: main vs origin/main\n"
+        "\nFile references are `path:line` on the new side. `(old)` means the line number before the change.\n"
+        "\n## `src/a.cpp:2`\n"
+        ">     return 2;\n"
+        "\nUse a named constant.\n"
+        "\n## `src/a.cpp:4` (old)\n"
+        "> old line\n"
+        "\nStill used.\n"));
+}
+
+void testExportPlain()
+{
+    ReviewNote note;
+    note.path = QStringLiteral("src/a.cpp");
+    note.line = 2;
+    note.snippet = QStringLiteral("    return 2;");
+    note.body = QStringLiteral("Use a named constant.\n");
+    const QString plain = reviewMarkdown(QStringLiteral("t"), {note});
+    CHECK(plain.contains(QStringLiteral("`path:line`")));
+    CHECK(!plain.contains(QStringLiteral("(old) means")));
     CHECK(reviewMarkdown(QStringLiteral("t"), {ReviewNote{}}).isEmpty());
+}
+
+void testExport()
+{
+    testExportOld();
+    testExportPlain();
 }
 
 QList<DiffRow> rowsOf(const QString &kinds)
