@@ -99,11 +99,22 @@ void MainWindow::addModeBox(QToolBar *bar)
     bar->addWidget(m_mode);
 }
 
+void applyBarButton(QPushButton *button, const QAction *action)
+{
+    button->setText(action->text());
+    button->setToolTip(action->toolTip().isEmpty() ? action->text() : action->toolTip());
+    button->setEnabled(action->isEnabled());
+    button->setVisible(action->isVisible());
+    button->setCheckable(action->isCheckable());
+    button->setChecked(action->isChecked());
+}
+
 void addBarButton(QToolBar *bar, QAction *action)
 {
-    auto *button = new QPushButton(action->text(), bar);
-    button->setToolTip(action->toolTip().isEmpty() ? action->text() : action->toolTip());
+    auto *button = new QPushButton(bar);
+    applyBarButton(button, action);
     QObject::connect(button, &QPushButton::clicked, action, &QAction::trigger);
+    QObject::connect(action, &QAction::changed, button, [button, action]() { applyBarButton(button, action); });
     bar->addWidget(button);
 }
 
