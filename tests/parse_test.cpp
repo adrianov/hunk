@@ -285,7 +285,7 @@ QString shiftedRepo(const QString &root)
 {
     QSettings::setPath(QSettings::NativeFormat, QSettings::UserScope, root);
     QFile file(QDir(root).filePath(QStringLiteral("a.rb")));
-    file.open(QIODevice::WriteOnly);
+    CHECK(file.open(QIODevice::WriteOnly));
     file.write("intro\nkeep\n");
     return root;
 }
