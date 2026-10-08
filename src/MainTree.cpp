@@ -1,6 +1,7 @@
 #include "MainWindow.hpp"
 
 #include "DiffColors.hpp"
+#include "MainSeen.hpp"
 
 #include <QHash>
 #include <QLineEdit>
@@ -60,7 +61,8 @@ QString fileLabel(const FileDiff &file)
     return file.shortName() + QStringLiteral("    +%1  −%2").arg(file.adds).arg(file.dels);
 }
 
-void addFileItem(QTreeWidgetItem *folderItem, const FileDiff &file, int fileIndex)
+void addFileItem(QTreeWidgetItem *folderItem, const FileDiff &file, int fileIndex, const QHash<QString, QString> &seen,
+                 const QWidget *tree)
 {
     auto *item = new QTreeWidgetItem(folderItem, {fileLabel(file)});
     item->setData(0, Qt::UserRole, fileIndex);
@@ -69,26 +71,48 @@ void addFileItem(QTreeWidgetItem *folderItem, const FileDiff &file, int fileInde
         item->setForeground(0, kAddFg);
     else if (file.removed)
         item->setForeground(0, kDelFg);
+    if (!staleFile(file, seen))
+        return;
+    item->setBackground(0, staleBg(tree));
+    item->setToolTip(0, file.title() + QStringLiteral("\nChanged since you reviewed it"));
 }
 
-void addFolder(QTreeWidget *tree, const Group &group, const DiffDoc &doc)
+void addFolder(QTreeWidget *tree, const Group &group, const DiffDoc &doc, const QHash<QString, QString> &seen)
 {
     const QString name = group.folder.isEmpty() ? QStringLiteral("(root)") : group.folder;
     auto *folderItem = new QTreeWidgetItem(tree, {name});
     folderItem->setData(0, Qt::UserRole, -1);
     folderItem->setForeground(0, kMuted);
     for (int fileIndex : group.files)
-        addFileItem(folderItem, doc.files.at(fileIndex), fileIndex);
+        addFileItem(folderItem, doc.files.at(fileIndex), fileIndex, seen, tree);
 }
 
 } // namespace
+
+void MainWindow::loadSeen()
+{
+    m_seen = readSeen(m_root);
+}
+
+void MainWindow::markSeenFile(int file)
+{
+    if (m_smoke || m_root.isEmpty() || file < 0 || file >= m_doc.files.size())
+        return;
+    const FileDiff &diff = m_doc.files.at(file);
+    const QString stamp = fileStamp(diff);
+    if (m_seen.value(diff.path()) == stamp)
+        return;
+    m_seen.insert(diff.path(), stamp);
+    writeSeen(m_root, m_seen);
+    clearSeenMark(m_tree, file);
+}
 
 void MainWindow::rebuildTree()
 {
     m_navLock = true;
     m_tree->clear();
     for (const Group &group : collectGroups(m_doc, m_filter->text().trimmed()))
-        addFolder(m_tree, group, m_doc);
+        addFolder(m_tree, group, m_doc, m_seen);
     m_tree->expandAll();
     m_navLock = false;
 }
@@ -97,6 +121,7 @@ void MainWindow::selectTreeFile(int file)
 {
     if (m_navLock)
         return;
+    markSeenFile(file);
     m_navLock = true;
     for (QTreeWidgetItem *item : m_tree->findItems(QStringLiteral("*"), Qt::MatchWildcard | Qt::MatchRecursive)) {
         if (item->data(0, Qt::UserRole).toInt() == file) {

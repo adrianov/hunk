@@ -1,6 +1,7 @@
 #include "MainWindow.hpp"
 
 #include "DiffCanvas.hpp"
+#include "MainSeen.hpp"
 #include "ReviewStore.hpp"
 
 #include <QCheckBox>
@@ -26,6 +27,7 @@ QWidget *MainWindow::makeFilePane()
     m_tree = new QTreeWidget(this);
     m_tree->setHeaderHidden(true);
     m_tree->setIndentation(14);
+    installSeenRows(m_tree);
     auto *left = new QWidget(this);
     auto *layout = new QVBoxLayout(left);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -108,6 +110,7 @@ void MainWindow::openTreeItem(QTreeWidgetItem *item)
     const int index = item->data(0, Qt::UserRole).toInt();
     if (index < 0)
         return;
+    markSeenFile(index);
     m_navLock = true;
     m_diff->showFile(index);
     m_navLock = false;

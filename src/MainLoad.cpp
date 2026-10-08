@@ -23,10 +23,13 @@ void MainWindow::reloadIfRangeChanged()
 
 void MainWindow::rememberRoot(const QString &root)
 {
+    const bool switched = root != m_root;
     m_root = root;
     if (!m_smoke)
         QSettings().setValue(QStringLiteral("lastRepo"), m_root);
     m_store->setRepo(m_root);
+    if (switched)
+        loadSeen();
 }
 
 void fitRefBox(QComboBox *box);

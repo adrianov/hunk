@@ -25,6 +25,13 @@ Feature: Diff view
     Then the diff stays as it was
     And the scroll position stays
 
+  Scenario: A reviewed file stays marked after it changes
+    Given I have reviewed a file in the list
+    When that file changes
+    Then that file is highlighted in the list
+    When I view that file again
+    Then the highlight is gone
+
   Scenario: A save in another program updates the diff
     Given the merge request is on screen
     When another program saves a tracked file

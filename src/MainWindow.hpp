@@ -4,6 +4,7 @@
 #include "MainDetail.hpp"
 
 #include <QFileSystemWatcher>
+#include <QHash>
 #include <QMainWindow>
 #include <QSet>
 #include <QTimer>
@@ -109,6 +110,8 @@ private:
     void showLoadedDiff(const GitResult &result);
     void showLoadedTitle();
     void rebuildTree();
+    void loadSeen();
+    void markSeenFile(int file);
     void refreshNotes();
     void placeNoteRows();
     void addListedNote(int index);
@@ -136,6 +139,7 @@ private:
     QCheckBox *m_cleanup = nullptr;
     QDockWidget *m_dock = nullptr;
     DiffDoc m_doc;
+    QHash<QString, QString> m_seen;
     QString m_root;
     QString m_startPath;
     QString m_title;
