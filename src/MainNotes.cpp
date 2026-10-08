@@ -1,3 +1,6 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #include "MainWindow.hpp"
 
 #include "DiffCanvas.hpp"
@@ -135,6 +138,16 @@ void MainWindow::saveNote()
     m_store->setBody(m_notes->currentRow(), m_editor->toPlainText());
 }
 
+void MainWindow::showStatus(const QString &text)
+{
+    QString line = text;
+    if (!m_drift.isEmpty())
+        line += QStringLiteral("    ") + m_drift;
+    if (!m_conflict.isEmpty())
+        line += QStringLiteral("    ") + m_conflict;
+    statusBar()->showMessage(line);
+}
+
 void MainWindow::updateStatus()
 {
     int adds = 0;
@@ -143,11 +156,11 @@ void MainWindow::updateStatus()
         adds += file.adds;
         dels += file.dels;
     }
-    statusBar()->showMessage(QStringLiteral("%1 files    +%2  −%3    %4 comments")
-                                 .arg(m_doc.files.size())
-                                 .arg(adds)
-                                 .arg(dels)
-                                 .arg(filledNotes(m_store->notes())));
+    showStatus(QStringLiteral("%1 files    +%2  −%3    %4 comments")
+                   .arg(m_doc.files.size())
+                   .arg(adds)
+                   .arg(dels)
+                   .arg(filledNotes(m_store->notes())));
 }
 
 void MainWindow::pushNoteKeys()

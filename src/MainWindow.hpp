@@ -1,3 +1,6 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "DiffDoc.hpp"
@@ -124,6 +127,7 @@ private:
     void commentAt(int file, int row, bool oldSide);
     bool commentLine(int file, int row, bool *oldSide, int *line, QString *snippet) const;
     void copyReviews();
+    void showStatus(const QString &text);
     void updateStatus();
     void pushNoteKeys();
     void selectTreeFile(int file);
@@ -147,6 +151,8 @@ private:
     QString m_root;
     QString m_startPath;
     QString m_title;
+    QString m_conflict;
+    QString m_drift;
     QString m_appliedBase;
     QString m_appliedHead;
     QString m_appliedStamp;

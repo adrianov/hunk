@@ -1,3 +1,6 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #include "MainWindow.hpp"
 
 #include "DiffCanvas.hpp"
@@ -10,7 +13,6 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPlainTextEdit>
-#include <QStatusBar>
 
 namespace {
 
@@ -44,7 +46,7 @@ void MainWindow::commentSelection()
     if (m_editor->hasFocus() || m_filter->hasFocus() || m_base->hasFocus() || m_head->hasFocus())
         return;
     if (!m_diff->hasSelection()) {
-        statusBar()->showMessage(QStringLiteral("Click a line number to comment"));
+        showStatus(QStringLiteral("Click a line number to comment"));
         return;
     }
     commentAt(m_diff->selectedFile(), m_diff->selectedRow(), m_diff->selectedOldSide());
@@ -81,9 +83,9 @@ void MainWindow::copyReviews()
 {
     const QString markdown = reviewMarkdown(m_title.isEmpty() ? QStringLiteral("diff") : m_title, m_store->notes());
     if (markdown.isEmpty()) {
-        statusBar()->showMessage(QStringLiteral("No review comments to copy"));
+        showStatus(QStringLiteral("No review comments to copy"));
         return;
     }
     QGuiApplication::clipboard()->setText(markdown);
-    statusBar()->showMessage(copyStatus(filledNotes(m_store->notes())));
+    showStatus(copyStatus(filledNotes(m_store->notes())));
 }

@@ -1,3 +1,6 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #include "MainWindow.hpp"
 
 #include "DiffCanvas.hpp"
@@ -87,6 +90,8 @@ void MainWindow::showLoadError(const GitResult &result)
 {
     m_doc = {};
     m_title.clear();
+    m_conflict.clear();
+    m_drift.clear();
     m_diff->setMessage(result.error);
     m_tree->clear();
     tintRepoLabel();
@@ -105,6 +110,8 @@ void MainWindow::showLoadedDiff(const GitResult &result)
 {
     const int scroll = m_quiet ? m_diff->scrollTop() : m_scrollKeep;
     m_title = result.title;
+    m_conflict = result.conflict;
+    m_drift = result.drift;
     m_doc = parseDiff(result.diffText);
     m_store->sync(m_doc, m_cleanup->isChecked());
     rebuildTree();
