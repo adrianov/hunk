@@ -12,17 +12,48 @@
 #include <QPalette>
 #include <QSettings>
 #include <QStyleHints>
+#include <QToolTip>
 
 namespace {
 
 bool g_systemDark = false;
 
-oclero::qlementine::QlementineStyle *appStyle()
+// Tooltips use the window background and normal text, not the inverted chip colors.
+class AppStyle : public oclero::qlementine::QlementineStyle {
+public:
+    using QlementineStyle::QlementineStyle;
+
+    const QColor &toolTipBackgroundColor() const override
+    {
+        return theme().backgroundColorMain1;
+    }
+
+    const QColor &toolTipBorderColor() const override
+    {
+        return theme().borderColor;
+    }
+
+    const QColor &toolTipForegroundColor() const override
+    {
+        return theme().secondaryColor;
+    }
+
+    void triggerCompleteRepaint() override
+    {
+        QlementineStyle::triggerCompleteRepaint();
+        QPalette palette = QToolTip::palette();
+        palette.setColor(QPalette::All, QPalette::ToolTipBase, toolTipBackgroundColor());
+        palette.setColor(QPalette::All, QPalette::ToolTipText, toolTipForegroundColor());
+        QToolTip::setPalette(palette);
+    }
+};
+
+AppStyle *appStyle()
 {
-    auto *style = qobject_cast<oclero::qlementine::QlementineStyle *>(qApp->style());
+    auto *style = dynamic_cast<AppStyle *>(qApp->style());
     if (style)
         return style;
-    style = new oclero::qlementine::QlementineStyle(qApp);
+    style = new AppStyle(qApp);
     qApp->setStyle(style);
     return style;
 }
