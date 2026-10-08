@@ -12,6 +12,7 @@
 #include <QMenuBar>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QScrollBar>
 #include <QSettings>
 #include <QSplitter>
 #include <QTreeWidget>
@@ -122,6 +123,9 @@ void MainWindow::wireTree()
 
 void MainWindow::wireNotes()
 {
+    m_notes->viewport()->installEventFilter(this);
+    m_notes->installEventFilter(this);
+    connect(m_notes->verticalScrollBar(), &QScrollBar::valueChanged, this, &MainWindow::placeNoteRows);
     connect(m_notes, &QListWidget::currentRowChanged, this, &MainWindow::showNote);
     connect(m_editor, &QPlainTextEdit::textChanged, this, &MainWindow::saveNote);
     connect(m_copy, &QPushButton::clicked, this, &MainWindow::copyReviews);

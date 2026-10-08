@@ -18,6 +18,7 @@ class QComboBox;
 class QDockWidget;
 class QDragEnterEvent;
 class QDropEvent;
+class QEvent;
 class QLabel;
 class QLineEdit;
 class QListWidget;
@@ -46,6 +47,7 @@ protected:
     void showEvent(QShowEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
+    bool eventFilter(QObject *object, QEvent *event) override;
 
 private:
     void wireStore();
@@ -108,6 +110,7 @@ private:
     void showLoadedTitle();
     void rebuildTree();
     void refreshNotes();
+    void placeNoteRows();
     void addListedNote(int index);
     void restoreNoteRow(int row);
     void commentSelection();

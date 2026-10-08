@@ -60,8 +60,7 @@ struct ListedRow {
 
 ListedRow noteRow(QListWidget *list, QListWidgetItem *item, const ReviewNote &note)
 {
-    auto *row = new QWidget(list);
-    row->setMinimumHeight(24);
+    auto *row = new QWidget;
     auto *layout = new QHBoxLayout(row);
     layout->setContentsMargins(2, 0, 2, 0);
     layout->setSpacing(6);
@@ -158,6 +157,7 @@ void MainWindow::refreshNotes()
     for (int index = 0; index < m_store->notes().size(); ++index)
         addListedNote(index);
     restoreNoteRow(rowFor(m_notes, picked));
+    placeNoteRows();
     m_noteLock = false;
     const int comments = m_store->notes().size();
     m_dock->setWindowTitle(comments == 0 ? QStringLiteral("Reviews") : QStringLiteral("Reviews (%1)").arg(comments));

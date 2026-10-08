@@ -1,13 +1,17 @@
 #include "MainWindow.hpp"
 
 #include "DiffCanvas.hpp"
+#include "DiffColors.hpp"
 #include "DiffParse.hpp"
 #include "MainDetail.hpp"
 #include "ReviewStore.hpp"
 
+#include <QEvent>
+#include <QLabel>
 #include <QListWidget>
 #include <QPlainTextEdit>
 #include <QStatusBar>
+#include <QTimer>
 
 namespace {
 
@@ -31,7 +35,60 @@ int filledNotes(const QList<ReviewNote> &notes)
     return count;
 }
 
+QColor noteInk(const QListWidget *list, bool selected, bool inDiff)
+{
+    if (selected)
+        return list->palette().color(QPalette::HighlightedText);
+    if (!inDiff)
+        return kMuted;
+    return list->palette().color(QPalette::Text);
+}
+
+void tintLabel(QLabel *label, const QColor &color)
+{
+    const QPalette::ColorRole role = label->foregroundRole();
+    QPalette palette = label->palette();
+    if (palette.color(role) == color)
+        return;
+    palette.setColor(role, color);
+    label->setPalette(palette);
+}
+
+void placeRow(QListWidget *list, int index, bool inDiff)
+{
+    QListWidgetItem *item = list->item(index);
+    QWidget *row = list->itemWidget(item);
+    const QRect rect = list->visualItemRect(item);
+    if (!row || rect.width() < 1)
+        return;
+    if (row->geometry() != rect)
+        row->setGeometry(rect);
+    if (QLabel *label = row->findChild<QLabel *>())
+        tintLabel(label, noteInk(list, list->hasFocus() && item == list->currentItem(), inDiff));
+}
+
 } // namespace
+
+void MainWindow::placeNoteRows()
+{
+    if (!m_notes)
+        return;
+    const QList<ReviewNote> &notes = m_store->notes();
+    for (int index = 0; index < notes.size() && index < m_notes->count(); ++index)
+        placeRow(m_notes, index, notes.at(index).inDiff);
+}
+
+bool MainWindow::eventFilter(QObject *object, QEvent *event)
+{
+    if (!m_notes)
+        return QMainWindow::eventFilter(object, event);
+    const QEvent::Type type = event->type();
+    const bool relayout = object == m_notes->viewport() && type == QEvent::Resize;
+    const bool refocus = object == m_notes && (type == QEvent::FocusIn || type == QEvent::FocusOut);
+    if (relayout || refocus)
+        QTimer::singleShot(0, this, &MainWindow::placeNoteRows);
+    return QMainWindow::eventFilter(object, event);
+}
 
 QString noteLabel(const ReviewNote &note)
 {
@@ -45,6 +102,7 @@ QString noteLabel(const ReviewNote &note)
 
 void MainWindow::showNote(int row)
 {
+    placeNoteRows();
     const bool on = row >= 0 && row < m_store->notes().size();
     m_editor->setEnabled(on);
     if (!on || m_noteLock)
