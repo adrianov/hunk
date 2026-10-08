@@ -12,6 +12,8 @@ QMenu::item:selected { background: #094771; }
 QToolBar { background: #252526; border: none; spacing: 6px; padding: 4px; }
 QToolButton, QPushButton { background: #2d2d2d; color: #d4d4d4; border: 1px solid #3c3c3c; padding: 4px 10px; }
 QToolButton:hover, QPushButton:hover { background: #3c3c3c; }
+QPushButton#noteDelete { padding: 0; border: none; background: transparent; }
+QPushButton#noteDelete:hover { background: #3c3c3c; }
 QLineEdit, QPlainTextEdit, QComboBox, QListWidget, QTreeWidget {
   background: #1e1e1e; color: #d4d4d4; border: 1px solid #3c3c3c; padding: 4px;
   selection-background-color: #094771;

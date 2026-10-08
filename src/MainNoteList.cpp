@@ -45,7 +45,7 @@ QLabel *noteText(const ReviewNote &note, QWidget *parent)
 QPushButton *noteDelete(QWidget *parent)
 {
     auto *button = new QPushButton(QStringLiteral("×"), parent);
-    button->setFlat(true);
+    button->setObjectName(QStringLiteral("noteDelete"));
     button->setFixedSize(22, 22);
     button->setToolTip(QStringLiteral("Delete"));
     return button;
