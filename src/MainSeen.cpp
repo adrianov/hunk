@@ -15,13 +15,19 @@ QString seenKey(const QString &root)
     return QString::fromLatin1(QCryptographicHash::hash(root.toUtf8(), QCryptographicHash::Sha1).toHex());
 }
 
+void addField(QCryptographicHash *hash, const QByteArray &bytes)
+{
+    hash->addData(bytes);
+    hash->addData(QByteArray(1, '\0'));
+}
+
 void hashRow(QCryptographicHash *hash, const DiffRow &row)
 {
     if (row.kind == RowKind::Context)
         return;
-    hash->addData(QByteArray::number(static_cast<int>(row.kind)));
-    hash->addData(row.leftText.toUtf8());
-    hash->addData(row.rightText.toUtf8());
+    addField(hash, QByteArray::number(static_cast<int>(row.kind)));
+    addField(hash, row.leftText.toUtf8());
+    addField(hash, row.rightText.toUtf8());
 }
 
 } // namespace
@@ -29,10 +35,10 @@ void hashRow(QCryptographicHash *hash, const DiffRow &row)
 QString fileStamp(const FileDiff &file)
 {
     QCryptographicHash hash(QCryptographicHash::Sha1);
-    hash.addData(file.path().toUtf8());
-    hash.addData(QByteArray::number(file.adds));
-    hash.addData(QByteArray::number(file.dels));
-    hash.addData(file.binary ? "1" : "0");
+    addField(&hash, file.path().toUtf8());
+    addField(&hash, QByteArray::number(file.adds));
+    addField(&hash, QByteArray::number(file.dels));
+    addField(&hash, file.binary ? "1" : "0");
     for (const DiffRow &row : file.rows)
         hashRow(&hash, row);
     return QString::fromLatin1(hash.result().toHex());
