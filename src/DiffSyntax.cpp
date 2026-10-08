@@ -188,4 +188,5 @@ void paintCode(QPainter &painter, int x, int top, int lineH, const QString &text
         paintPiece(painter, &drawX, baseline, top, lineH, text.mid(piece.start, piece.end - piece.start),
                    pieceColor(piece.kind, plain), piece.changed, wordBg);
     }
+    painter.setFont(base);
 }
