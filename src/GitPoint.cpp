@@ -10,47 +10,41 @@ bool parentSuffix(const QString &parent, const QString &name)
     return name == parent || name.startsWith(parent + QLatin1Char('~')) || name.startsWith(parent + QLatin1Char('^'));
 }
 
-QString relativeName(const QString &parent, const QString &named)
+bool sameCommit(const QString &root, const QString &name, const QString &point)
 {
-    if (parentSuffix(parent, named))
-        return named;
-    const QString remote = QStringLiteral("remotes/") + parent;
-    if (!parentSuffix(remote, named))
-        return {};
-    return named.mid(int(QStringLiteral("remotes/").size()));
+    const GitCmd tip = runGit(root, {QStringLiteral("rev-parse"), QStringLiteral("--verify"), QStringLiteral("--quiet"), name});
+    return tip.code == 0 && tip.out.trimmed() == point;
 }
 
-QString peelFirst(QString name)
+QString stepName(const QString &parent, int steps)
 {
-    const int mark = name.lastIndexOf(QLatin1Char('~'));
-    if (mark < 0 || name.mid(mark) != QLatin1String("~1"))
-        return name;
-    if (mark > 0 && name.at(mark - 1).isDigit())
-        return name;
-    name.replace(mark, 2, QLatin1Char('^'));
-    return name;
+    if (steps <= 0)
+        return parent;
+    if (steps == 1)
+        return parent + QStringLiteral("^");
+    return parent + QLatin1Char('~') + QString::number(steps);
+}
+
+int parentSteps(const QString &root, const QString &parent, const QString &point)
+{
+    const GitCmd count = runGit(root, {QStringLiteral("rev-list"), QStringLiteral("--first-parent"), QStringLiteral("--count"),
+                                        point + QStringLiteral("..") + parent});
+    return count.code == 0 ? count.out.trimmed().toInt() : -1;
 }
 
 QString namedPoint(const QString &root, const QString &parent, const QString &point)
 {
-    const QString full = runGit(root, {QStringLiteral("rev-parse"), QStringLiteral("--symbolic-full-name"), parent}).out.trimmed();
-    if (full.isEmpty())
+    if (sameCommit(root, parent, point))
         return parent;
-    const GitCmd named = runGit(root, {QStringLiteral("name-rev"), QStringLiteral("--name-only"), QStringLiteral("--no-undefined"),
-                                        QStringLiteral("--refs=") + full, point});
-    if (named.code != 0)
-        return parent;
-    const QString relative = relativeName(parent, named.out.trimmed());
-    return relative.isEmpty() ? parent : peelFirst(relative);
+    const int steps = parentSteps(root, parent, point);
+    const QString name = steps < 0 ? parent : stepName(parent, steps);
+    return sameCommit(root, name, point) ? name : parent;
 }
 
 bool sameTip(const QString &root, const QString &parent, const QString &headRef)
 {
     const QString point = branchPoint(root, headRef);
-    if (point.isEmpty())
-        return false;
-    const GitCmd tip = runGit(root, {QStringLiteral("rev-parse"), QStringLiteral("--verify"), QStringLiteral("--quiet"), parent});
-    return tip.code == 0 && tip.out.trimmed() == point;
+    return !point.isEmpty() && sameCommit(root, parent, point);
 }
 
 } // namespace
