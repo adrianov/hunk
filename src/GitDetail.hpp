@@ -13,6 +13,9 @@ struct GitCmd {
 
 GitCmd runGit(const QString &cwd, const QStringList &args);
 QString branchPointName();
+QString parentRef(const QString &root);
+QString branchPointLabel(const QString &root);
+bool isBranchPoint(const QString &ref);
 QStringList baseRefs(const QString &root);
 QStringList baseChoices(const QString &root);
 QStringList branchRefs(const QString &root, const QString &current);

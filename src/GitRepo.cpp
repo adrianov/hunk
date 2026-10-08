@@ -122,7 +122,8 @@ void pickRefs(GitResult &result, const QString &baseRef, const QString &headRef)
     result.bases = baseChoices(result.root);
     result.branches = branchRefs(result.root, result.branch);
     result.headRef = headRef.trimmed().isEmpty() ? result.branch : headRef.trimmed();
-    result.baseRef = baseRef.trimmed().isEmpty() ? branchPointName() : baseRef.trimmed();
+    const QString base = baseRef.trimmed();
+    result.baseRef = base.isEmpty() || isBranchPoint(base) ? branchPointLabel(result.root) : base;
 }
 
 GitResult loadGit(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef,

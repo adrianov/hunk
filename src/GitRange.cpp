@@ -1,5 +1,19 @@
 #include "GitDetail.hpp"
 
+QString branchPointLabel(const QString &root)
+{
+    const QString parent = parentRef(root);
+    if (parent.isEmpty())
+        return branchPointName();
+    return branchPointName() + QStringLiteral(" (") + parent + QLatin1Char(')');
+}
+
+bool isBranchPoint(const QString &ref)
+{
+    const QString text = ref.trimmed();
+    return text == branchPointName() || text.startsWith(branchPointName() + QStringLiteral(" ("));
+}
+
 namespace {
 
 QString shortRef(const QString &root, const QString &ref)
@@ -21,7 +35,7 @@ bool mergeBase(GitResult &result, const QString &left, const QString &headRef, Q
 
 QString resolveLeft(GitResult &result, const QString &headRef)
 {
-    if (result.baseRef != branchPointName())
+    if (!isBranchPoint(result.baseRef))
         return result.baseRef;
     const QString point = branchPoint(result.root, headRef);
     if (point.isEmpty())

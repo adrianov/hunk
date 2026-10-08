@@ -8,7 +8,7 @@ QString baseCommit(const QString &root, const QString &baseRef, const QString &h
 {
     const QString base = baseRef.trimmed();
     const QString head = headRef.trimmed().isEmpty() ? QStringLiteral("HEAD") : headRef.trimmed();
-    if (base.isEmpty() || base == branchPointName())
+    if (base.isEmpty() || isBranchPoint(base))
         return branchPoint(root, head);
     const GitCmd rev = runGit(root, {QStringLiteral("rev-parse"), QStringLiteral("--verify"), QStringLiteral("--quiet"), base});
     return rev.code == 0 ? rev.out.trimmed() : QString();
