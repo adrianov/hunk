@@ -24,7 +24,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/DiffCanvas.cpp` / `DiffCanvas.hpp` — diff view state
 - `src/DiffScroll.cpp` — scroll and sticky file tracking
 - `src/DiffInput.cpp` — gutter clicks
-- `src/DiffSelect.cpp` — drag to select text in a pane
+- `src/DiffSelect.cpp` — drag to select text and the copy menu
 - `src/DiffMark.cpp` — word selection and the copied text
 - `src/DiffHeader.cpp` — file header and labels
 - `src/DiffPaint.cpp` — row paint

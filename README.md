@@ -14,10 +14,10 @@ Copyright © 2026 Peter Adrianov. Licensed under the [MIT License](LICENSE).
 - Switching back reloads the diff. Saves of tracked files from other programs, and a base that moves, show up while Hunk stays open. Ignored files are left alone. An unchanged diff stays put, including the scroll position
 - The status bar says when local `main` or `master` is ahead of or behind its origin
 - Click a line number to comment. Comments stay in app settings, not in the repo
-- Select text in either pane and copy it
+- Select text in either pane and copy it from the pane menu or with Ctrl+C
 - **Copy reviews** writes markdown with `` `path:line` `` and the line text
 - Diff flags match a review diff: `-w -W --no-prefix --diff-algorithm=histogram`
-- **View → Theme** follows the system, or switches to dark or light. Controls use Qlementine, so they match on macOS and Linux. Toolbar buttons use that filled button style. Diff code uses the theme monospace size; the rest of the window uses the theme text size
+- **View → Theme** follows the system, or switches to dark or light. Controls use Qlementine, so they match on macOS and Linux. Toolbar buttons use that filled button style. Tooltips use the window background and the normal text color. Diff code uses the theme monospace size; the rest of the window uses the theme text size
 
 Untracked files are not part of `git diff`.
 

@@ -88,7 +88,9 @@ Feature: Diff view
   Scenario: Copy text from a diff pane
     Given a diff is on screen
     When I select text in the left or the right pane
-    And I copy
+    And I open the pane menu
+    Then Copy is there, with the shortcut Ctrl+C
+    When I copy
     Then the clipboard contains that text
 
   Scenario: A long line wraps inside the pane
@@ -115,6 +117,7 @@ Feature: Diff view
     And the View menu can switch to dark or light
     And buttons, fields, and menus have rounded corners
     And the toolbar buttons have a filled background
+    And tooltips use the window background and the normal text color
 
   Scenario: Text sizes follow the theme
     Given a diff is on screen
