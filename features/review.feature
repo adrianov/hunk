@@ -3,6 +3,7 @@ Feature: Review comments
   Scenario: Each review line can be deleted
     Given the review list has a comment
     Then that line has its own delete control
+    And hovering that control highlights it
 
   Scenario: Auto cleanup starts on
     Given the review list is open
