@@ -5,7 +5,6 @@
 #include "MainDetail.hpp"
 #include "ReviewStore.hpp"
 
-#include <QDockWidget>
 #include <QListWidget>
 #include <QPlainTextEdit>
 #include <QStatusBar>

@@ -51,18 +51,24 @@ QPushButton *noteDelete(QWidget *parent)
     return button;
 }
 
-QWidget *noteRow(QListWidget *list, QListWidgetItem *item, const ReviewNote &note)
+struct ListedRow {
+    QWidget *row = nullptr;
+    QPushButton *drop = nullptr;
+};
+
+ListedRow noteRow(QListWidget *list, QListWidgetItem *item, const ReviewNote &note)
 {
     auto *row = new QWidget(list);
     row->setMinimumHeight(24);
     auto *layout = new QHBoxLayout(row);
     layout->setContentsMargins(2, 0, 2, 0);
     layout->setSpacing(6);
+    auto *drop = noteDelete(row);
     layout->addWidget(noteText(note, row), 1);
-    layout->addWidget(noteDelete(row));
+    layout->addWidget(drop);
     row->setToolTip(note.body);
     row->installEventFilter(new PickRow(list, item, row));
-    return row;
+    return {row, drop};
 }
 
 struct NoteId {
@@ -125,12 +131,11 @@ void MainWindow::addListedNote(int index)
     auto *item = new QListWidgetItem();
     const NoteId id = noteId(note);
     tagId(item, id);
-    auto *rowWidget = noteRow(m_notes, item, note);
-    item->setSizeHint(rowWidget->sizeHint());
+    const ListedRow listed = noteRow(m_notes, item, note);
+    item->setSizeHint(listed.row->sizeHint());
     m_notes->addItem(item);
-    m_notes->setItemWidget(item, rowWidget);
-    connect(rowWidget->findChild<QPushButton *>(), &QPushButton::clicked, this, [this, id]() { dropId(m_store, id); },
-            Qt::QueuedConnection);
+    m_notes->setItemWidget(item, listed.row);
+    connect(listed.drop, &QPushButton::clicked, this, [this, id]() { dropId(m_store, id); }, Qt::QueuedConnection);
 }
 
 void MainWindow::restoreNoteRow(int row)
