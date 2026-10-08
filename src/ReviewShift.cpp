@@ -114,6 +114,8 @@ struct NearText {
 
 NearText textAt(const DiffDoc &doc, const ReviewNote &note, int line)
 {
+    if (line <= 0)
+        return {};
     for (const FileDiff &file : doc.files) {
         if (!sameFile(file, note.path))
             continue;
