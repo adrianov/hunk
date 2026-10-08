@@ -1,28 +1,28 @@
 #include "DiffColors.hpp"
 
-const QColor kBg(QStringLiteral("#1e1e1e"));
-const QColor kHeaderBg(QStringLiteral("#252526"));
-const QColor kGutter(QStringLiteral("#252526"));
-const QColor kText(QStringLiteral("#d4d4d4"));
-const QColor kMuted(QStringLiteral("#858585"));
-const QColor kFile(QStringLiteral("#7eb8da"));
-const QColor kAccent(QStringLiteral("#0e639c"));
-const QColor kAddFg(QStringLiteral("#3fb950"));
-const QColor kDelFg(QStringLiteral("#f85149"));
-const QColor kAddBg(46, 160, 67, 38);
-const QColor kDelBg(248, 81, 73, 32);
-const QColor kAddWord(46, 160, 67, 110);
-const QColor kDelWord(248, 81, 73, 110);
-const QColor kEmpty(QStringLiteral("#1a1a1a"));
-const QColor kLine(QStringLiteral("#333333"));
-const QColor kNote(QStringLiteral("#c586c0"));
-const QColor kSynComment(QStringLiteral("#6a9955"));
-const QColor kSynString(QStringLiteral("#ce9178"));
-const QColor kSynNumber(QStringLiteral("#b5cea8"));
-const QColor kSynKeyword(QStringLiteral("#569cd6"));
-const QColor kSynType(QStringLiteral("#4ec9b0"));
-const QColor kSynMethod(QStringLiteral("#dcdcaa"));
-const QColor kSynVariable(QStringLiteral("#9cdcfe"));
+QColor kBg;
+QColor kHeaderBg;
+QColor kGutter;
+QColor kText;
+QColor kMuted;
+QColor kFile;
+QColor kAccent;
+QColor kAddFg;
+QColor kDelFg;
+QColor kAddBg;
+QColor kDelBg;
+QColor kAddWord;
+QColor kDelWord;
+QColor kEmpty;
+QColor kLine;
+QColor kNote;
+QColor kSynComment;
+QColor kSynString;
+QColor kSynNumber;
+QColor kSynKeyword;
+QColor kSynType;
+QColor kSynMethod;
+QColor kSynVariable;
 
 QColor synColor(SynKind kind)
 {
@@ -45,4 +45,51 @@ QColor synColor(SynKind kind)
         return kText;
     }
     return kText;
+}
+
+namespace {
+
+struct HexSlot {
+    QColor *color;
+    const char *dark;
+    const char *light;
+};
+
+const HexSlot kHex[] = {
+    {&kBg, "#1e1e1e", "#ffffff"},       {&kHeaderBg, "#252526", "#f3f3f3"}, {&kGutter, "#252526", "#f3f3f3"},
+    {&kText, "#d4d4d4", "#1e1e1e"},      {&kMuted, "#858585", "#6e6e6e"},    {&kFile, "#7eb8da", "#0451a5"},
+    {&kAccent, "#0e639c", "#0078d4"},    {&kAddFg, "#3fb950", "#1a7f37"},    {&kDelFg, "#f85149", "#d1242f"},
+    {&kEmpty, "#1a1a1a", "#f6f6f6"},     {&kLine, "#333333", "#e5e5e5"},     {&kNote, "#c586c0", "#a626a4"},
+    {&kSynComment, "#6a9955", "#008000"}, {&kSynString, "#ce9178", "#a31515"}, {&kSynNumber, "#b5cea8", "#098658"},
+    {&kSynKeyword, "#569cd6", "#0000ff"}, {&kSynType, "#4ec9b0", "#267f99"},  {&kSynMethod, "#dcdcaa", "#795e26"},
+    {&kSynVariable, "#9cdcfe", "#001080"},
+};
+
+void paintHex(bool dark)
+{
+    for (const HexSlot &slot : kHex)
+        *slot.color = QColor(QLatin1String(dark ? slot.dark : slot.light));
+}
+
+void paintMark(bool dark)
+{
+    if (dark) {
+        kAddBg = QColor(46, 160, 67, 38);
+        kDelBg = QColor(248, 81, 73, 32);
+        kAddWord = QColor(46, 160, 67, 110);
+        kDelWord = QColor(248, 81, 73, 110);
+        return;
+    }
+    kAddBg = QColor(46, 160, 67, 48);
+    kDelBg = QColor(207, 34, 46, 36);
+    kAddWord = QColor(46, 160, 67, 90);
+    kDelWord = QColor(207, 34, 46, 80);
+}
+
+} // namespace
+
+void useDiffColors(bool dark)
+{
+    paintHex(dark);
+    paintMark(dark);
 }

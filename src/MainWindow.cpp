@@ -35,7 +35,8 @@ MainWindow::MainWindow(bool smoke, QWidget *parent)
     : QMainWindow(parent)
     , m_smoke(smoke)
 {
-    applyTheme();
+    noteSystemTheme();
+    applyTheme(m_smoke);
     setWindowTitle(QStringLiteral("Hunk"));
     resize(1280, 800);
     setAcceptDrops(true);
@@ -47,6 +48,7 @@ MainWindow::MainWindow(bool smoke, QWidget *parent)
     buildReviews();
     restoreWindow();
     wireUi();
+    watchSystemTheme();
 }
 
 void MainWindow::wireStore()
@@ -81,8 +83,12 @@ void MainWindow::notesChanged()
 
 void MainWindow::noteBodyEdited(int index)
 {
-    if (index >= 0 && index < m_notes->count())
-        m_notes->item(index)->setText(noteLabel(m_store->notes().at(index)));
+    if (index < 0 || index >= m_notes->count() || index >= m_store->notes().size())
+        return;
+    if (QWidget *row = m_notes->itemWidget(m_notes->item(index))) {
+        if (auto *label = row->findChild<QLabel *>())
+            label->setText(noteLabel(m_store->notes().at(index)));
+    }
     updateStatus();
 }
 

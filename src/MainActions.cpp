@@ -1,9 +1,13 @@
 #include "MainWindow.hpp"
 
+#include "MainDetail.hpp"
+
 #include <QAction>
+#include <QActionGroup>
 #include <QComboBox>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMenu>
 #include <QMenuBar>
 #include <QToolBar>
 
@@ -52,6 +56,25 @@ QAction *MainWindow::makeQuit()
     return action;
 }
 
+void MainWindow::addThemeAction(QMenu *menu, QActionGroup *group, ThemePick pick, const QString &label)
+{
+    auto *action = menu->addAction(label);
+    action->setCheckable(true);
+    action->setChecked(pick == themePick());
+    group->addAction(action);
+    connect(action, &QAction::triggered, this, [this, pick]() { chooseTheme(pick); });
+}
+
+void MainWindow::addThemeMenu(QMenu *view)
+{
+    auto *menu = view->addMenu(QStringLiteral("Theme"));
+    auto *group = new QActionGroup(menu);
+    group->setExclusive(true);
+    addThemeAction(menu, group, ThemePick::System, QStringLiteral("System"));
+    addThemeAction(menu, group, ThemePick::Dark, QStringLiteral("Dark"));
+    addThemeAction(menu, group, ThemePick::Light, QStringLiteral("Light"));
+}
+
 void MainWindow::addMenus(QAction *openAct, QAction *refreshAct, QAction *quitAct, QAction *commentAct, QAction *copyAct)
 {
     auto *fileMenu = menuBar()->addMenu(QStringLiteral("File"));
@@ -76,6 +99,8 @@ void MainWindow::addModeBox(QToolBar *bar)
     bar->addWidget(m_mode);
 }
 
+void watchRefFilter(QComboBox *box);
+
 void addRef(QToolBar *bar, QComboBox **box, const QString &label, const QString &tip)
 {
     bar->addWidget(new QLabel(label, bar));
@@ -89,8 +114,10 @@ void addRef(QToolBar *bar, QComboBox **box, const QString &label, const QString 
 void MainWindow::addRefBoxes(QToolBar *bar)
 {
     addRef(bar, &m_base, QStringLiteral("Base"),
-           QStringLiteral("Base of the merge request. Branching point is where this branch left the default branch."));
-    addRef(bar, &m_head, QStringLiteral("Branch"), QStringLiteral("Branch compared with the base"));
+           QStringLiteral("Base of the merge request. Branching point is where this branch left the default branch. Type to filter."));
+    addRef(bar, &m_head, QStringLiteral("Branch"), QStringLiteral("Branch compared with the base. Type to filter the list."));
+    watchRefFilter(m_base);
+    watchRefFilter(m_head);
 }
 
 void MainWindow::fillBar(QToolBar *bar, QAction *openAct, QAction *refreshAct, QAction *commentAct, QAction *copyAct)

@@ -94,7 +94,10 @@ void MainWindow::buildReviews()
     m_dock = new QDockWidget(QStringLiteral("Reviews"), this);
     m_dock->setWidget(reviewPanel());
     addDockWidget(Qt::BottomDockWidgetArea, m_dock);
-    menuBar()->addMenu(QStringLiteral("View"))->addAction(m_dock->toggleViewAction());
+    auto *view = menuBar()->addMenu(QStringLiteral("View"));
+    view->addAction(m_dock->toggleViewAction());
+    view->addSeparator();
+    addThemeMenu(view);
 }
 
 void MainWindow::openTreeItem(QTreeWidgetItem *item)

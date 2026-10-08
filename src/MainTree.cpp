@@ -1,5 +1,7 @@
 #include "MainWindow.hpp"
 
+#include "DiffColors.hpp"
+
 #include <QHash>
 #include <QLineEdit>
 #include <QTreeWidget>
@@ -64,9 +66,9 @@ void addFileItem(QTreeWidgetItem *folderItem, const FileDiff &file, int fileInde
     item->setData(0, Qt::UserRole, fileIndex);
     item->setToolTip(0, file.title());
     if (file.added)
-        item->setForeground(0, QColor(QStringLiteral("#3fb950")));
+        item->setForeground(0, kAddFg);
     else if (file.removed)
-        item->setForeground(0, QColor(QStringLiteral("#f85149")));
+        item->setForeground(0, kDelFg);
 }
 
 void addFolder(QTreeWidget *tree, const Group &group, const DiffDoc &doc)
@@ -74,7 +76,7 @@ void addFolder(QTreeWidget *tree, const Group &group, const DiffDoc &doc)
     const QString name = group.folder.isEmpty() ? QStringLiteral("(root)") : group.folder;
     auto *folderItem = new QTreeWidgetItem(tree, {name});
     folderItem->setData(0, Qt::UserRole, -1);
-    folderItem->setForeground(0, QColor(QStringLiteral("#858585")));
+    folderItem->setForeground(0, kMuted);
     for (int fileIndex : group.files)
         addFileItem(folderItem, doc.files.at(fileIndex), fileIndex);
 }

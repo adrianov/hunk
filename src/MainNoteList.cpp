@@ -1,5 +1,6 @@
 #include "MainWindow.hpp"
 
+#include "DiffColors.hpp"
 #include "MainDetail.hpp"
 #include "ReviewStore.hpp"
 
@@ -35,10 +36,11 @@ QLabel *noteText(const ReviewNote &note, QWidget *parent)
 {
     auto *label = new QLabel(noteLabel(note), parent);
     label->setAttribute(Qt::WA_TransparentForMouseEvents);
-    QPalette palette = label->palette();
-    const QString color = note.inDiff ? QStringLiteral("#d4d4d4") : QStringLiteral("#858585");
-    palette.setColor(QPalette::WindowText, QColor(color));
-    label->setPalette(palette);
+    if (!note.inDiff) {
+        QPalette palette = label->palette();
+        palette.setColor(QPalette::WindowText, kMuted);
+        label->setPalette(palette);
+    }
     return label;
 }
 

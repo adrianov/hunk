@@ -9,7 +9,6 @@ void setupApp()
 {
     QCoreApplication::setOrganizationName(QStringLiteral("Hunk"));
     QCoreApplication::setApplicationName(QStringLiteral("Hunk"));
-    QApplication::setStyle(QStringLiteral("Fusion"));
 }
 
 QString launchPath(bool *smoke)

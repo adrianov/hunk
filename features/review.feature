@@ -4,6 +4,7 @@ Feature: Review comments
     Given the review list has a comment
     Then that line has its own delete control
     And hovering that control highlights it
+    And the line text is drawn once in the list color
 
   Scenario: Auto cleanup starts on
     Given the review list is open

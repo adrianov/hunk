@@ -13,12 +13,13 @@ Local merge-request diff for macOS and Linux. Qt 6, side-by-side, with review co
 - Click a line number to comment. Comments stay in app settings, not in the repo
 - **Copy reviews** writes markdown with `` `path:line` `` and the line text
 - Diff flags match a review diff: `-w -W --no-prefix --diff-algorithm=histogram`
+- **View → Theme** follows the system, or switches to dark or light. Controls use Qlementine, so they match on macOS and Linux
 
 Untracked files are not part of `git diff`.
 
 ## Build
 
-Needs CMake, a C++20 compiler, Qt 6 (Widgets, Concurrent), and `git`.
+Needs CMake, a C++20 compiler, Qt 6.9 or newer (Widgets, Svg, Concurrent), and `git`. Qlementine is fetched when configuring.
 
 macOS (Homebrew Qt):
 
@@ -31,16 +32,16 @@ ctest --test-dir build --output-on-failure
 Debian / Ubuntu:
 
 ```sh
-sudo apt install build-essential cmake qt6-base-dev git
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+sudo apt install build-essential cmake git
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/path/to/Qt/6.9/gcc_64
 cmake --build build
 ```
 
 Fedora:
 
 ```sh
-sudo dnf install gcc-c++ cmake qt6-qtbase-devel git
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+sudo dnf install gcc-c++ cmake git
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/path/to/Qt/6.9/gcc_64
 cmake --build build
 ```
 
@@ -53,7 +54,7 @@ cmake --build build
 
 A path opens that repository as a merge request. With no path, Hunk opens the last repository, or the current directory.
 
-The base box defaults to the branching point (where the branch left the default branch), then lists upstream, `origin/main`, `main`, `origin/master`, and `master` when they exist. The branch box lists local branches, with the current branch selected. Type another ref and press Return.
+The base box defaults to the branching point (where the branch left the default branch), named with that parent branch, then lists upstream, `origin/main`, `main`, `origin/master`, and `master` when they exist. The branch box lists local branches with the newest change first, and the current branch selected. Typing in either box filters that list. Type another ref and press Return.
 
 Drop a repository folder on the window to open it.
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DiffDoc.hpp"
+#include "MainDetail.hpp"
 
 #include <QFileSystemWatcher>
 #include <QMainWindow>
@@ -10,6 +11,7 @@
 class DiffCanvas;
 class GitRepo;
 class QAction;
+class QActionGroup;
 class QCheckBox;
 class QCloseEvent;
 class QComboBox;
@@ -19,6 +21,7 @@ class QDropEvent;
 class QLabel;
 class QLineEdit;
 class QListWidget;
+class QMenu;
 class QPlainTextEdit;
 class QPushButton;
 class QShowEvent;
@@ -55,6 +58,11 @@ private:
     QAction *makeCopy();
     QAction *makeQuit();
     void addMenus(QAction *openAct, QAction *refreshAct, QAction *quitAct, QAction *commentAct, QAction *copyAct);
+    void addThemeMenu(QMenu *view);
+    void addThemeAction(QMenu *menu, QActionGroup *group, ThemePick pick, const QString &label);
+    void chooseTheme(ThemePick pick);
+    void repaintTheme();
+    void watchSystemTheme();
     void fillBar(QToolBar *bar, QAction *openAct, QAction *refreshAct, QAction *commentAct, QAction *copyAct);
     void addModeBox(QToolBar *bar);
     void addRefBoxes(QToolBar *bar);

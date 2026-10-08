@@ -11,8 +11,11 @@ Feature: Diff view
 
   Scenario: Base and branch selectors
     Given I open a repository
-    Then the base selector shows the branching point
+    Then the base selector shows the branching point and its parent branch
     And the branch selector shows the current branch
+    And the branch list puts the newest change first
+    And typing in either box filters that list without leaving the field
+    And a branch name stays whole unless it is wider than the screen
     And the diff is a merge request between them
     And uncommitted changes on the current branch are included
 
@@ -74,6 +77,12 @@ Feature: Diff view
     When a line adds "amount = ask_rate.zero?"
     Then "zero?" is colored as a method
     And "amount" and "ask_rate" are colored as variables
+
+  Scenario: Theme follows the system
+    Given hunk is open
+    Then the colors follow the system theme
+    And the View menu can switch to dark or light
+    And buttons, fields, and menus have rounded corners
 
   Scenario: A rename keeps each side's language
     Given "app.rb" is renamed to "app.cpp"

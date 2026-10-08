@@ -4,28 +4,29 @@
 
 #include <QColor>
 
-extern const QColor kBg;
-extern const QColor kHeaderBg;
-extern const QColor kGutter;
-extern const QColor kText;
-extern const QColor kMuted;
-extern const QColor kFile;
-extern const QColor kAccent;
-extern const QColor kAddFg;
-extern const QColor kDelFg;
-extern const QColor kAddBg;
-extern const QColor kDelBg;
-extern const QColor kAddWord;
-extern const QColor kDelWord;
-extern const QColor kEmpty;
-extern const QColor kLine;
-extern const QColor kNote;
-extern const QColor kSynComment;
-extern const QColor kSynString;
-extern const QColor kSynNumber;
-extern const QColor kSynKeyword;
-extern const QColor kSynType;
-extern const QColor kSynMethod;
-extern const QColor kSynVariable;
+extern QColor kBg;
+extern QColor kHeaderBg;
+extern QColor kGutter;
+extern QColor kText;
+extern QColor kMuted;
+extern QColor kFile;
+extern QColor kAccent;
+extern QColor kAddFg;
+extern QColor kDelFg;
+extern QColor kAddBg;
+extern QColor kDelBg;
+extern QColor kAddWord;
+extern QColor kDelWord;
+extern QColor kEmpty;
+extern QColor kLine;
+extern QColor kNote;
+extern QColor kSynComment;
+extern QColor kSynString;
+extern QColor kSynNumber;
+extern QColor kSynKeyword;
+extern QColor kSynType;
+extern QColor kSynMethod;
+extern QColor kSynVariable;
 
 QColor synColor(SynKind kind);
+void useDiffColors(bool dark);

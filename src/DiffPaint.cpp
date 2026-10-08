@@ -61,7 +61,9 @@ void DiffCanvas::paintSelection(QPainter &painter, const Band &band, int viewW)
     const bool hovered = band.file == m_hoverFile && band.row == m_hoverRow;
     if (!selected && !hovered)
         return;
-    painter.setPen(selected ? kAccent : QColor(255, 255, 255, 50));
+    QColor hover = kText;
+    hover.setAlpha(48);
+    painter.setPen(selected ? kAccent : hover);
     painter.setBrush(Qt::NoBrush);
     painter.drawRect(0, band.y, viewW - 1, band.h - 1);
 }
