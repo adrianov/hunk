@@ -71,6 +71,7 @@ add_executable(hunk
   src/GitCmd.cpp
   src/GitStamp.cpp
   src/GitDrift.cpp
+  src/GitRef.cpp
   src/GitRange.cpp
   src/GitPoint.cpp
   src/ReviewStore.cpp

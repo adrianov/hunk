@@ -3,7 +3,22 @@
 
 #include "GitDetail.hpp"
 
+#include <QMutex>
+#include <QMutexLocker>
+
 namespace {
+
+QMutex g_lock;
+
+struct PairCache {
+    QString root;
+    QString state;
+    QString local;
+    QString remote;
+    bool filled = false;
+};
+
+PairCache g_pair;
 
 bool hasRef(const QString &root, const QString &name)
 {
@@ -48,9 +63,41 @@ QString driftText(const QString &local, const QString &remote, int ahead, int be
     return {};
 }
 
-QString tipOf(const QString &root, const QString &name)
+bool cachedPair(const QString &root, const QString &state, QString *local, QString *remote)
 {
-    return runGit(root, {QStringLiteral("rev-parse"), QStringLiteral("--verify"), QStringLiteral("--quiet"), name}).out.trimmed();
+    const QMutexLocker lock(&g_lock);
+    if (!g_pair.filled || g_pair.root != root || g_pair.state != state)
+        return false;
+    *local = g_pair.local;
+    *remote = g_pair.remote;
+    return true;
+}
+
+void storePair(const QString &root, const QString &state, const QString &local, const QString &remote)
+{
+    const QMutexLocker lock(&g_lock);
+    g_pair = {root, state, local, remote, true};
+}
+
+// Branch names stay until refs or packed-refs change. Tips are read on every stamp.
+bool takePair(const QString &root, QString *local, QString *remote)
+{
+    const QString state = refState(root);
+    if (cachedPair(root, state, local, remote))
+        return !local->isEmpty();
+    const QString name = localMain(root, remote);
+    storePair(root, state, name, *remote);
+    *local = name;
+    return !name.isEmpty();
+}
+
+QString bothTips(const QString &root, const QString &local, const QString &remote)
+{
+    const GitCmd tips = runGit(root, {QStringLiteral("rev-parse"), local, remote});
+    const QStringList lines = tips.out.split(QLatin1Char('\n'), Qt::SkipEmptyParts);
+    if (tips.code != 0 || lines.size() < 2)
+        return {};
+    return lines.at(0).trimmed() + QLatin1Char(' ') + lines.at(1).trimmed();
 }
 
 QString countDrift(const QString &root, const QString &local, const QString &remote)
@@ -67,16 +114,18 @@ QString countDrift(const QString &root, const QString &local, const QString &rem
 
 QString mainStamp(const QString &root)
 {
+    QString local;
     QString remote;
-    const QString local = localMain(root, &remote);
-    if (local.isEmpty())
+    if (!takePair(root, &local, &remote))
         return {};
-    return tipOf(root, local) + QLatin1Char(' ') + tipOf(root, remote);
+    return bothTips(root, local, remote);
 }
 
 QString branchDrift(const QString &root)
 {
+    QString local;
     QString remote;
-    const QString local = localMain(root, &remote);
-    return local.isEmpty() ? QString() : countDrift(root, local, remote);
+    if (!takePair(root, &local, &remote))
+        return {};
+    return countDrift(root, local, remote);
 }
