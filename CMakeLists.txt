@@ -82,6 +82,7 @@ add_executable(hunk
   src/GitRef.cpp
   src/GitRange.cpp
   src/GitPoint.cpp
+  src/GitFork.cpp
   src/ReviewStore.cpp
   src/ReviewShift.cpp
 )

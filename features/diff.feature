@@ -20,7 +20,7 @@ Feature: Diff view
 
   Scenario: Base and branch selectors
     Given I open a repository
-    Then the base selector shows the parent branch, with ^ or ~N when the branch left an older commit
+    Then the base selector shows the branch this work was cut from, with ^ or ~N when that cut is an older commit
     And the branch selector shows the current branch
     And the branch list puts the newest change first
     And typing in either box filters that list without leaving the field

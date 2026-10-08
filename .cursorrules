@@ -51,7 +51,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/GitDrift.cpp` — whether local main or master is ahead or behind origin
 - `src/GitRef.cpp` — mtime of refs and packed-refs
 - `src/GitRange.cpp` — merge-request range
-- `src/GitPoint.cpp` — branching point as `branch` or `branch^` / `branch~N`
+- `src/GitPoint.cpp` / `GitFork.cpp` — branching point: the branch this work was cut from, or `branch^` / `branch~N`
 - `src/ReviewStore.cpp` / `ReviewStore.hpp` — comments in QSettings
 - `src/ReviewShift.cpp` / `ReviewShift.hpp` — moved comment line
 - `src/ReviewNote.hpp` — one comment

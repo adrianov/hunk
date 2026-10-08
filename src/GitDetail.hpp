@@ -18,6 +18,7 @@ GitCmd runGit(const QString &cwd, const QStringList &args);
 QString branchPointName();
 QString parentRef(const QString &root);
 QString branchPointLabel(const QString &root, const QString &headRef);
+QString forkLabel(const QString &root, const QString &headRef);
 bool isBranchPoint(const QString &root, const QString &headRef, const QString &ref);
 QStringList baseRefs(const QString &root);
 QStringList baseChoices(const QString &root, const QString &headRef);

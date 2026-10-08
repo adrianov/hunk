@@ -51,6 +51,9 @@ bool sameTip(const QString &root, const QString &parent, const QString &headRef)
 
 QString branchPointLabel(const QString &root, const QString &headRef)
 {
+    const QString cut = forkLabel(root, headRef);
+    if (!cut.isEmpty())
+        return cut;
     const QString parent = parentRef(root);
     if (parent.isEmpty())
         return branchPointName();
