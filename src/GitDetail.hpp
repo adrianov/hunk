@@ -29,3 +29,4 @@ QString branchDrift(const QString &root);
 QString workStamp(const QString &root, const QString &baseRef, const QString &headRef);
 QStringList ignoredDirs(const QString &root);
 bool fillMerge(GitResult &result, QStringList *args);
+void fillDocGaps(DiffDoc *doc, const GitResult &result);

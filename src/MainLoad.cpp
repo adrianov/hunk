@@ -4,14 +4,12 @@
 #include "MainWindow.hpp"
 
 #include "DiffCanvas.hpp"
-#include "DiffParse.hpp"
 #include "GitRepo.hpp"
 #include "MainSeen.hpp"
 #include "ReviewStore.hpp"
 
 #include <QCheckBox>
 #include <QComboBox>
-#include <QDir>
 #include <QSettings>
 #include <QLabel>
 #include <QLineEdit>
@@ -113,7 +111,7 @@ void MainWindow::showLoadedDiff(const GitResult &result)
     m_title = result.title;
     m_conflict = result.conflict;
     m_drift = result.drift;
-    m_doc = parseDiff(result.diffText);
+    m_doc = result.doc;
     applySeen(&m_doc, m_seen);
     m_store->sync(m_doc, m_cleanup->isChecked());
     rebuildTree();
@@ -130,7 +128,7 @@ void MainWindow::showLoadedDiff(const GitResult &result)
 void MainWindow::showLoadedTitle()
 {
     showRepoPath();
-    setWindowTitle(QStringLiteral("Hunk — ") + QDir(m_root).dirName());
+    setWindowTitle(QStringLiteral("Hunk — ") + m_root);
     updateStatus();
     emit loaded(true);
 }

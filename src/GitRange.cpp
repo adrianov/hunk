@@ -57,10 +57,15 @@ QString conflictLabel(const QString &target, const QStringList &files)
     return text;
 }
 
+bool isAncestor(const QString &root, const QString &side, const QString &other)
+{
+    return runGit(root, {QStringLiteral("merge-base"), QStringLiteral("--is-ancestor"), side, other}).code == 0;
+}
+
 void noteConflicts(GitResult &result, const QString &headRef)
 {
     const QString target = isBranchPoint(result.root, headRef, result.baseRef) ? parentRef(result.root) : result.baseRef;
-    if (target.isEmpty())
+    if (target.isEmpty() || isAncestor(result.root, target, headRef) || isAncestor(result.root, headRef, target))
         return;
     const GitCmd merged = runGit(result.root, {QStringLiteral("merge-tree"), QStringLiteral("--write-tree"),
                                                 QStringLiteral("--name-only"), target, headRef});
@@ -103,6 +108,9 @@ bool fillMerge(GitResult &result, QStringList *args)
         return false;
     setMergeLabels(result, headRef, leftShort);
     noteConflicts(result, headRef);
+    result.leftRev = leftCommit;
+    const bool worktree = headRef == QLatin1String("HEAD") || headRef == result.branch;
+    result.rightRev = worktree ? QString() : headRef;
     addRange(args, result, leftCommit, headRef);
     return true;
 }

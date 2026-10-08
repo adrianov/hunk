@@ -13,7 +13,7 @@ struct WordSpan {
     bool changed = false;
 };
 
-enum class SynKind { Plain, Comment, String, Number, Keyword, Type, Method, Variable };
+enum class SynKind { Plain, Comment, String, Number, Keyword, Type, Method, Variable, Strong, Emph, Strike };
 
 // One syntax-colored range inside a diff line.
 struct SynSpan {
@@ -45,6 +45,7 @@ enum class RowHeat { Open, Seen, Fresh };
 // One visual row. A modification pairs an old line with a new line.
 struct DiffRow {
     RowKind kind = RowKind::Context;
+    bool gap = false;
     int leftNum = 0;
     int rightNum = 0;
     QString leftText;

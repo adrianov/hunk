@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "DiffDoc.hpp"
+
 #include <QObject>
 #include <QString>
 #include <QStringList>
@@ -24,6 +26,9 @@ struct GitResult {
     QString conflict;
     QString drift;
     QString diffText;
+    QString leftRev;
+    QString rightRev;
+    DiffDoc doc;
     QString error;
     QString diskStamp;
     QString stamp;

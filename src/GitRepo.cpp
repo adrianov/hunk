@@ -3,6 +3,7 @@
 
 #include "GitRepo.hpp"
 
+#include "DiffParse.hpp"
 #include "GitDetail.hpp"
 
 #include <QDir>
@@ -65,6 +66,8 @@ QStringList diffFlags()
 void fillWorktree(GitResult &result, const QString &headShort, bool staged, QStringList *args)
 {
     result.leftLabel = headShort;
+    result.leftRev = QStringLiteral("HEAD");
+    result.rightRev = staged ? QStringLiteral(":") : QString();
     if (staged) {
         result.rightLabel = QStringLiteral("Index");
         result.title = result.branch + QStringLiteral(" staged");
@@ -93,6 +96,8 @@ bool runDiff(GitResult &result, const QStringList &args)
         return false;
     }
     result.diffText = diff.out;
+    result.doc = parseDiff(result.diffText);
+    fillDocGaps(&result.doc, result);
     return true;
 }
 
@@ -127,9 +132,7 @@ void pickRefs(GitResult &result, const QString &baseRef, const QString &headRef)
     result.bases = baseChoices(result.root, result.headRef);
     result.branches = branchRefs(result.root, result.branch);
     const QString base = baseRef.trimmed();
-    result.baseRef = base.isEmpty() || isBranchPoint(result.root, result.headRef, base)
-                         ? branchPointLabel(result.root, result.headRef)
-                         : base;
+    result.baseRef = base.isEmpty() || isBranchPoint(result.root, result.headRef, base) ? result.bases.value(0) : base;
 }
 
 GitResult loadGit(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef,
