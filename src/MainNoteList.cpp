@@ -68,7 +68,7 @@ ListedRow noteRow(QListWidget *list, QListWidgetItem *item, const ReviewNote &no
 {
     auto *row = new QWidget;
     auto *layout = new QHBoxLayout(row);
-    layout->setContentsMargins(2, 0, 2, 0);
+    layout->setContentsMargins(8, 4, 10, 4);
     layout->setSpacing(6);
     auto *text = noteText(note, row);
     auto *drop = noteDelete(row);
