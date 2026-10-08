@@ -35,6 +35,7 @@ add_executable(hunk
   src/MainLoad.cpp
   src/MainWatch.cpp
   src/MainDisk.cpp
+  src/MainDiskWalk.cpp
   src/Theme.cpp
   src/DiffCanvas.cpp
   src/DiffScroll.cpp

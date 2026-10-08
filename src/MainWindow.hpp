@@ -4,6 +4,7 @@
 
 #include <QFileSystemWatcher>
 #include <QMainWindow>
+#include <QSet>
 #include <QTimer>
 
 class DiffCanvas;
@@ -75,12 +76,17 @@ private:
     void reloadQuiet();
     void askLoad(bool keepScroll, bool quiet);
     void startLoad(const QString &path);
-    void scheduleWatch();
+    void scheduleWatch(int msec = 400);
     void finishWatch();
     void watchApp(Qt::ApplicationState state);
     void clearDisk();
-    void armDisk();
+    void armDisk(const QStringList &ignored);
     void noteDisk(const QString &path);
+    void markGap();
+    bool growDisk(const QString &dir, const QString &skip);
+    bool watchTree();
+    bool watchRefs();
+    void applyWatch(const GitResult &result);
     void reloadIfRangeChanged();
     void chooseRepo();
     void onReady(const GitResult &result);
@@ -112,6 +118,7 @@ private:
     QLabel *m_repoLabel = nullptr;
     QListWidget *m_notes = nullptr;
     QPlainTextEdit *m_editor = nullptr;
+    QPushButton *m_copy = nullptr;
     QPushButton *m_delete = nullptr;
     QDockWidget *m_dock = nullptr;
     DiffDoc m_doc;
@@ -125,6 +132,9 @@ private:
     QTimer m_watch;
     QFileSystemWatcher m_disk;
     QString m_gitDir;
+    QSet<QString> m_ignored;
+    bool m_diskGap = false;
+    int m_gapLeft = 0;
     int m_scrollKeep = 0;
     bool m_loading = false;
     bool m_quiet = false;

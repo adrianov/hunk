@@ -25,7 +25,9 @@ void MainWindow::startLoad(const QString &path)
     m_base->setEnabled(merge);
     m_head->setEnabled(merge);
     m_loading = true;
-    m_git->load(path, mode, m_base->currentText().trimmed(), m_head->currentText().trimmed(), m_appliedStamp, m_quiet);
+    const bool listIgnored = m_gitDir.isEmpty() || m_diskGap;
+    m_git->load(path, mode, m_base->currentText().trimmed(), m_head->currentText().trimmed(), m_appliedStamp, m_quiet,
+                listIgnored);
 }
 
 void MainWindow::askLoad(bool keepScroll, bool quiet)
@@ -64,17 +66,27 @@ void MainWindow::reloadQuiet()
     askLoad(true, true);
 }
 
-void MainWindow::scheduleWatch()
+void MainWindow::scheduleWatch(int msec)
 {
     if (m_smoke || m_root.isEmpty() || QGuiApplication::applicationState() != Qt::ApplicationActive)
         return;
+    m_watch.setInterval(msec);
     m_watch.start();
 }
 
 void MainWindow::finishWatch()
 {
-    if (!m_watchAgain)
+    if (m_watchAgain) {
+        m_watchAgain = false;
+        reloadQuiet();
         return;
-    m_watchAgain = false;
-    reloadQuiet();
+    }
+    if (!m_diskGap)
+        return;
+    if (m_gapLeft <= 0) {
+        m_diskGap = false;
+        return;
+    }
+    --m_gapLeft;
+    scheduleWatch(1000);
 }

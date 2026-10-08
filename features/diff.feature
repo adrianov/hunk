@@ -23,6 +23,18 @@ Feature: Diff view
     Then the diff updates
     And the scroll position stays
 
+  Scenario: A save of an ignored file leaves the diff still
+    Given the merge request is on screen
+    When another program saves a file git ignores
+    Then the diff stays as it was
+
+  Scenario: An incomplete watch retries then rests
+    Given the merge request is on screen
+    And hunk cannot watch every directory
+    When a tracked file changes
+    Then the diff updates within a few checks
+    And hunk stops checking every second
+
   Scenario: A moved base updates the diff
     Given the merge request is on screen
     When the selected base moves to another commit

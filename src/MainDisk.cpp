@@ -3,9 +3,10 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
-#include <QSet>
 
 namespace {
+
+constexpr int kGapTries = 3;
 
 QString gitSpec(const QString &root, const QString &line)
 {
@@ -31,80 +32,96 @@ QString gitDirOf(const QString &root)
     return readGitDir(root, dot);
 }
 
-bool watchDeeper(const QString &git, const QString &path)
+QString refsPathOf(const QString &git)
 {
-    if (!QFileInfo(path).isDir() || path == git)
+    return git.isEmpty() ? QString() : git + QStringLiteral("/refs");
+}
+
+bool isRefsPath(const QString &git, const QString &path)
+{
+    const QString refs = refsPathOf(git);
+    return !refs.isEmpty() && (path == refs || path.startsWith(refs + QLatin1Char('/')));
+}
+
+bool isWatchedGitPath(const QString &git, const QString &path)
+{
+    if (path == git)
         return false;
-    const bool inside = !git.isEmpty() && path.startsWith(git + QLatin1Char('/'));
-    if (!inside)
+    if (git.isEmpty() || !path.startsWith(git + QLatin1Char('/')))
         return true;
-    const QString refs = git + QStringLiteral("/refs");
-    return path == refs || path.startsWith(refs + QLatin1Char('/'));
+    return isRefsPath(git, path);
 }
 
-void queueDir(QSet<QString> *have, QStringList *pending, QStringList *extra, const QString &path)
+QString watchSkip(const QString &git, const QString &path)
 {
-    if (have->contains(path))
-        return;
-    have->insert(path);
-    extra->append(path);
-    pending->append(path);
+    return isRefsPath(git, path) ? QString() : QStringLiteral(".git");
 }
 
-void scanDir(QSet<QString> *have, QStringList *pending, QStringList *extra, const QString &dir, const QString &skip)
+void dropWatched(QFileSystemWatcher *disk)
 {
-    for (const QFileInfo &info : QDir(dir).entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden)) {
-        if (!skip.isEmpty() && info.fileName() == skip)
-            continue;
-        queueDir(have, pending, extra, info.absoluteFilePath());
-    }
-}
-
-void addUnwatched(QFileSystemWatcher *disk, const QString &dir, const QString &skip)
-{
-    QSet<QString> have(disk->directories().cbegin(), disk->directories().cend());
-    QStringList pending{dir};
-    QStringList extra;
-    while (!pending.isEmpty())
-        scanDir(&have, &pending, &extra, pending.takeLast(), skip);
-    if (!extra.isEmpty())
-        disk->addPaths(extra);
+    const QStringList watched = disk->directories() + disk->files();
+    if (!watched.isEmpty())
+        disk->removePaths(watched);
 }
 
 } // namespace
 
 void MainWindow::clearDisk()
 {
-    const QStringList watched = m_disk.directories() + m_disk.files();
-    if (!watched.isEmpty())
-        m_disk.removePaths(watched);
+    dropWatched(&m_disk);
     m_gitDir.clear();
+    m_ignored.clear();
+    m_diskGap = false;
+    m_gapLeft = 0;
 }
 
-void MainWindow::armDisk()
+void MainWindow::markGap()
+{
+    if (m_diskGap)
+        return;
+    m_diskGap = true;
+    m_gapLeft = kGapTries;
+}
+
+void MainWindow::armDisk(const QStringList &ignored)
 {
     if (m_smoke || m_root.isEmpty())
         return;
-    clearDisk();
+    dropWatched(&m_disk);
     m_gitDir = gitDirOf(m_root);
-    m_disk.addPath(m_root);
-    addUnwatched(&m_disk, m_root, QStringLiteral(".git"));
-    if (m_gitDir.isEmpty())
+    m_ignored = QSet<QString>(ignored.cbegin(), ignored.cend());
+    if (watchTree() & watchRefs()) {
+        m_diskGap = false;
+        m_gapLeft = 0;
         return;
-    m_disk.addPath(m_gitDir);
-    const QString refs = m_gitDir + QStringLiteral("/refs");
-    if (!QDir(refs).exists())
-        return;
-    m_disk.addPath(refs);
-    addUnwatched(&m_disk, refs, {});
+    }
+    if (!m_diskGap)
+        m_gapLeft = kGapTries;
+    m_diskGap = true;
 }
 
 void MainWindow::noteDisk(const QString &path)
 {
-    if (watchDeeper(m_gitDir, path)) {
-        const QString refs = m_gitDir + QStringLiteral("/refs");
-        const bool refsTree = path == refs || path.startsWith(refs + QLatin1Char('/'));
-        addUnwatched(&m_disk, path, refsTree ? QString() : QStringLiteral(".git"));
+    if (QFileInfo(path).isDir() && isWatchedGitPath(m_gitDir, path)) {
+        if (!growDisk(path, watchSkip(m_gitDir, path)))
+            markGap();
     }
     scheduleWatch();
+}
+
+bool MainWindow::watchTree()
+{
+    return m_disk.addPath(m_root) & growDisk(m_root, watchSkip(m_gitDir, m_root));
+}
+
+bool MainWindow::watchRefs()
+{
+    if (m_gitDir.isEmpty())
+        return true;
+    bool covered = m_disk.addPath(m_gitDir);
+    const QString refs = refsPathOf(m_gitDir);
+    if (!QDir(refs).exists())
+        return covered;
+    covered = m_disk.addPath(refs) && covered;
+    return growDisk(refs, watchSkip(m_gitDir, refs)) && covered;
 }

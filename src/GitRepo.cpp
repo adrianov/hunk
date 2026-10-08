@@ -111,6 +111,12 @@ bool reuseDiff(GitResult &result, DiffMode mode, const QString &baseRef, const Q
     return !previous.isEmpty() && result.stamp == previous;
 }
 
+void fillIgnored(GitResult &result)
+{
+    result.ignored = ignoredDirs(result.root);
+    result.ignoredReady = true;
+}
+
 void pickRefs(GitResult &result, const QString &baseRef, const QString &headRef)
 {
     result.bases = baseChoices(result.root);
@@ -120,12 +126,14 @@ void pickRefs(GitResult &result, const QString &baseRef, const QString &headRef)
 }
 
 GitResult loadGit(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef,
-                   const QString &previous, bool quiet)
+                   const QString &previous, bool quiet, bool listIgnored)
 {
     GitResult result;
     QString cwd;
     if (!readCwd(result, startPath, &cwd) || !readRoot(result, cwd))
         return result;
+    if (listIgnored)
+        fillIgnored(result);
     readBranch(result);
     QString headShort;
     if (!readHead(result, &headShort))
@@ -151,7 +159,7 @@ GitRepo::GitRepo(QObject *parent)
 }
 
 void GitRepo::load(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef,
-                    const QString &stamp, bool quiet)
+                    const QString &stamp, bool quiet, bool listIgnored)
 {
     const int token = ++generation;
     auto *watcher = new QFutureWatcher<GitResult>(this);
@@ -162,7 +170,7 @@ void GitRepo::load(const QString &startPath, DiffMode mode, const QString &baseR
             return;
         emit ready(result);
     });
-    watcher->setFuture(QtConcurrent::run([startPath, mode, baseRef, headRef, stamp, quiet]() {
-        return loadGit(startPath, mode, baseRef, headRef, stamp, quiet);
+    watcher->setFuture(QtConcurrent::run([startPath, mode, baseRef, headRef, stamp, quiet, listIgnored]() {
+        return loadGit(startPath, mode, baseRef, headRef, stamp, quiet, listIgnored);
     }));
 }

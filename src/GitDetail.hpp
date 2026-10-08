@@ -18,4 +18,5 @@ QStringList baseChoices(const QString &root);
 QStringList branchRefs(const QString &root, const QString &current);
 QString branchPoint(const QString &root, const QString &headRef);
 QString workStamp(const QString &root, const QString &baseRef, const QString &headRef);
+QStringList ignoredDirs(const QString &root);
 bool fillMerge(GitResult &result, QStringList *args);

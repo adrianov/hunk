@@ -22,6 +22,8 @@ struct GitResult {
     QString error;
     QString diskStamp;
     QString stamp;
+    QStringList ignored;
+    bool ignoredReady = false;
     bool unchanged = false;
 };
 
@@ -31,7 +33,7 @@ class GitRepo : public QObject {
 public:
     explicit GitRepo(QObject *parent = nullptr);
     void load(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef,
-              const QString &stamp, bool quiet);
+              const QString &stamp, bool quiet, bool listIgnored);
 
 signals:
     void ready(const GitResult &result);

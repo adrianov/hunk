@@ -22,13 +22,10 @@ void MainWindow::reloadIfRangeChanged()
 
 void MainWindow::rememberRoot(const QString &root)
 {
-    const bool moved = m_root != root;
     m_root = root;
     if (!m_smoke)
         QSettings().setValue(QStringLiteral("lastRepo"), m_root);
     m_store->setRepo(m_root);
-    if (moved)
-        armDisk();
 }
 
 namespace {
@@ -138,24 +135,30 @@ bool MainWindow::stopForError(const GitResult &result)
     return true;
 }
 
+void MainWindow::applyWatch(const GitResult &result)
+{
+    if (!result.ignoredReady || result.root.isEmpty() || result.root != m_root)
+        return;
+    armDisk(result.ignored);
+}
+
 void MainWindow::onReady(const GitResult &result)
 {
     m_loading = false;
     if (!result.root.isEmpty())
         m_seenLoad = true;
-    if (keepQuiet(result)) {
-        finishWatch();
-        return;
+    if (!keepQuiet(result)) {
+        if (stopForError(result))
+            return;
+        if (!result.root.isEmpty())
+            rememberRoot(result.root);
+        applyBases(result);
+        m_appliedBase = result.baseRef;
+        m_appliedHead = result.headRef;
+        m_appliedStamp = result.stamp;
+        m_appliedDiff = result.diffText;
+        showLoadedDiff(result);
     }
-    if (stopForError(result))
-        return;
-    if (!result.root.isEmpty())
-        rememberRoot(result.root);
-    applyBases(result);
-    m_appliedBase = result.baseRef;
-    m_appliedHead = result.headRef;
-    m_appliedStamp = result.stamp;
-    m_appliedDiff = result.diffText;
-    showLoadedDiff(result);
+    applyWatch(result);
     finishWatch();
 }
