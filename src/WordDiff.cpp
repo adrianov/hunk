@@ -123,6 +123,25 @@ bool tooLong(const QList<Tok> &left, const QList<Tok> &right)
     return left.size() > 400 || right.size() > 400;
 }
 
+bool hasLetter(const QString &key)
+{
+    for (const QChar &ch : key) {
+        if (ch.isLetterOrNumber())
+            return true;
+    }
+    return false;
+}
+
+// Spaces and punctuation alone are not a shared word.
+bool sharesWord(const QList<Tok> &tokens, const QVector<char> &match)
+{
+    for (int index = 0; index < tokens.size(); ++index) {
+        if (match.at(index) && hasLetter(tokens.at(index).key))
+            return true;
+    }
+    return false;
+}
+
 } // namespace
 
 void wordDiff(const QString &left, const QString &right, QList<WordSpan> *leftSpans, QList<WordSpan> *rightSpans)
@@ -142,6 +161,8 @@ void wordDiff(const QString &left, const QString &right, QList<WordSpan> *leftSp
     QVector<char> leftMatch(leftTokens.size(), 0);
     QVector<char> rightMatch(rightTokens.size(), 0);
     walkLcs(table, leftTokens, rightTokens, leftMatch, rightMatch);
+    if (!sharesWord(leftTokens, leftMatch))
+        return;
     spansFor(leftTokens, leftMatch, leftSpans);
     spansFor(rightTokens, rightMatch, rightSpans);
 }

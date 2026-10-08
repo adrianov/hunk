@@ -194,6 +194,27 @@ void testFoldOpen()
     CHECK(spans.at(1).first == 11);
 }
 
+DiffRow wordRow(const char *body)
+{
+    const QString diff = QStringLiteral("diff --git a.rb a.rb\n--- a.rb\n+++ a.rb\n@@ -1 +1 @@\n")
+        + QString::fromUtf8(body);
+    return parseDiff(diff).files.at(0).rows.at(0);
+}
+
+void testWordRewritten()
+{
+    const DiffRow row = wordRow("-# one two three\n+# four five six\n");
+    CHECK(row.leftSpans.isEmpty());
+    CHECK(row.rightSpans.isEmpty());
+}
+
+void testWordEdited()
+{
+    const DiffRow row = wordRow("-keep this\n+keep that\n");
+    CHECK(changedText(row.leftText, row.leftSpans) == QLatin1String("this"));
+    CHECK(changedText(row.rightText, row.rightSpans) == QLatin1String("that"));
+}
+
 void testFoldPlain()
 {
     CHECK(foldSpans(rowsOf(QString(30, QLatin1Char('c'))), {}).isEmpty());
@@ -210,6 +231,8 @@ int main(int argc, char **argv)
     testFoldMiddle();
     testFoldEdge();
     testFoldOpen();
+    testWordRewritten();
+    testWordEdited();
     testFoldPlain();
     Q_UNUSED(app);
     return g_fails == 0 ? 0 : 1;
