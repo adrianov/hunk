@@ -7,7 +7,6 @@
 
 #include <QAction>
 #include <QActionGroup>
-#include <QComboBox>
 #include <QLabel>
 #include <QMenu>
 #include <QMenuBar>
@@ -88,18 +87,6 @@ void MainWindow::addMenus(QAction *openAct, QAction *refreshAct, QAction *quitAc
     auto *reviewMenu = menuBar()->addMenu(QStringLiteral("Review"));
     reviewMenu->addAction(commentAct);
     reviewMenu->addAction(copyAct);
-}
-
-void MainWindow::addModeBox(QToolBar *bar)
-{
-    m_mode = new QComboBox(this);
-    m_mode->addItem(QStringLiteral("Merge request"));
-    m_mode->addItem(QStringLiteral("Uncommitted"));
-    m_mode->addItem(QStringLiteral("Staged"));
-    m_mode->setItemData(0, QStringLiteral("Three-dot diff from the base, including uncommitted changes"), Qt::ToolTipRole);
-    m_mode->setItemData(1, QStringLiteral("Staged and unstaged changes against HEAD"), Qt::ToolTipRole);
-    m_mode->setItemData(2, QStringLiteral("Staged changes only"), Qt::ToolTipRole);
-    bar->addWidget(m_mode);
 }
 
 void applyBarButton(QPushButton *button, const QAction *action)

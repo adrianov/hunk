@@ -46,6 +46,8 @@ void MainWindow::tintRepoLabel()
 {
     useTextColor(m_repoLabel);
     tintToolbar(m_repoLabel);
+    if (m_mode)
+        showRefText(m_mode);
     if (m_base)
         showRefText(m_base);
     if (m_head)

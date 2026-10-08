@@ -7,8 +7,10 @@
 #include <QComboBox>
 #include <QCompleter>
 #include <QFontMetrics>
+#include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMouseEvent>
 #include <QScreen>
 #include <QStyleOptionComboBox>
 #include <QToolBar>
@@ -102,6 +104,75 @@ void addRef(QToolBar *bar, QComboBox **box, const QString &label, const QString 
     (*box)->setMinimumWidth(160);
     (*box)->setToolTip(tip);
     bar->addWidget(*box);
+}
+
+class ModePress : public QObject {
+public:
+    explicit ModePress(QComboBox *box)
+        : QObject(box)
+        , m_box(box)
+    {
+    }
+
+protected:
+    bool eventFilter(QObject *, QEvent *event) override
+    {
+        if (event->type() == QEvent::MouseButtonPress)
+            return open(static_cast<QMouseEvent *>(event));
+        if (event->type() == QEvent::KeyPress)
+            return step(static_cast<QKeyEvent *>(event));
+        return false;
+    }
+
+private:
+    bool open(const QMouseEvent *event)
+    {
+        if (event->button() != Qt::LeftButton)
+            return false;
+        m_box->showPopup();
+        return true;
+    }
+
+    bool step(const QKeyEvent *event)
+    {
+        const int key = event->key();
+        if (key != Qt::Key_Down && key != Qt::Key_Up)
+            return false;
+        const int next = m_box->currentIndex() + (key == Qt::Key_Down ? 1 : -1);
+        if (next >= 0 && next < m_box->count())
+            m_box->setCurrentIndex(next);
+        return true;
+    }
+
+    QComboBox *m_box;
+};
+
+void armMode(QComboBox *box)
+{
+    box->setEditable(true);
+    box->setInsertPolicy(QComboBox::NoInsert);
+    box->setCompleter(nullptr);
+    QLineEdit *edit = box->lineEdit();
+    edit->setReadOnly(true);
+    edit->setCursor(Qt::ArrowCursor);
+    useTextColor(edit);
+    QObject::connect(edit, &QLineEdit::selectionChanged, edit, &QLineEdit::deselect);
+    edit->installEventFilter(new ModePress(box));
+}
+
+void MainWindow::addModeBox(QToolBar *bar)
+{
+    m_mode = new QComboBox(this);
+    const QStringList labels{QStringLiteral("Merge request"), QStringLiteral("Uncommitted"), QStringLiteral("Staged")};
+    const QStringList tips{QStringLiteral("Three-dot diff from the base, including uncommitted changes"),
+                           QStringLiteral("Staged and unstaged changes against HEAD"),
+                           QStringLiteral("Staged changes only")};
+    for (int index = 0; index < labels.size(); ++index) {
+        m_mode->addItem(labels.at(index));
+        m_mode->setItemData(index, tips.at(index), Qt::ToolTipRole);
+    }
+    armMode(m_mode);
+    bar->addWidget(m_mode);
 }
 
 void MainWindow::addRefBoxes(QToolBar *bar)

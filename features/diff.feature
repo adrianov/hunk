@@ -8,6 +8,7 @@ Feature: Diff view
     Then the window shows that repository's merge request
     And the toolbar shows the path to that repository
     And toolbar labels use the normal text color
+    And the Merge request menu uses the same arrow as Base and Branch
 
   Scenario: Opening another repository watches that one
     Given a repository is on screen
