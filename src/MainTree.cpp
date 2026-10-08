@@ -57,18 +57,20 @@ QList<Group> collectGroups(const DiffDoc &doc, const QString &query)
     return groups;
 }
 
-QString fileLabel(const FileDiff &file)
+void tagCounts(QTreeWidgetItem *item, const FileDiff &file)
 {
     if (!file.adds && !file.dels)
-        return file.shortName();
-    return file.shortName() + QStringLiteral("    +%1  −%2").arg(file.adds).arg(file.dels);
+        return;
+    item->setData(0, Qt::UserRole + 1, file.adds);
+    item->setData(0, Qt::UserRole + 2, file.dels);
 }
 
 void addFileItem(QTreeWidgetItem *folderItem, const FileDiff &file, int fileIndex, const QHash<QString, QString> &seen,
                  const QWidget *tree)
 {
-    auto *item = new QTreeWidgetItem(folderItem, {fileLabel(file)});
+    auto *item = new QTreeWidgetItem(folderItem, {file.shortName()});
     item->setData(0, Qt::UserRole, fileIndex);
+    tagCounts(item, file);
     item->setToolTip(0, file.title());
     if (file.added)
         item->setForeground(0, kAddFg);

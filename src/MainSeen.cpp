@@ -6,9 +6,7 @@
 #include <QCryptographicHash>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QPainter>
 #include <QSettings>
-#include <QStyledItemDelegate>
 #include <QTreeWidget>
 
 namespace {
@@ -77,41 +75,6 @@ QColor staleBg(const QWidget *tree)
 {
     const bool dark = tree->palette().color(QPalette::Base).lightness() < 128;
     return dark ? QColor(72, 58, 32) : QColor(255, 246, 220);
-}
-
-class SeenRow : public QStyledItemDelegate {
-public:
-    using QStyledItemDelegate::QStyledItemDelegate;
-
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override
-    {
-        const QBrush brush = index.data(Qt::BackgroundRole).value<QBrush>();
-        if (brush.style() == Qt::NoBrush || option.state.testFlag(QStyle::State_Selected)) {
-            QStyledItemDelegate::paint(painter, option, index);
-            return;
-        }
-        paintStale(painter, option, index, brush);
-    }
-
-private:
-    void paintStale(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index,
-                    const QBrush &brush) const
-    {
-        painter->fillRect(option.rect, brush);
-        QStyleOptionViewItem opt(option);
-        initStyleOption(&opt, index);
-        const QRect textRect = opt.widget->style()->subElementRect(QStyle::SE_ItemViewItemText, &opt, opt.widget);
-        const QVariant ink = index.data(Qt::ForegroundRole);
-        painter->setPen(ink.canConvert<QBrush>() ? ink.value<QBrush>().color() : opt.palette.color(QPalette::Text));
-        painter->setFont(opt.font);
-        painter->drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft,
-                          opt.fontMetrics.elidedText(opt.text, Qt::ElideRight, textRect.width()));
-    }
-};
-
-void installSeenRows(QTreeWidget *tree)
-{
-    tree->setItemDelegate(new SeenRow(tree));
 }
 
 void clearSeenMark(QTreeWidget *tree, int file)
