@@ -1,3 +1,6 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include "DiffDoc.hpp"
@@ -8,6 +11,7 @@
 #include <QTimer>
 #include <QVector>
 
+class QKeyEvent;
 class QMouseEvent;
 class QPainter;
 
@@ -38,6 +42,7 @@ signals:
 protected:
     void resizeEvent(QResizeEvent *event) override;
     bool viewportEvent(QEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     struct Band {
@@ -48,6 +53,14 @@ private:
         int y = 0;
         int h = 0;
         int end = -1;
+    };
+
+    struct TextMark {
+        int file = -1;
+        int row = -1;
+        bool old = false;
+        int pos = 0;
+        bool code = false;
     };
 
     void ensureFont();
@@ -85,17 +98,31 @@ private:
     void paintPair(QPainter &painter, const Band &band, const FileDiff &file, const DiffRow &row, int viewW);
     void paintSelection(QPainter &painter, const Band &band, int viewW);
     void paintOneSide(QPainter &painter, int cellX, int cellW, SideStyle style, const QString &text, int number,
-                      const QList<Piece> &pieces, bool note, int top, int height);
+                      const QList<Piece> &pieces, bool note, int top, int height, int file, int row, bool oldSide);
+    void paintTextMark(QPainter &painter, int cellX, int cellW, int top, int height, int file, int row, bool oldSide,
+                       const QString &text, const QList<Piece> &pieces);
     void paintFileHeader(QPainter &painter, const QRect &rect, const FileDiff &file, const QFont &font);
     bool pressIgnored(QMouseEvent *mouse) const;
     void chooseRow(const Band &band, int x);
-    void pressBand(const Band *band, int x);
     void hoverRow(const Band *band);
     void hoverCursor(const Band *band, int x);
     bool openFold(const Band *band, int x);
     void setHover(int file, int row);
     void onPress(QMouseEvent *mouse);
     void onMove(QMouseEvent *mouse);
+    void pressRow(const Band &band, int x, int y, QMouseEvent *mouse);
+    void clearMark();
+    void beginText(int x, int y, bool extend);
+    TextMark codeAt(TextMark mark, const DiffRow &row, int localX, int localY) const;
+    void takeWord(const TextMark &hit);
+    void dragText(int x, int y);
+    void endText(QMouseEvent *mouse);
+    void pickWord(QMouseEvent *mouse);
+    TextMark textAt(int x, int y) const;
+    bool markEnds(TextMark *from, TextMark *to) const;
+    bool markSpan(int file, int row, bool oldSide, int size, int *start, int *end) const;
+    QString markedText() const;
+    void copyMarked();
     void clearHover();
     const Band *bandAt(int y) const;
     bool inGutter(const FileDiff &file, int x, bool *oldSide) const;
@@ -122,6 +149,9 @@ private:
     int m_selFile = -1;
     int m_selRow = -1;
     bool m_selOld = false;
+    TextMark m_anchor;
+    TextMark m_caret;
+    bool m_dragText = false;
     int m_hoverFile = -1;
     int m_hoverRow = -1;
     int m_lastFile = -1;

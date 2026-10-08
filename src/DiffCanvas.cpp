@@ -1,3 +1,6 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #include "DiffCanvas.hpp"
 
 #include "DiffSyntax.hpp"
@@ -32,6 +35,7 @@ DiffCanvas::DiffCanvas(QWidget *parent)
     : QAbstractScrollArea(parent)
 {
     setFrameShape(QFrame::NoFrame);
+    setFocusPolicy(Qt::StrongFocus);
     setMouseTracking(true);
     viewport()->setMouseTracking(true);
     viewport()->setAttribute(Qt::WA_OpaquePaintEvent);
@@ -70,6 +74,7 @@ void DiffCanvas::setMessage(const QString &text)
     m_bands.clear();
     m_docH = 0;
     m_selFile = m_selRow = m_hoverFile = m_hoverRow = m_lastFile = -1;
+    clearMark();
     updateScroll();
     viewport()->update();
 }
@@ -86,6 +91,7 @@ void DiffCanvas::setDoc(const DiffDoc &doc, const QString &leftLabel, const QStr
     m_leftLabel = leftLabel;
     m_rightLabel = rightLabel;
     m_selFile = m_selRow = m_hoverFile = m_hoverRow = m_lastFile = -1;
+    clearMark();
     rebuild();
 }
 

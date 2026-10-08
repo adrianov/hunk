@@ -1,3 +1,6 @@
+# Copyright © 2026 Peter Adrianov
+# SPDX-License-Identifier: MIT
+
 cmake_minimum_required(VERSION 3.21)
 project(hunk VERSION 0.1.0 LANGUAGES CXX)
 
@@ -55,6 +58,8 @@ add_executable(hunk
   src/DiffCanvas.cpp
   src/DiffScroll.cpp
   src/DiffInput.cpp
+  src/DiffSelect.cpp
+  src/DiffMark.cpp
   src/DiffHeader.cpp
   src/DiffPaint.cpp
   src/DiffFoldView.cpp
@@ -65,7 +70,9 @@ add_executable(hunk
   src/GitRepo.cpp
   src/GitCmd.cpp
   src/GitStamp.cpp
+  src/GitDrift.cpp
   src/GitRange.cpp
+  src/GitPoint.cpp
   src/ReviewStore.cpp
   src/ReviewShift.cpp
 )

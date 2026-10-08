@@ -1,8 +1,12 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #include "DiffCanvas.hpp"
 
 #include "DiffColors.hpp"
 #include "DiffSyntax.hpp"
 
+#include <QFontMetrics>
 #include <QPainter>
 
 namespace {
@@ -63,13 +67,64 @@ void paintWrapped(QPainter &painter, const QFont &font, int cellX, int cellW, in
     painter.restore();
 }
 
+void fillPiece(QPainter &painter, const QFontMetrics &metrics, const QString &text, const Piece &piece, int *drawX,
+               int top, int lineH, int from, int to, const QColor &color)
+{
+    if (piece.end <= piece.start)
+        return;
+    const int width = metrics.horizontalAdvance(text.mid(piece.start, piece.end - piece.start));
+    const int left = qMax(piece.start, from);
+    const int right = qMin(piece.end, to);
+    if (left < right) {
+        const int skip = metrics.horizontalAdvance(text.mid(piece.start, left - piece.start));
+        const int span = metrics.horizontalAdvance(text.mid(left, right - left));
+        painter.fillRect(*drawX + skip, top, qMax(1, span), lineH, color);
+    }
+    *drawX += width;
+}
+
+void paintRuns(QPainter &painter, const QFontMetrics &metrics, const QString &text, const QList<Piece> &pieces, int x,
+               int top, int lineH, int from, int to, const QColor &color)
+{
+    int lineTop = top;
+    int drawX = x;
+    bool lined = false;
+    for (const Piece &piece : pieces) {
+        if (piece.newLine) {
+            if (lined)
+                lineTop += lineH;
+            lined = true;
+            drawX = x;
+        }
+        fillPiece(painter, metrics, text, piece, &drawX, lineTop, lineH, from, to, color);
+    }
+}
+
 } // namespace
 
+void DiffCanvas::paintTextMark(QPainter &painter, int cellX, int cellW, int top, int height, int file, int row,
+                               bool oldSide, const QString &text, const QList<Piece> &pieces)
+{
+    int start = 0;
+    int end = 0;
+    if (!markSpan(file, row, oldSide, text.size(), &start, &end))
+        return;
+    QColor color = kAccent;
+    color.setAlpha(140);
+    painter.save();
+    const int codeW = cellW - m_gutterW;
+    painter.setClipRect(cellX + m_gutterW, top, codeW > 0 ? codeW : 1, height);
+    painter.setPen(Qt::NoPen);
+    paintRuns(painter, QFontMetrics(m_mono), text, pieces, cellX + m_gutterW + 8, top, m_rowH, start, end, color);
+    painter.restore();
+}
+
 void DiffCanvas::paintOneSide(QPainter &painter, int cellX, int cellW, SideStyle style, const QString &text, int number,
-                              const QList<Piece> &pieces, bool note, int top, int height)
+                              const QList<Piece> &pieces, bool note, int top, int height, int file, int row, bool oldSide)
 {
     const SideColors colors = colorsFor(style);
     fillCell(painter, cellX, cellW, top, height, m_gutterW, colors);
+    paintTextMark(painter, cellX, cellW, top, height, file, row, oldSide, text, pieces);
     if (note)
         paintNoteDot(painter, cellX, top, m_rowH);
     paintNumber(painter, m_mono, cellX, top, m_rowH, m_gutterW, number);

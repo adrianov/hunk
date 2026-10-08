@@ -1,3 +1,6 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #include "DiffCanvas.hpp"
 
 #include <QMouseEvent>
@@ -42,19 +45,27 @@ void DiffCanvas::chooseRow(const Band &band, int x)
         emit commentRequested(band.file, band.row, oldSide);
 }
 
-void DiffCanvas::pressBand(const Band *band, int x)
+void DiffCanvas::pressRow(const Band &band, int x, int y, QMouseEvent *mouse)
 {
-    if (!band || openFold(band, x) || band->kind != Band::Row)
+    if (inGutter(m_doc.files.at(band.file), x, nullptr)) {
+        clearMark();
+        chooseRow(band, x);
         return;
-    chooseRow(*band, x);
+    }
+    beginText(x, y, mouse->modifiers().testFlag(Qt::ShiftModifier));
 }
 
 void DiffCanvas::onPress(QMouseEvent *mouse)
 {
     if (pressIgnored(mouse))
         return;
+    setFocus();
+    const int x = int(mouse->position().x());
     const int y = int(mouse->position().y()) + verticalScrollBar()->value();
-    pressBand(bandAt(y), int(mouse->position().x()));
+    const Band *band = bandAt(y);
+    if (!band || openFold(band, x) || band->kind != Band::Row)
+        return;
+    pressRow(*band, x, y, mouse);
 }
 
 void DiffCanvas::clearHover()
@@ -85,15 +96,25 @@ void DiffCanvas::hoverCursor(const Band *band, int x)
     const int file = band && band->kind == Band::Row ? band->file : -1;
     const bool gutter = file >= 0 && inGutter(m_doc.files.at(file), x, nullptr);
     const bool fold = band && band->kind == Band::Fold;
-    viewport()->setCursor(gutter || fold ? Qt::PointingHandCursor : Qt::ArrowCursor);
+    Qt::CursorShape shape = Qt::ArrowCursor;
+    if (gutter || fold)
+        shape = Qt::PointingHandCursor;
+    else if (file >= 0)
+        shape = Qt::IBeamCursor;
+    viewport()->setCursor(shape);
 }
 
 void DiffCanvas::onMove(QMouseEvent *mouse)
 {
+    const int x = int(mouse->position().x());
     const int y = int(mouse->position().y()) + verticalScrollBar()->value();
+    if (m_dragText && mouse->buttons().testFlag(Qt::LeftButton)) {
+        dragText(x, y);
+        return;
+    }
     const Band *band = bandAt(y);
     hoverRow(band);
-    hoverCursor(band, int(mouse->position().x()));
+    hoverCursor(band, x);
 }
 
 bool DiffCanvas::viewportEvent(QEvent *event)
@@ -104,6 +125,12 @@ bool DiffCanvas::viewportEvent(QEvent *event)
         return true;
     case QEvent::MouseButtonPress:
         onPress(static_cast<QMouseEvent *>(event));
+        return true;
+    case QEvent::MouseButtonRelease:
+        endText(static_cast<QMouseEvent *>(event));
+        return true;
+    case QEvent::MouseButtonDblClick:
+        pickWord(static_cast<QMouseEvent *>(event));
         return true;
     case QEvent::MouseMove:
         onMove(static_cast<QMouseEvent *>(event));
