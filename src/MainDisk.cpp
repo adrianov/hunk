@@ -95,7 +95,9 @@ void MainWindow::armDisk(const QStringList &ignored)
     m_watchRoot = m_root;
     m_gitDir = gitDirOf(m_root);
     m_ignored = QSet<QString>(ignored.cbegin(), ignored.cend());
-    if (watchTree() & watchRefs()) {
+    const bool treeOk = watchTree();
+    const bool refsOk = watchRefs();
+    if (treeOk && refsOk) {
         m_diskGap = false;
         m_gapLeft = 0;
         return;
@@ -116,7 +118,9 @@ void MainWindow::noteDisk(const QString &path)
 
 bool MainWindow::watchTree()
 {
-    return m_disk.addPath(m_root) & growDisk(m_root, watchSkip(m_gitDir, m_root));
+    const bool rootOk = m_disk.addPath(m_root);
+    const bool grown = growDisk(m_root, watchSkip(m_gitDir, m_root));
+    return rootOk && grown;
 }
 
 bool MainWindow::watchRefs()
