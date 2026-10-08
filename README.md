@@ -69,7 +69,7 @@ Drop a repository folder on the window to open it.
 ```markdown
 # Review: feature vs origin/main
 
-File references are `path:line` on the new side. `(old)` means the line number before the change.
+File references are `path:line` on the new side.
 
 ## `src/app.cpp:42`
 > return value;
@@ -77,7 +77,7 @@ File references are `path:line` on the new side. `(old)` means the line number b
 The nil check is missing when the user is blank.
 ```
 
-Comment with ⌘↩ / Ctrl+Enter on the selected line, or click the line number. One comment per line. Each review line has its own delete control. Auto cleanup, on by default, removes a review when that line's text changes or the line leaves the file. A line that only moves keeps its review, and the comment follows the new line when that text still identifies it. The same text on another line does not take the review.
+A comment on the old side is marked `(old)`, and the copy then explains that marker. Comment with ⌘↩ / Ctrl+Enter on the selected line, or click the line number. One comment per line. Each review line has its own delete control. Auto cleanup, on by default, removes a review when that line's text changes or the line leaves the file. A line that only moves keeps its review, and the comment follows the new line when that text still identifies it. The same text on another line does not take the review.
 
 ## Layout
 
