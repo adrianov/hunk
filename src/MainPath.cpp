@@ -1,8 +1,38 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #include "MainWindow.hpp"
 
 #include <QGuiApplication>
 #include <QLabel>
 #include <QSizePolicy>
+#include <QToolBar>
+
+void useTextColor(QWidget *widget)
+{
+    if (!widget)
+        return;
+    const QColor text = qApp->palette().color(QPalette::Active, QPalette::Text);
+    QPalette palette = widget->palette();
+    palette.setColor(QPalette::WindowText, text);
+    palette.setColor(QPalette::Text, text);
+    palette.setColor(QPalette::ButtonText, text);
+    widget->setForegroundRole(QPalette::WindowText);
+    widget->setPalette(palette);
+}
+
+namespace {
+
+void tintToolbar(QWidget *widget)
+{
+    auto *bar = qobject_cast<QToolBar *>(widget ? widget->parentWidget() : nullptr);
+    if (!bar)
+        return;
+    for (QLabel *label : bar->findChildren<QLabel *>(Qt::FindDirectChildrenOnly))
+        useTextColor(label);
+}
+
+} // namespace
 
 void MainWindow::prepareRepoLabel()
 {
@@ -14,15 +44,12 @@ void MainWindow::prepareRepoLabel()
 
 void MainWindow::tintRepoLabel()
 {
-    if (!m_repoLabel)
-        return;
-    const QColor text = qApp->palette().color(QPalette::Active, QPalette::Text);
-    QPalette palette = m_repoLabel->palette();
-    palette.setColor(QPalette::WindowText, text);
-    palette.setColor(QPalette::Text, text);
-    palette.setColor(QPalette::ButtonText, text);
-    m_repoLabel->setForegroundRole(QPalette::WindowText);
-    m_repoLabel->setPalette(palette);
+    useTextColor(m_repoLabel);
+    tintToolbar(m_repoLabel);
+    if (m_base)
+        showRefText(m_base);
+    if (m_head)
+        showRefText(m_head);
 }
 
 void MainWindow::showRepoPath()

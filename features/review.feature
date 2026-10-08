@@ -1,3 +1,6 @@
+# Copyright © 2026 Peter Adrianov
+# SPDX-License-Identifier: MIT
+
 Feature: Review comments
 
   Scenario: Each review line can be deleted

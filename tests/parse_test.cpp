@@ -1,3 +1,6 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #include "DiffFold.hpp"
 #include "DiffParse.hpp"
 #include "ReviewExport.hpp"

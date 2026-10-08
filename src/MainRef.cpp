@@ -1,3 +1,6 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #include "MainWindow.hpp"
 
 #include <QAbstractItemView>
@@ -49,15 +52,9 @@ int refCap(const QWidget *bar, int want)
 
 void showRefText(QComboBox *box)
 {
-    QLineEdit *edit = box->lineEdit();
-    if (!edit)
+    if (!box)
         return;
-    const QColor text = box->palette().color(QPalette::Active, QPalette::Text);
-    QPalette pal = edit->palette();
-    pal.setColor(QPalette::Text, text);
-    pal.setColor(QPalette::WindowText, text);
-    pal.setColor(QPalette::ButtonText, text);
-    edit->setPalette(pal);
+    useTextColor(box->lineEdit());
 }
 
 void finishRefEdit(QComboBox *box)
@@ -97,7 +94,9 @@ void watchRefFilter(QComboBox *box)
 
 void addRef(QToolBar *bar, QComboBox **box, const QString &label, const QString &tip)
 {
-    bar->addWidget(new QLabel(label, bar));
+    auto *caption = new QLabel(label, bar);
+    useTextColor(caption);
+    bar->addWidget(caption);
     *box = new QComboBox(bar);
     (*box)->setEditable(true);
     (*box)->setMinimumWidth(160);
