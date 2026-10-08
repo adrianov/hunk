@@ -10,9 +10,29 @@
 
 namespace {
 
+constexpr int seenVersion = 2;
+
 QString seenKey(const QString &root)
 {
     return QString::fromLatin1(QCryptographicHash::hash(root.toUtf8(), QCryptographicHash::Sha1).toHex());
+}
+
+bool keepSeen(QSettings *settings)
+{
+    if (settings->value(QStringLiteral("version")).toInt() == seenVersion)
+        return true;
+    settings->remove(QString());
+    settings->setValue(QStringLiteral("version"), seenVersion);
+    return false;
+}
+
+QHash<QString, QString> stampsFrom(const QByteArray &raw)
+{
+    QHash<QString, QString> seen;
+    const QJsonObject object = QJsonDocument::fromJson(raw).object();
+    for (auto it = object.begin(); it != object.end(); ++it)
+        seen.insert(it.key(), it.value().toString());
+    return seen;
 }
 
 void addField(QCryptographicHash *hash, const QByteArray &bytes)
@@ -46,16 +66,17 @@ QString fileStamp(const FileDiff &file)
 
 QHash<QString, QString> readSeen(const QString &root)
 {
-    QHash<QString, QString> seen;
     if (root.isEmpty())
-        return seen;
+        return {};
     QSettings settings;
     settings.beginGroup(QStringLiteral("seenFiles"));
-    const QJsonObject object = QJsonDocument::fromJson(settings.value(seenKey(root)).toByteArray()).object();
+    if (!keepSeen(&settings)) {
+        settings.endGroup();
+        return {};
+    }
+    const QByteArray raw = settings.value(seenKey(root)).toByteArray();
     settings.endGroup();
-    for (auto it = object.begin(); it != object.end(); ++it)
-        seen.insert(it.key(), it.value().toString());
-    return seen;
+    return stampsFrom(raw);
 }
 
 void writeSeen(const QString &root, const QHash<QString, QString> &seen)
@@ -65,6 +86,7 @@ void writeSeen(const QString &root, const QHash<QString, QString> &seen)
         object.insert(it.key(), it.value());
     QSettings settings;
     settings.beginGroup(QStringLiteral("seenFiles"));
+    settings.setValue(QStringLiteral("version"), seenVersion);
     settings.setValue(seenKey(root), QJsonDocument(object).toJson(QJsonDocument::Compact));
     settings.endGroup();
 }
