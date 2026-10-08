@@ -52,14 +52,19 @@ QString localMain(const QString &root, QString *remote)
     return main.isEmpty() ? paired(root, QStringLiteral("master"), remote) : main;
 }
 
+QString commitCount(int count)
+{
+    return QString::number(count) + (count == 1 ? QStringLiteral(" commit") : QStringLiteral(" commits"));
+}
+
 QString driftText(const QString &local, const QString &remote, int ahead, int behind)
 {
     if (ahead > 0 && behind > 0)
-        return QStringLiteral("%1 is %2 ahead and %3 behind %4").arg(local).arg(ahead).arg(behind).arg(remote);
+        return QStringLiteral("%1 is %2 ahead and %3 behind %4").arg(local, commitCount(ahead), commitCount(behind), remote);
     if (ahead > 0)
-        return QStringLiteral("%1 is %2 ahead of %3").arg(local).arg(ahead).arg(remote);
+        return QStringLiteral("%1 is %2 ahead of %3").arg(local, commitCount(ahead), remote);
     if (behind > 0)
-        return QStringLiteral("%1 is %2 behind %3").arg(local).arg(behind).arg(remote);
+        return QStringLiteral("%1 is %2 behind %3").arg(local, commitCount(behind), remote);
     return {};
 }
 
