@@ -4,6 +4,7 @@
 #include "GitRepo.hpp"
 
 #include <QComboBox>
+#include <QDir>
 #include <QGuiApplication>
 #include <QLabel>
 #include <QLineEdit>
@@ -25,7 +26,8 @@ void MainWindow::startLoad(const QString &path)
     m_base->setEnabled(merge);
     m_head->setEnabled(merge);
     m_loading = true;
-    const bool listIgnored = m_gitDir.isEmpty() || m_diskGap;
+    const bool sameRoot = !m_watchRoot.isEmpty() && QDir::cleanPath(path) == m_watchRoot;
+    const bool listIgnored = m_diskGap || !sameRoot;
     m_git->load(path, mode, m_base->currentText().trimmed(), m_head->currentText().trimmed(), m_appliedStamp, m_quiet,
                 listIgnored);
 }

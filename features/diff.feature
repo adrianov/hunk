@@ -4,6 +4,11 @@ Feature: Diff view
     Given I run hunk in a git repository
     Then the window shows that repository's merge request
 
+  Scenario: Opening another repository watches that one
+    Given a repository is on screen
+    When I open a different repository
+    Then hunk watches the repository I opened
+
   Scenario: Base and branch selectors
     Given I open a repository
     Then the base selector shows the branching point

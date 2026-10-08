@@ -70,6 +70,7 @@ void MainWindow::clearDisk()
 {
     dropWatched(&m_disk);
     m_gitDir.clear();
+    m_watchRoot.clear();
     m_ignored.clear();
     m_diskGap = false;
     m_gapLeft = 0;
@@ -88,6 +89,7 @@ void MainWindow::armDisk(const QStringList &ignored)
     if (m_smoke || m_root.isEmpty())
         return;
     dropWatched(&m_disk);
+    m_watchRoot = m_root;
     m_gitDir = gitDirOf(m_root);
     m_ignored = QSet<QString>(ignored.cbegin(), ignored.cend());
     if (watchTree() & watchRefs()) {
