@@ -5,6 +5,11 @@
 #include "Smoke.hpp"
 
 #include <QApplication>
+#include <QIcon>
+
+#ifdef Q_OS_MACOS
+#include "MacIcon.hpp"
+#endif
 
 namespace {
 
@@ -12,6 +17,12 @@ void setupApp()
 {
     QCoreApplication::setOrganizationName(QStringLiteral("Hunk"));
     QCoreApplication::setApplicationName(QStringLiteral("Hunk"));
+    QCoreApplication::setApplicationVersion(QStringLiteral(HUNK_VERSION));
+    QGuiApplication::setDesktopFileName(QStringLiteral("hunk"));
+    QApplication::setWindowIcon(QIcon(QStringLiteral(":/icons/hunk.png")));
+#ifdef Q_OS_MACOS
+    applyMacIcon();
+#endif
 }
 
 QString launchPath(bool *smoke)

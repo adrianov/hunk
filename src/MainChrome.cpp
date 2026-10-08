@@ -7,14 +7,17 @@
 #include "MainSeen.hpp"
 #include "ReviewStore.hpp"
 
+#include <QAction>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QCoreApplication>
 #include <QDockWidget>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QMenuBar>
+#include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QScrollBar>
@@ -107,6 +110,7 @@ QWidget *MainWindow::reviewPanel()
     m_notes = new QListWidget(this);
     m_editor = makeEditor(this);
     m_copy = new QPushButton(QStringLiteral("Copy reviews"), this);
+    setButtonIcon(m_copy, buttonIcon(ButtonIcon::Copy));
     m_cleanup = makeCleanup(this, m_smoke);
     auto *panel = new QWidget(this);
     auto *layout = new QVBoxLayout(panel);
@@ -115,6 +119,22 @@ QWidget *MainWindow::reviewPanel()
     layout->addWidget(m_editor, 1);
     layout->addLayout(reviewButtons(m_copy, m_cleanup));
     return panel;
+}
+
+void MainWindow::showAbout()
+{
+    QMessageBox::about(this, QStringLiteral("About Hunk"),
+                       QStringLiteral("<p><b>Hunk %1</b></p>"
+                                      "<p>Local merge-request diff for macOS and Linux.</p>"
+                                      "<p>Copyright © 2026 Peter Adrianov<br>MIT License</p>")
+                           .arg(QCoreApplication::applicationVersion()));
+}
+
+void MainWindow::addHelpMenu()
+{
+    auto *about = menuBar()->addMenu(QStringLiteral("Help"))->addAction(QStringLiteral("About Hunk"));
+    about->setMenuRole(QAction::AboutRole);
+    connect(about, &QAction::triggered, this, &MainWindow::showAbout);
 }
 
 void MainWindow::buildReviews()
@@ -126,6 +146,7 @@ void MainWindow::buildReviews()
     view->addAction(m_dock->toggleViewAction());
     view->addSeparator();
     addThemeMenu(view);
+    addHelpMenu();
 }
 
 void MainWindow::openTreeItem(QTreeWidgetItem *item)

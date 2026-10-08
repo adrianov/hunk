@@ -5,11 +5,18 @@
 
 #include "ReviewNote.hpp"
 
+#include <QIcon>
+
 class QComboBox;
+class QPushButton;
 class QLabel;
 class QWidget;
 
 enum class ThemePick { System, Dark, Light };
+enum class ButtonIcon { Open, Refresh, Copy };
+
+QIcon buttonIcon(ButtonIcon kind);
+void setButtonIcon(QPushButton *button, const QIcon &icon);
 
 void noteSystemTheme();
 void applyTheme(bool forceDark = false);

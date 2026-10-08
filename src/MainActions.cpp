@@ -15,7 +15,7 @@
 
 QAction *MainWindow::makeOpen()
 {
-    auto *action = new QAction(QStringLiteral("Open"), this);
+    auto *action = new QAction(buttonIcon(ButtonIcon::Open), QStringLiteral("Open"), this);
     action->setShortcut(QKeySequence::Open);
     connect(action, &QAction::triggered, this, &MainWindow::chooseRepo);
     return action;
@@ -23,7 +23,7 @@ QAction *MainWindow::makeOpen()
 
 QAction *MainWindow::makeRefresh()
 {
-    auto *action = new QAction(QStringLiteral("Refresh"), this);
+    auto *action = new QAction(buttonIcon(ButtonIcon::Refresh), QStringLiteral("Refresh"), this);
     action->setShortcut(QKeySequence::Refresh);
     connect(action, &QAction::triggered, this, [this]() { reload(true); });
     return action;
@@ -41,7 +41,7 @@ QAction *MainWindow::makeComment()
 
 QAction *MainWindow::makeCopy()
 {
-    auto *action = new QAction(QStringLiteral("Copy reviews"), this);
+    auto *action = new QAction(buttonIcon(ButtonIcon::Copy), QStringLiteral("Copy reviews"), this);
     action->setShortcut(Qt::CTRL | Qt::SHIFT | Qt::Key_C);
     action->setShortcutContext(Qt::WindowShortcut);
     action->setToolTip(QStringLiteral("Copy review comments for an LLM agent"));
@@ -92,6 +92,7 @@ void MainWindow::addMenus(QAction *openAct, QAction *refreshAct, QAction *quitAc
 void applyBarButton(QPushButton *button, const QAction *action)
 {
     button->setText(action->text());
+    setButtonIcon(button, action->icon());
     button->setToolTip(action->toolTip().isEmpty() ? action->text() : action->toolTip());
     button->setEnabled(action->isEnabled());
     button->setVisible(action->isVisible());

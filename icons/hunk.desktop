@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Hunk
+Comment=Side-by-side git diff
+Exec=hunk
+Icon=hunk
+StartupWMClass=hunk
+Terminal=false
+Categories=Development;

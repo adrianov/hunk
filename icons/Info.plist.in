@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key>
+  <string>Hunk</string>
+  <key>CFBundleDisplayName</key>
+  <string>Hunk</string>
+  <key>CFBundleIdentifier</key>
+  <string>app.hunk</string>
+  <key>CFBundleVersion</key>
+  <string>@PROJECT_VERSION@</string>
+  <key>CFBundleShortVersionString</key>
+  <string>@PROJECT_VERSION@</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleExecutable</key>
+  <string>hunk</string>
+  <key>CFBundleIconFile</key>
+  <string>hunk.icns</string>
+  <key>NSHighResolutionCapable</key>
+  <true/>
+</dict>
+</plist>
