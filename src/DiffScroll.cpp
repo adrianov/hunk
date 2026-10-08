@@ -55,7 +55,7 @@ void DiffCanvas::resizeEvent(QResizeEvent *event)
     QAbstractScrollArea::resizeEvent(event);
     updateScroll();
     viewport()->update();
-    if (viewport()->width() != m_viewW && !m_doc.files.isEmpty())
+    if (qMax(1, viewport()->width()) != m_viewW && !m_doc.files.isEmpty())
         m_wrapTimer.start();
 }
 

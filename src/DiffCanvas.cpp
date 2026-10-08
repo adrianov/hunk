@@ -58,6 +58,8 @@ void DiffCanvas::setMessage(const QString &text)
     m_message = text;
     m_doc = {};
     m_open.clear();
+    m_wrapW.clear();
+    m_viewW = -1;
     m_bands.clear();
     m_docH = 0;
     m_selFile = m_selRow = m_hoverFile = m_hoverRow = m_lastFile = -1;
@@ -71,6 +73,8 @@ void DiffCanvas::setDoc(const DiffDoc &doc, const QString &leftLabel, const QStr
     m_message.clear();
     m_doc = doc;
     m_open = QVector<QSet<int>>(m_doc.files.size());
+    m_wrapW = QVector<int>(m_doc.files.size(), -1);
+    m_viewW = -1;
     highlightDoc(&m_doc);
     m_leftLabel = leftLabel;
     m_rightLabel = rightLabel;
@@ -78,22 +82,9 @@ void DiffCanvas::setDoc(const DiffDoc &doc, const QString &leftLabel, const QStr
     rebuild();
 }
 
-void DiffCanvas::setNoteKeys(const QSet<QString> &keys)
-{
-    if (m_notes == keys)
-        return;
-    m_notes = keys;
-    if (m_doc.files.isEmpty())
-        viewport()->update();
-    else
-        rebuild();
-}
-
 void DiffCanvas::wrapRow(DiffRow *row, bool single)
 {
-    int width = viewport()->width();
-    if (width <= 0)
-        width = 1;
+    const int width = m_viewW > 0 ? m_viewW : 1;
     if (single) {
         row->leftPiece.clear();
         row->rightPiece = sidePieces(row->rightText, row->rightSpans, row->rightSyn, m_mono, paneText(width, m_gutterW));
@@ -127,14 +118,13 @@ void DiffCanvas::addFileBands(int fileIndex, int *y)
 
 void DiffCanvas::rebuild()
 {
+    m_wrapTimer.stop();
     ensureFont();
+    prepareWidth();
     m_bands.clear();
     int y = 8;
     for (int fileIndex = 0; fileIndex < m_doc.files.size(); ++fileIndex)
         addFileBands(fileIndex, &y);
-    m_viewW = viewport()->width();
     m_docH = y + 12;
-    updateScroll();
-    viewport()->update();
-    emitVisibleFile();
+    publishLayout();
 }

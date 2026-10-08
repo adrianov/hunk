@@ -51,7 +51,14 @@ private:
     };
 
     void ensureFont();
+    void prepareWidth();
+    void dropPieces();
     void rebuild();
+    void relayoutFile(int fileIndex);
+    int fileBands(int fileIndex, int *end) const;
+    void appendTail(const QList<Band> &tail, int delta);
+    void publishLayout();
+    void applyNotePaths(const QSet<QString> &keys);
     void addFileBands(int fileIndex, int *y);
     void addRowBands(int fileIndex, int *y);
     void addFoldBand(int fileIndex, const FoldSpan &span, int *y);
@@ -59,6 +66,7 @@ private:
     QSet<int> pinnedRows(int fileIndex) const;
     void showHidden(int file, int first, int last);
     void revealRow(int file, int row);
+    void ensureRow(int fileIndex, int rowIndex, bool single);
     void wrapRow(DiffRow *row, bool single);
     int rowHeight(const DiffRow &row, bool single) const;
     void updateScroll();
@@ -102,6 +110,7 @@ private:
     QList<Band> m_bands;
     QSet<QString> m_notes;
     QVector<QSet<int>> m_open;
+    QVector<int> m_wrapW;
     QFont m_mono;
     int m_rowH = 20;
     int m_headerH = 34;

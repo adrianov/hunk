@@ -56,7 +56,8 @@ void DiffCanvas::showHidden(int file, int first, int last)
         return;
     for (int row = first; row <= last; ++row)
         m_open[file].insert(row);
-    rebuild();
+    relayoutFile(file);
+    publishLayout();
 }
 
 void DiffCanvas::revealRow(int file, int row)
@@ -80,9 +81,8 @@ void DiffCanvas::addFoldBand(int fileIndex, const FoldSpan &span, int *y)
 
 void DiffCanvas::addCodeBand(int fileIndex, int rowIndex, bool single, int *y)
 {
-    DiffRow &row = m_doc.files[fileIndex].rows[rowIndex];
-    wrapRow(&row, single);
-    const int height = rowHeight(row, single);
+    ensureRow(fileIndex, rowIndex, single);
+    const int height = rowHeight(m_doc.files.at(fileIndex).rows.at(rowIndex), single);
     m_bands.push_back(Band{Band::Row, fileIndex, rowIndex, *y, height});
     *y += height;
 }
