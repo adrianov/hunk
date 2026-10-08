@@ -3,6 +3,9 @@
 #include "DiffSyntax.hpp"
 #include "Syntax.hpp"
 
+#include <oclero/qlementine/style/QlementineStyle.hpp>
+
+#include <QApplication>
 #include <QFontDatabase>
 #include <QFontMetrics>
 #include <QScrollBar>
@@ -46,10 +49,14 @@ DiffCanvas::DiffCanvas(QWidget *parent)
 void DiffCanvas::ensureFont()
 {
     m_mono = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    m_mono.setPointSize(12);
+    int px = 13;
+    if (const auto *style = qobject_cast<const oclero::qlementine::QlementineStyle *>(qApp->style()))
+        px = style->theme().fontMonospace.pixelSize();
+    if (px > 0)
+        m_mono.setPixelSize(px);
     const QFontMetrics metrics(m_mono);
-    m_rowH = metrics.height() + 6;
-    m_gutterW = qMax(56, metrics.horizontalAdvance(QStringLiteral("00000")) + 18);
+    m_rowH = metrics.height() + 4;
+    m_gutterW = metrics.horizontalAdvance(QStringLiteral("00000")) + 22;
 }
 
 void DiffCanvas::setMessage(const QString &text)

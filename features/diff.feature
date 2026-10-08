@@ -84,6 +84,11 @@ Feature: Diff view
     And the View menu can switch to dark or light
     And buttons, fields, and menus have rounded corners
 
+  Scenario: Text sizes follow the theme
+    Given a diff is on screen
+    Then the code uses the theme monospace size
+    And file names, labels, and the rest of the window use the theme text size
+
   Scenario: A rename keeps each side's language
     Given "app.rb" is renamed to "app.cpp"
     Then the old side colors Ruby
