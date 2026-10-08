@@ -3,10 +3,13 @@
 
 #include "DiffCanvas.hpp"
 
+#include <QAction>
 #include <QClipboard>
+#include <QContextMenuEvent>
 #include <QFontMetrics>
 #include <QGuiApplication>
 #include <QKeyEvent>
+#include <QMenu>
 #include <QMouseEvent>
 
 namespace {
@@ -143,6 +146,17 @@ void DiffCanvas::copyMarked()
     if (text.isEmpty())
         return;
     QGuiApplication::clipboard()->setText(text);
+}
+
+void DiffCanvas::contextMenuEvent(QContextMenuEvent *event)
+{
+    QMenu menu(this);
+    QAction *copy = menu.addAction(QStringLiteral("Copy"));
+    copy->setShortcut(QKeySequence::Copy);
+    copy->setEnabled(!markedText().isEmpty());
+    if (menu.exec(event->globalPos()) == copy)
+        copyMarked();
+    event->accept();
 }
 
 void DiffCanvas::keyPressEvent(QKeyEvent *event)

@@ -11,6 +11,7 @@
 #include <QTimer>
 #include <QVector>
 
+class QContextMenuEvent;
 class QKeyEvent;
 class QMouseEvent;
 class QPainter;
@@ -43,6 +44,7 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
     bool viewportEvent(QEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
+    void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
     struct Band {
