@@ -77,12 +77,6 @@ QString originHead(const QString &root)
     return name;
 }
 
-QString defaultBase(const QString &root)
-{
-    const QString origin = originHead(root);
-    return origin.isEmpty() ? baseRefs(root).value(0) : origin;
-}
-
 void addKnownBases(const QString &root, QStringList *bases)
 {
     const QStringList candidates{QStringLiteral("origin/main"), QStringLiteral("main"),
@@ -100,6 +94,12 @@ QString branchPointName()
     return QStringLiteral("branching point");
 }
 
+QString parentRef(const QString &root)
+{
+    const QString origin = originHead(root);
+    return origin.isEmpty() ? baseRefs(root).value(0) : origin;
+}
+
 QStringList baseRefs(const QString &root)
 {
     QStringList bases;
@@ -112,7 +112,7 @@ QStringList baseRefs(const QString &root)
 
 QStringList baseChoices(const QString &root)
 {
-    QStringList bases{branchPointName()};
+    QStringList bases{branchPointLabel(root)};
     for (const QString &name : baseRefs(root)) {
         if (!bases.contains(name))
             bases << name;
@@ -122,19 +122,17 @@ QStringList baseChoices(const QString &root)
 
 QStringList branchRefs(const QString &root, const QString &current)
 {
-    QStringList names = runGit(root, {QStringLiteral("for-each-ref"), QStringLiteral("--format=%(refname:short)"),
-                                      QStringLiteral("refs/heads")})
+    QStringList names = runGit(root, {QStringLiteral("for-each-ref"), QStringLiteral("--sort=-committerdate"),
+                                      QStringLiteral("--format=%(refname:short)"), QStringLiteral("refs/heads")})
                             .out.split(QLatin1Char('\n'), Qt::SkipEmptyParts);
-    if (!current.isEmpty()) {
-        names.removeAll(current);
+    if (!current.isEmpty() && !names.contains(current))
         names.prepend(current);
-    }
     return names;
 }
 
 QString branchPoint(const QString &root, const QString &headRef)
 {
-    const QString parent = defaultBase(root);
+    const QString parent = parentRef(root);
     if (parent.isEmpty())
         return {};
     const GitCmd base = runGit(root, {QStringLiteral("merge-base"), parent, headRef});

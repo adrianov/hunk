@@ -29,6 +29,8 @@ void MainWindow::rememberRoot(const QString &root)
     m_store->setRepo(m_root);
 }
 
+void fitRefBox(QComboBox *box);
+
 namespace {
 
 void setBaseBlocked(QComboBox *base, bool blocked)
@@ -60,6 +62,7 @@ void selectRef(QComboBox *box, const QStringList &items, const QString &selected
         box->setCurrentText(selected);
     else if (!typed.isEmpty())
         box->setCurrentText(typed);
+    fitRefBox(box);
 }
 
 } // namespace
