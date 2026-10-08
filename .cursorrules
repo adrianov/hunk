@@ -24,9 +24,11 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/DiffCanvas.cpp` / `DiffCanvas.hpp` — diff view state
 - `src/DiffScroll.cpp` — scroll and sticky file tracking
 - `src/DiffInput.cpp` — gutter clicks
+- `src/DiffSelect.cpp` — drag to select text in a pane
+- `src/DiffMark.cpp` — word selection and the copied text
 - `src/DiffHeader.cpp` — file header and labels
 - `src/DiffPaint.cpp` — row paint
-- `src/DiffSide.cpp` — one pane, word highlights
+- `src/DiffSide.cpp` — one pane, word highlights, selected text
 - `src/DiffSyntax.cpp` / `DiffSyntax.hpp` — paint syntax colors
 - `src/Syntax.hpp` / `SyntaxRule.hpp` / `SyntaxLang.cpp` / `SyntaxScan.cpp` / `SyntaxText.cpp` / `SyntaxWord.cpp` — language tokens
 - `src/DiffColors.cpp` / `DiffColors.hpp` — diff colors
@@ -39,9 +41,11 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/DiffFoldView.cpp` — fold bar paint and clicks
 - `src/DiffLayout.cpp` — per-file line wrap cache and band relayout
 - `src/GitRepo.cpp` / `GitRepo.hpp` — background git load
-- `src/GitCmd.cpp` / `GitDetail.hpp` — git process, base, and branch refs
+- `src/GitCmd.cpp` / `GitDetail.hpp` — git process, base and branch refs
 - `src/GitStamp.cpp` — head, worktree status, resolved base, and ignored directories
-- `src/GitRange.cpp` — merge-request range and branching point label
+- `src/GitDrift.cpp` — whether local main or master is ahead or behind origin
+- `src/GitRange.cpp` — merge-request range
+- `src/GitPoint.cpp` — branching point as `branch` or `branch^` / `branch~N`
 - `src/ReviewStore.cpp` / `ReviewStore.hpp` — comments in QSettings
 - `src/ReviewShift.cpp` / `ReviewShift.hpp` — moved comment line
 - `src/ReviewNote.hpp` — one comment
@@ -50,5 +54,6 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `tests/syntax_test.cpp` — syntax color checks
 - `CMakeLists.txt` — Qt 6 Widgets app and test
 - `README.md` — build and review format
+- `LICENSE` — MIT license, Copyright © 2026 Peter Adrianov
 - `features/*.feature` — Gherkin UX reference
 - `.cursor/rules/gherkin-features.mdc` — keep those scenarios current
