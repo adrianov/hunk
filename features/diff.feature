@@ -1,9 +1,13 @@
+# Copyright © 2026 Peter Adrianov
+# SPDX-License-Identifier: MIT
+
 Feature: Diff view
 
   Scenario: Run hunk in a repository
     Given I run hunk in a git repository
     Then the window shows that repository's merge request
     And the toolbar shows the path to that repository
+    And toolbar labels use the normal text color
 
   Scenario: Opening another repository watches that one
     Given a repository is on screen
@@ -12,13 +16,21 @@ Feature: Diff view
 
   Scenario: Base and branch selectors
     Given I open a repository
-    Then the base selector shows the branching point and its parent branch
+    Then the base selector shows the parent branch, with ^ or ~N when the branch left an older commit
     And the branch selector shows the current branch
     And the branch list puts the newest change first
     And typing in either box filters that list without leaving the field
     And a branch name stays readable on the toolbar, shortened only when it does not fit there
     And the diff is a merge request between them
     And uncommitted changes on the current branch are included
+
+  Scenario: The main branch differs from its origin
+    Given local main or master is ahead of or behind its origin
+    Then the status bar says how far ahead or behind it is
+
+  Scenario: A merge request that conflicts with its target
+    Given a merge request that cannot merge into its target
+    Then the status bar names that target and the conflicting files
 
   Scenario: Switching back leaves an unchanged diff still
     Given the merge request is on screen
@@ -72,6 +84,12 @@ Feature: Diff view
     Given a changed line where only spaces stay the same
     Then that line is shown as removed and added
     And individual words are not highlighted
+
+  Scenario: Copy text from a diff pane
+    Given a diff is on screen
+    When I select text in the left or the right pane
+    And I copy
+    Then the clipboard contains that text
 
   Scenario: A long line wraps inside the pane
     Given a changed line longer than the pane
