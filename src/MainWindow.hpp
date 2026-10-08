@@ -119,10 +119,11 @@ private:
     void rebuildTree();
     void loadSeen();
     void markSeenFile(int file);
+    void fillNotes();
     void refreshNotes();
     void placeNoteRows();
     void addListedNote(int index);
-    void restoreNoteRow(int row);
+    void restoreNoteRow(int row, bool editing);
     void commentSelection();
     void commentAt(int file, int row, bool oldSide);
     bool commentLine(int file, int row, bool *oldSide, int *line, QString *snippet) const;

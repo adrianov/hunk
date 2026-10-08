@@ -110,12 +110,13 @@ QString noteLabel(const ReviewNote &note)
 
 void MainWindow::showNote(int row)
 {
+    if (m_noteLock)
+        return;
     placeNoteRows();
     const bool on = row >= 0 && row < m_store->notes().size();
     m_editor->setEnabled(on);
-    if (!on || m_noteLock)
-        return;
-    loadNote(row);
+    if (on)
+        loadNote(row);
 }
 
 void MainWindow::loadNote(int row)

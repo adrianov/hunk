@@ -120,6 +120,19 @@ int rowFor(const QListWidget *list, const NoteId &id)
     return -1;
 }
 
+int keptRow(const QListWidget *list, const NoteId &id, const QList<ReviewNote> &notes, const QString &body, bool editing)
+{
+    const int exact = rowFor(list, id);
+    if (exact >= 0 || !editing)
+        return exact;
+    for (int index = 0; index < notes.size(); ++index) {
+        const ReviewNote &note = notes.at(index);
+        if (note.path == id.path && note.oldSide == id.oldSide && note.body == body)
+            return index;
+    }
+    return -1;
+}
+
 void dropId(ReviewStore *store, const NoteId &id)
 {
     const QList<ReviewNote> &notes = store->notes();
@@ -152,26 +165,35 @@ void MainWindow::addListedNote(int index)
     connect(listed.drop, &QPushButton::clicked, this, [this, id]() { dropId(m_store, id); }, Qt::QueuedConnection);
 }
 
-void MainWindow::restoreNoteRow(int row)
+void MainWindow::restoreNoteRow(int row, bool editing)
 {
-    if (row >= 0 && row < m_notes->count())
-        m_notes->setCurrentRow(row);
-    else {
+    if (row < 0 || row >= m_notes->count()) {
         m_editor->clear();
         m_editor->setEnabled(false);
+        return;
     }
+    m_notes->setCurrentRow(row);
+    if (editing)
+        m_editor->setFocus();
+}
+
+void MainWindow::fillNotes()
+{
+    m_notes->clear();
+    for (int index = 0; index < m_store->notes().size(); ++index)
+        addListedNote(index);
+    const int comments = m_store->notes().size();
+    m_dock->setWindowTitle(comments == 0 ? QStringLiteral("Reviews") : QStringLiteral("Reviews (%1)").arg(comments));
 }
 
 void MainWindow::refreshNotes()
 {
+    const bool editing = m_editor->hasFocus();
+    const QString typed = m_editor->toPlainText();
     m_noteLock = true;
     const NoteId picked = selectedId(m_notes);
-    m_notes->clear();
-    for (int index = 0; index < m_store->notes().size(); ++index)
-        addListedNote(index);
-    restoreNoteRow(rowFor(m_notes, picked));
+    fillNotes();
+    restoreNoteRow(keptRow(m_notes, picked, m_store->notes(), typed, editing), editing);
     placeNoteRows();
     m_noteLock = false;
-    const int comments = m_store->notes().size();
-    m_dock->setWindowTitle(comments == 0 ? QStringLiteral("Reviews") : QStringLiteral("Reviews (%1)").arg(comments));
 }

@@ -3,6 +3,13 @@
 
 Feature: Review comments
 
+  Scenario: Refresh keeps the comment being edited
+    Given I am typing in a review comment
+    When the diff refreshes
+    Then the comment box still has focus
+    And the text I typed is still there
+    And that stays true when the comment's line moves
+
   Scenario: Each review line can be deleted
     Given the review list has a comment
     Then that line has its own delete control
