@@ -15,7 +15,7 @@ Feature: Diff view
     And the branch selector shows the current branch
     And the branch list puts the newest change first
     And typing in either box filters that list without leaving the field
-    And a branch name stays whole unless it is wider than the screen
+    And a branch name stays readable on the toolbar, shortened only when it does not fit there
     And the diff is a merge request between them
     And uncommitted changes on the current branch are included
 
@@ -83,6 +83,7 @@ Feature: Diff view
     Then the colors follow the system theme
     And the View menu can switch to dark or light
     And buttons, fields, and menus have rounded corners
+    And the toolbar buttons have a filled background
 
   Scenario: Text sizes follow the theme
     Given a diff is on screen

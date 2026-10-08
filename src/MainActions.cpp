@@ -6,9 +6,9 @@
 #include <QActionGroup>
 #include <QComboBox>
 #include <QLabel>
-#include <QLineEdit>
 #include <QMenu>
 #include <QMenuBar>
+#include <QPushButton>
 #include <QToolBar>
 
 QAction *MainWindow::makeOpen()
@@ -99,34 +99,21 @@ void MainWindow::addModeBox(QToolBar *bar)
     bar->addWidget(m_mode);
 }
 
-void watchRefFilter(QComboBox *box);
-
-void addRef(QToolBar *bar, QComboBox **box, const QString &label, const QString &tip)
+void addBarButton(QToolBar *bar, QAction *action)
 {
-    bar->addWidget(new QLabel(label, bar));
-    *box = new QComboBox(bar);
-    (*box)->setEditable(true);
-    (*box)->setMinimumWidth(160);
-    (*box)->setToolTip(tip);
-    bar->addWidget(*box);
-}
-
-void MainWindow::addRefBoxes(QToolBar *bar)
-{
-    addRef(bar, &m_base, QStringLiteral("Base"),
-           QStringLiteral("Base of the merge request. Branching point is where this branch left the default branch. Type to filter."));
-    addRef(bar, &m_head, QStringLiteral("Branch"), QStringLiteral("Branch compared with the base. Type to filter the list."));
-    watchRefFilter(m_base);
-    watchRefFilter(m_head);
+    auto *button = new QPushButton(action->text(), bar);
+    button->setToolTip(action->toolTip().isEmpty() ? action->text() : action->toolTip());
+    QObject::connect(button, &QPushButton::clicked, action, &QAction::trigger);
+    bar->addWidget(button);
 }
 
 void MainWindow::fillBar(QToolBar *bar, QAction *openAct, QAction *refreshAct, QAction *commentAct, QAction *copyAct)
 {
-    bar->addAction(openAct);
+    addBarButton(bar, openAct);
     addModeBox(bar);
     addRefBoxes(bar);
-    bar->addAction(refreshAct);
-    bar->addAction(commentAct);
+    addBarButton(bar, refreshAct);
+    addBarButton(bar, commentAct);
     bar->addSeparator();
     bar->addWidget(m_repoLabel);
     addAction(commentAct);
