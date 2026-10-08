@@ -122,14 +122,15 @@ bool dropStale(QList<ReviewNote> *notes, int index, bool inDiff, const QString &
     return adoptLine(&note, text);
 }
 
-bool syncNote(QList<ReviewNote> *notes, int index, const DiffDoc &doc, const QString &root, bool dropChanged)
+bool syncNote(QList<ReviewNote> *notes, int index, const DiffDoc &doc, const QString &root, LineCache *cache,
+              bool dropChanged)
 {
     ReviewNote &note = (*notes)[index];
     const LineHit hit = findLine(doc, note.path, note.oldSide, note.line);
     const QString text = hit.file >= 0 ? lineText(doc, hit, note.oldSide) : QString();
     if (hit.file >= 0 && (note.snippet.isEmpty() || text == note.snippet))
         return adoptLine(&note, text);
-    const int moved = shiftedLine(doc, root, note);
+    const int moved = shiftedLine(doc, root, note, cache);
     if (moved > 0)
         return followLine(&note, moved, doc);
     return dropStale(notes, index, hit.file >= 0, text, dropChanged);
@@ -139,9 +140,10 @@ bool syncNote(QList<ReviewNote> *notes, int index, const DiffDoc &doc, const QSt
 
 void ReviewStore::sync(const DiffDoc &doc, bool dropChanged)
 {
+    LineCache cache;
     bool changed = false;
     for (int index = m_notes.size() - 1; index >= 0; --index)
-        changed = syncNote(&m_notes, index, doc, m_root, dropChanged) || changed;
+        changed = syncNote(&m_notes, index, doc, m_root, &cache, dropChanged) || changed;
     if (!changed)
         return;
     write();

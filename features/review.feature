@@ -31,6 +31,13 @@ Feature: Review comments
     When that line stays in the file at a new line
     Then the review stays on the new line
 
+  Scenario: The same text on another line does not take a review
+    Given auto cleanup is on
+    And a review comments on a diff line
+    When that line's text changes
+    And the same text remains on another line
+    Then the review is removed
+
   Scenario: Auto cleanup can stay off
     Given auto cleanup is off
     And a review comments on a diff line

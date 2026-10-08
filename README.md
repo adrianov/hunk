@@ -5,7 +5,7 @@ Local merge-request diff for macOS and Linux. Qt 6, side-by-side, with review co
 ## Features
 
 - Open a git repository and read the branch like a pull request
-- File list grouped by folder, two panes, wrapped lines, syntax colors (keywords, methods, variables, strings, comments), word highlights, sticky file header
+- File list grouped by folder, two panes, wrapped lines, syntax colors (keywords, methods, variables, strings, comments), word highlights, sticky file header. A file you already reviewed is highlighted when its diff changes again
 - Long unchanged stretches collapse. Click the bar to show them, or the side arrows to show 20 lines
 - New files use one pane
 - Compare **merge request** (three-dot from the base, including uncommitted changes on the current branch; base defaults to the branching point), **uncommitted** (`git diff HEAD`), or **staged**
@@ -73,7 +73,7 @@ File references are `path:line` on the new side. `(old)` means the line number b
 The nil check is missing when the user is blank.
 ```
 
-Comment with ⌘↩ / Ctrl+Enter on the selected line, or click the line number. One comment per line. Each review line has its own delete control. Auto cleanup, on by default, removes a review when that line's text changes or the line leaves the file. A line that only moves keeps its review, and the comment follows the new line.
+Comment with ⌘↩ / Ctrl+Enter on the selected line, or click the line number. One comment per line. Each review line has its own delete control. Auto cleanup, on by default, removes a review when that line's text changes or the line leaves the file. A line that only moves keeps its review, and the comment follows the new line when that text still identifies it. The same text on another line does not take the review.
 
 ## Layout
 

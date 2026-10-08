@@ -254,6 +254,14 @@ void testChangedLineDrops()
     CHECK(store.notes().isEmpty());
 }
 
+void testDuplicateDrops()
+{
+    ReviewStore store;
+    store.ensure(QStringLiteral("a.rb"), false, 2, QStringLiteral("end"));
+    store.sync(diffOf(QStringLiteral("@@ -1,4 +1,4 @@\n def\n-end\n+end!\n def\n end\n")), true);
+    CHECK(store.notes().isEmpty());
+}
+
 QString shiftedRepo(const QString &root)
 {
     QSettings::setPath(QSettings::NativeFormat, QSettings::UserScope, root);
@@ -291,6 +299,7 @@ int main(int argc, char **argv)
     testFoldPlain();
     testShiftedLine();
     testChangedLineDrops();
+    testDuplicateDrops();
     testShiftedOutsideDiff();
     Q_UNUSED(app);
     return g_fails == 0 ? 0 : 1;
