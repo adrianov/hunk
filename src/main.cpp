@@ -5,10 +5,8 @@
 #include "Smoke.hpp"
 
 #include <QApplication>
+#ifndef Q_OS_MACOS
 #include <QIcon>
-
-#ifdef Q_OS_MACOS
-#include "MacIcon.hpp"
 #endif
 
 namespace {
@@ -19,9 +17,9 @@ void setupApp()
     QCoreApplication::setApplicationName(QStringLiteral("Hunk"));
     QCoreApplication::setApplicationVersion(QStringLiteral(HUNK_VERSION));
     QGuiApplication::setDesktopFileName(QStringLiteral("hunk"));
+    // macOS masks the bundle icon into the system squircle. A bitmap set here stays square.
+#ifndef Q_OS_MACOS
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/icons/hunk.png")));
-#ifdef Q_OS_MACOS
-    applyMacIcon();
 #endif
 }
 

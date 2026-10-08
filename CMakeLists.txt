@@ -93,9 +93,8 @@ qt_add_resources(hunk hunk_icons PREFIX "/icons" FILES icons/hunk.png)
 
 if(APPLE)
   configure_file(icons/Info.plist.in ${CMAKE_BINARY_DIR}/Info.plist @ONLY)
-  target_sources(hunk PRIVATE src/MacIcon.mm icons/hunk.icns)
+  target_sources(hunk PRIVATE icons/hunk.icns)
   set_source_files_properties(icons/hunk.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-  target_link_libraries(hunk PRIVATE "-framework AppKit")
   set_target_properties(hunk PROPERTIES
     MACOSX_BUNDLE TRUE
     MACOSX_BUNDLE_INFO_PLIST ${CMAKE_BINARY_DIR}/Info.plist

@@ -11,6 +11,7 @@ Feature: Diff view
     And toolbar labels use the normal text color
     And the Merge request menu uses the same arrow as Base and Branch
     And the dock or taskbar shows the Hunk icon
+    And on macOS the dock icon has the system rounded shape
 
   Scenario: Opening another repository watches that one
     Given a repository is on screen
