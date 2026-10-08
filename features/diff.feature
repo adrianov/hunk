@@ -6,9 +6,11 @@ Feature: Diff view
   Scenario: Run hunk in a repository
     Given I run hunk in a git repository
     Then the window shows that repository's merge request
+    And the window title shows the full path to that repository
     And the toolbar shows the path to that repository
     And toolbar labels use the normal text color
     And the Merge request menu uses the same arrow as Base and Branch
+    And the dock or taskbar shows the Hunk icon
 
   Scenario: Opening another repository watches that one
     Given a repository is on screen
@@ -27,12 +29,13 @@ Feature: Diff view
 
   Scenario: The file list shows added and removed lines
     Given a diff is on screen
-    Then under the file list the total added lines are green and the total removed lines are red
+    Then each file's added count is green and its removed count is red
+    And under the file list the total added lines are green and the total removed lines are red
     And that total stays visible while the file list scrolls
 
   Scenario: The main branch differs from its origin
     Given local main or master is ahead of or behind its origin
-    Then the status bar says how far ahead or behind it is
+    Then the status bar says how many commits ahead or behind it is
 
   Scenario: A merge request that conflicts with its target
     Given a merge request that cannot merge into its target
@@ -81,12 +84,29 @@ Feature: Diff view
     When the selected base moves to another commit
     Then the diff updates
 
-  Scenario: Unchanged lines collapse between changes
-    Given a diff with a long stretch of unchanged lines
-    Then those lines are hidden
-    And a bar shows how many unchanged lines are hidden
+  Scenario: A short changed block stays open
+    Given a diff whose unchanged lines in the block are 500 or fewer
+    Then those unchanged lines stay visible
+    And unchanged lines outside that block are hidden
+
+  Scenario: A hunk collapses when the rest of the file is missing
+    Given a diff that only includes the lines git printed
+    And an unchanged stretch beside a change is long
+    Then that stretch collapses to a few lines beside the change
+
+  Scenario: A long changed block collapses
+    Given a diff whose unchanged lines in the block are more than 500
+    Then those unchanged lines are hidden
+    And a few lines stay visible beside the change
     When I click that bar
     Then the unchanged lines are shown
+
+  Scenario: Lines above the hunk stay folded
+    Given a changed file with many unchanged lines before the change
+    Then the change's block stays visible
+    And a bar counts the unchanged lines before that block
+    When I show 20 lines from the side of that bar
+    Then a bar remains for the lines still hidden
 
   Scenario: A rewritten line stays one block
     Given a changed line where only spaces stay the same
@@ -119,12 +139,33 @@ Feature: Diff view
     Then "zero?" is colored as a method
     And "amount" and "ask_rate" are colored as variables
 
+  Scenario: Markdown on an added line
+    Given a diff of "README.md"
+    When a line adds "# Hello"
+    Then "#" is colored as a keyword
+    When a line adds "see `code`"
+    Then "`code`" is colored as a string
+    When a line adds "[Hunk](https://example.com)"
+    Then "Hunk" is colored as a method
+    And "https://example.com" is colored as a string
+    When a line adds "see **bold**, *italics*, and ~~gone~~"
+    Then "bold" is bold
+    And "italics" is italic
+    And "gone" is struck through
+    And the "**", "*", and "~~" marks are colored as keywords
+
+  Scenario: About Hunk
+    Given hunk is open
+    When I choose About
+    Then a dialog shows the Hunk version and the copyright
+
   Scenario: Theme follows the system
     Given hunk is open
     Then the colors follow the system theme
     And the View menu can switch to dark or light
     And buttons, fields, and menus have rounded corners
     And the toolbar buttons have a filled background
+    And Open, Refresh, and Copy reviews each show a matching icon
     And tooltips use the window background and the normal text color
 
   Scenario: Text sizes follow the theme

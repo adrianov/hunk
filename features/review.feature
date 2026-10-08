@@ -23,7 +23,7 @@ Feature: Review comments
 
   Scenario: Each review line can be deleted
     Given the review list has a comment
-    Then that line has its own delete control
+    Then that line has its own delete control, inset from the row edge
     And hovering that control highlights it
     And the line text is drawn once in the list color
     And that text stays readable when the line is selected

@@ -6,18 +6,18 @@ Copyright © 2026 Peter Adrianov. Licensed under the [MIT License](LICENSE).
 
 ## Features
 
-- Open a git repository and read the branch like a pull request. The toolbar shows the repository path in the normal text color
-- File list grouped by folder, two panes, wrapped lines, syntax colors (keywords, methods, variables, strings, comments), word highlights, sticky file header. A file you already reviewed is highlighted when its diff changes again. Lines from that review stay a lighter green and red; lines changed since then are stronger
-- Long unchanged stretches collapse. Click the bar to show them, or the side arrows to show 20 lines
+- Open a git repository and read the branch like a pull request. The toolbar shows the repository path in the normal text color. The dock on macOS and the taskbar on Linux show the Hunk icon
+- File list grouped by folder, two panes, wrapped lines, syntax colors (keywords, methods, variables, strings, comments, and markdown headings, bold, italic, strike, code, and links), word highlights, sticky file header. A file you already reviewed is highlighted when its diff changes again. Lines from that review stay a lighter green and red; lines changed since then are stronger
+- A changed block stays open when it has 500 unchanged lines or fewer, matching the diff's own context. Longer blocks collapse to a few lines beside each change, and lines outside the block stay folded. Click the bar to show them, or the side arrows to show 20 lines and leave the rest folded
 - New files use one pane
 - Compare **merge request** (three-dot from the base, including uncommitted changes on the current branch; base defaults to the branching point), **uncommitted** (`git diff HEAD`), or **staged**. The status bar names the target when the merge request would conflict with it
 - Switching back reloads the diff. Saves of tracked files from other programs, and a base that moves, show up while Hunk stays open. Ignored files are left alone. An unchanged diff stays put, including the scroll position
-- Under the file list, the total added and removed lines stay visible. The status bar says when local `main` or `master` is ahead of or behind its origin
+- Under the file list, each file's added and removed counts are green and red, and the total stays visible. The status bar says how many commits local `main` or `master` is ahead of or behind its origin
 - Click a line number to comment. Comments stay in app settings, not in the repo
 - Select text in either pane and copy it from the pane menu or with Ctrl+C
 - **Copy reviews** writes markdown with `` `path:line` `` and the line text
 - Diff flags match a review diff: `-w -W --no-prefix --diff-algorithm=histogram`
-- **View → Theme** follows the system, or switches to dark or light. Controls use Qlementine, so they match on macOS and Linux. Toolbar buttons use that filled button style. Tooltips use the window background and the normal text color. Diff code uses the theme monospace size; the rest of the window uses the theme text size
+- **About** (the application menu on macOS, **Help** on Linux) shows the version and copyright. **View → Theme** follows the system, or switches to dark or light. Controls use Qlementine, so they match on macOS and Linux. Toolbar buttons use that filled button style. Open, Refresh, and Copy reviews each show a matching icon. Tooltips use the window background and the normal text color. Diff code uses the theme monospace size; the rest of the window uses the theme text size
 
 Untracked files are not part of `git diff`.
 
