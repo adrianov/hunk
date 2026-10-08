@@ -5,6 +5,7 @@
 #include "GitRepo.hpp"
 #include "ReviewStore.hpp"
 
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDir>
 #include <QSettings>
@@ -92,7 +93,7 @@ void MainWindow::showLoadedDiff(const GitResult &result)
     const int scroll = m_quiet ? m_diff->scrollTop() : m_scrollKeep;
     m_title = result.title;
     m_doc = parseDiff(result.diffText);
-    m_store->sync(m_doc);
+    m_store->sync(m_doc, m_cleanup->isChecked());
     rebuildTree();
     if (m_doc.files.isEmpty())
         m_diff->setMessage(QStringLiteral("No changes."));

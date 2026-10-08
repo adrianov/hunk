@@ -100,7 +100,6 @@ void MainWindow::fillBar(QToolBar *bar, QAction *openAct, QAction *refreshAct, Q
     addRefBoxes(bar);
     bar->addAction(refreshAct);
     bar->addAction(commentAct);
-    bar->addAction(copyAct);
     bar->addSeparator();
     bar->addWidget(m_repoLabel);
     addAction(commentAct);

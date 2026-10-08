@@ -68,23 +68,52 @@ void ReviewStore::removeAt(int index)
     emit structureChanged();
 }
 
-void ReviewStore::sync(const DiffDoc &doc)
+namespace {
+
+QString lineText(const DiffDoc &doc, const LineHit &hit, bool oldSide)
+{
+    const DiffRow &row = doc.files.at(hit.file).rows.at(hit.row);
+    return oldSide ? row.leftText : row.rightText;
+}
+
+bool markMissing(ReviewNote *note)
+{
+    if (!note->inDiff)
+        return false;
+    note->inDiff = false;
+    return true;
+}
+
+bool adoptLine(ReviewNote *note, const QString &text)
+{
+    if (note->inDiff && note->snippet == text)
+        return false;
+    note->inDiff = true;
+    note->snippet = text;
+    return true;
+}
+
+bool syncNote(QList<ReviewNote> *notes, int index, const DiffDoc &doc, bool dropChanged)
+{
+    ReviewNote &note = (*notes)[index];
+    const LineHit hit = findLine(doc, note.path, note.oldSide, note.line);
+    if (hit.file < 0)
+        return markMissing(&note);
+    const QString text = lineText(doc, hit, note.oldSide);
+    if (dropChanged && !note.snippet.isEmpty() && text != note.snippet) {
+        notes->removeAt(index);
+        return true;
+    }
+    return adoptLine(&note, text);
+}
+
+} // namespace
+
+void ReviewStore::sync(const DiffDoc &doc, bool dropChanged)
 {
     bool changed = false;
-    for (ReviewNote &note : m_notes) {
-        const LineHit hit = findLine(doc, note.path, note.oldSide, note.line);
-        const bool inDiff = hit.file >= 0;
-        QString snippet = note.snippet;
-        if (inDiff) {
-            const DiffRow &row = doc.files.at(hit.file).rows.at(hit.row);
-            snippet = note.oldSide ? row.leftText : row.rightText;
-        }
-        if (inDiff != note.inDiff || snippet != note.snippet) {
-            note.inDiff = inDiff;
-            note.snippet = snippet;
-            changed = true;
-        }
-    }
+    for (int index = m_notes.size() - 1; index >= 0; --index)
+        changed = syncNote(&m_notes, index, doc, dropChanged) || changed;
     if (!changed)
         return;
     write();

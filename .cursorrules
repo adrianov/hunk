@@ -10,7 +10,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/MainActions.cpp` — menus and toolbar
 - `src/MainChrome.cpp` — file pane and review dock
 - `src/MainTree.cpp` — folder tree
-- `src/MainNotes.cpp` — review list
+- `src/MainNotes.cpp` / `MainNoteList.cpp` — review list and per-line delete
 - `src/MainReview.cpp` — comment and copy
 - `src/MainLoad.cpp` — git result applied to the window
 - `src/MainWatch.cpp` — quiet reload on focus and when watched paths change

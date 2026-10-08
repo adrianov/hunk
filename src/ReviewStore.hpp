@@ -17,7 +17,7 @@ public:
     int ensure(const QString &path, bool oldSide, int line, const QString &snippet);
     void setBody(int index, const QString &body);
     void removeAt(int index);
-    void sync(const DiffDoc &doc);
+    void sync(const DiffDoc &doc, bool dropChanged);
 
 signals:
     void structureChanged();

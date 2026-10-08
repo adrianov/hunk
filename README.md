@@ -59,7 +59,7 @@ Drop a repository folder on the window to open it.
 
 ## Review copy
 
-**Copy reviews**, next to Delete in the review list (⇧⌘C on macOS, Ctrl+Shift+C on Linux), puts this on the clipboard:
+**Copy reviews** under the review list (⇧⌘C on macOS, Ctrl+Shift+C on Linux) puts this on the clipboard:
 
 ```markdown
 # Review: feature vs origin/main
@@ -72,7 +72,7 @@ File references are `path:line` on the new side. `(old)` means the line number b
 The nil check is missing when the user is blank.
 ```
 
-Comment with ⌘↩ / Ctrl+Enter on the selected line, or click the line number. One comment per line. Delete removes it.
+Comment with ⌘↩ / Ctrl+Enter on the selected line, or click the line number. One comment per line. Each review line has its own delete control. Auto cleanup, on by default, removes a review when that line's text changes.
 
 ## Layout
 

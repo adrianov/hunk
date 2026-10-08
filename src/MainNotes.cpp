@@ -8,7 +8,6 @@
 #include <QDockWidget>
 #include <QListWidget>
 #include <QPlainTextEdit>
-#include <QPushButton>
 #include <QStatusBar>
 
 namespace {
@@ -21,14 +20,6 @@ QString notePreview(const QString &body)
     if (preview.size() <= 72)
         return QStringLiteral("  —  ") + preview;
     return QStringLiteral("  —  ") + preview.left(69) + QStringLiteral("…");
-}
-
-void addNoteItem(QListWidget *list, const ReviewNote &note)
-{
-    auto *item = new QListWidgetItem(noteLabel(note));
-    item->setForeground(note.inDiff ? QColor(QStringLiteral("#d4d4d4")) : QColor(QStringLiteral("#858585")));
-    item->setToolTip(note.body);
-    list->addItem(item);
 }
 
 int filledNotes(const QList<ReviewNote> &notes)
@@ -57,7 +48,6 @@ void MainWindow::showNote(int row)
 {
     const bool on = row >= 0 && row < m_store->notes().size();
     m_editor->setEnabled(on);
-    m_delete->setEnabled(on);
     if (!on || m_noteLock)
         return;
     loadNote(row);
@@ -81,25 +71,6 @@ void MainWindow::saveNote()
     if (m_noteLock)
         return;
     m_store->setBody(m_notes->currentRow(), m_editor->toPlainText());
-}
-
-void MainWindow::refreshNotes()
-{
-    m_noteLock = true;
-    const int row = m_notes->currentRow();
-    m_notes->clear();
-    for (const ReviewNote &note : m_store->notes())
-        addNoteItem(m_notes, note);
-    if (row >= 0 && row < m_notes->count())
-        m_notes->setCurrentRow(row);
-    else {
-        m_editor->clear();
-        m_editor->setEnabled(false);
-        m_delete->setEnabled(false);
-    }
-    m_noteLock = false;
-    const int comments = m_store->notes().size();
-    m_dock->setWindowTitle(comments == 0 ? QStringLiteral("Reviews") : QStringLiteral("Reviews (%1)").arg(comments));
 }
 
 void MainWindow::updateStatus()

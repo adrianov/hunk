@@ -10,6 +10,7 @@
 class DiffCanvas;
 class GitRepo;
 class QAction;
+class QCheckBox;
 class QCloseEvent;
 class QComboBox;
 class QDockWidget;
@@ -99,6 +100,8 @@ private:
     void showLoadedTitle();
     void rebuildTree();
     void refreshNotes();
+    void addListedNote(int index);
+    void restoreNoteRow(int row);
     void commentSelection();
     void commentAt(int file, int row, bool oldSide);
     bool commentLine(int file, int row, bool *oldSide, int *line, QString *snippet) const;
@@ -119,7 +122,7 @@ private:
     QListWidget *m_notes = nullptr;
     QPlainTextEdit *m_editor = nullptr;
     QPushButton *m_copy = nullptr;
-    QPushButton *m_delete = nullptr;
+    QCheckBox *m_cleanup = nullptr;
     QDockWidget *m_dock = nullptr;
     DiffDoc m_doc;
     QString m_root;
@@ -132,6 +135,7 @@ private:
     QTimer m_watch;
     QFileSystemWatcher m_disk;
     QString m_gitDir;
+    QString m_watchRoot;
     QSet<QString> m_ignored;
     bool m_diskGap = false;
     int m_gapLeft = 0;

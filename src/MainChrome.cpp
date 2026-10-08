@@ -3,6 +3,7 @@
 #include "DiffCanvas.hpp"
 #include "ReviewStore.hpp"
 
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDockWidget>
 #include <QHBoxLayout>
@@ -11,6 +12,7 @@
 #include <QMenuBar>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QSettings>
 #include <QSplitter>
 #include <QTreeWidget>
 #include <QVBoxLayout>
@@ -54,17 +56,18 @@ QPlainTextEdit *makeEditor(QWidget *parent)
     return editor;
 }
 
-QPushButton *makeDelete(QWidget *parent)
+QCheckBox *makeCleanup(QWidget *parent, bool smoke)
 {
-    auto *button = new QPushButton(QStringLiteral("Delete"), parent);
-    button->setEnabled(false);
-    return button;
+    auto *box = new QCheckBox(QStringLiteral("Auto cleanup reviews for changed lines"), parent);
+    box->setChecked(smoke || QSettings().value(QStringLiteral("autoCleanup"), true).toBool());
+    return box;
 }
 
-QHBoxLayout *reviewButtons(QPushButton *button)
+QHBoxLayout *reviewButtons(QPushButton *copy, QCheckBox *cleanup)
 {
     auto *buttons = new QHBoxLayout();
-    buttons->addWidget(button);
+    buttons->addWidget(copy);
+    buttons->addWidget(cleanup);
     buttons->addStretch();
     return buttons;
 }
@@ -75,13 +78,14 @@ QWidget *MainWindow::reviewPanel()
 {
     m_notes = new QListWidget(this);
     m_editor = makeEditor(this);
-    m_delete = makeDelete(this);
+    m_copy = new QPushButton(QStringLiteral("Copy reviews"), this);
+    m_cleanup = makeCleanup(this, m_smoke);
     auto *panel = new QWidget(this);
     auto *layout = new QVBoxLayout(panel);
     layout->setContentsMargins(8, 8, 8, 8);
     layout->addWidget(m_notes, 1);
     layout->addWidget(m_editor, 1);
-    layout->addLayout(reviewButtons(m_delete));
+    layout->addLayout(reviewButtons(m_copy, m_cleanup));
     return panel;
 }
 
@@ -117,7 +121,12 @@ void MainWindow::wireNotes()
 {
     connect(m_notes, &QListWidget::currentRowChanged, this, &MainWindow::showNote);
     connect(m_editor, &QPlainTextEdit::textChanged, this, &MainWindow::saveNote);
-    connect(m_delete, &QPushButton::clicked, this, [this]() { m_store->removeAt(m_notes->currentRow()); });
+    connect(m_copy, &QPushButton::clicked, this, &MainWindow::copyReviews);
+    connect(m_cleanup, &QCheckBox::toggled, this, [this](bool on) {
+        if (!m_smoke)
+            QSettings().setValue(QStringLiteral("autoCleanup"), on);
+        m_store->sync(m_doc, on);
+    });
 }
 
 void MainWindow::wireMode()
