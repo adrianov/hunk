@@ -11,6 +11,11 @@ Feature: Review comments
     And that stays true when the comment's line moves
     And a different comment with the same text is left alone
 
+  Scenario: The main toolbar has no Comment button
+    Given hunk is open
+    Then the main toolbar does not show Comment
+    And the Review menu still has Comment
+
   Scenario: Copy reviews explains old lines only when one is commented
     Given every review comment is on the new side
     When I copy reviews

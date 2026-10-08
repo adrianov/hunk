@@ -114,7 +114,6 @@ void MainWindow::fillBar(QToolBar *bar, QAction *openAct, QAction *refreshAct, Q
     addModeBox(bar);
     addRefBoxes(bar);
     addBarButton(bar, refreshAct);
-    addBarButton(bar, commentAct);
     bar->addSeparator();
     bar->addWidget(m_repoLabel);
     addAction(commentAct);
