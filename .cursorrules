@@ -11,7 +11,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/MainChrome.cpp` — file pane and review dock
 - `src/MainTree.cpp` — folder tree
 - `src/MainSeen.cpp` / `MainSeen.hpp` — files changed since review
-- `src/MainNotes.cpp` / `MainNoteList.cpp` — review list and per-line delete
+- `src/MainNotes.cpp` / `MainNoteList.cpp` / `MainNoteKeep.cpp` — review list, per-line delete, and which comment stays selected
 - `src/MainReview.cpp` — comment and copy
 - `src/MainLoad.cpp` — git result applied to the window
 - `src/MainPath.cpp` — project path on the toolbar

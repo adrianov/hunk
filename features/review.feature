@@ -9,6 +9,7 @@ Feature: Review comments
     Then the comment box still has focus
     And the text I typed is still there
     And that stays true when the comment's line moves
+    And a different comment with the same text is left alone
 
   Scenario: Each review line can be deleted
     Given the review list has a comment

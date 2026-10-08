@@ -121,6 +121,7 @@ private:
     void markSeenFile(int file);
     void fillNotes();
     void refreshNotes();
+    int keptNote(int slot, int oldCount, const QString &path, bool oldSide, int line, const QString &body, bool editing);
     void placeNoteRows();
     void addListedNote(int index);
     void restoreNoteRow(int row, bool editing);

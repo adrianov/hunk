@@ -107,32 +107,6 @@ NoteId selectedId(const QListWidget *list)
             current->data(Qt::UserRole + 2).toInt()};
 }
 
-int rowFor(const QListWidget *list, const NoteId &id)
-{
-    if (id.line <= 0)
-        return -1;
-    for (int index = 0; index < list->count(); ++index) {
-        const QListWidgetItem *item = list->item(index);
-        if (item->data(Qt::UserRole).toString() == id.path && item->data(Qt::UserRole + 1).toBool() == id.oldSide
-            && item->data(Qt::UserRole + 2).toInt() == id.line)
-            return index;
-    }
-    return -1;
-}
-
-int keptRow(const QListWidget *list, const NoteId &id, const QList<ReviewNote> &notes, const QString &body, bool editing)
-{
-    const int exact = rowFor(list, id);
-    if (exact >= 0 || !editing)
-        return exact;
-    for (int index = 0; index < notes.size(); ++index) {
-        const ReviewNote &note = notes.at(index);
-        if (note.path == id.path && note.oldSide == id.oldSide && note.body == body)
-            return index;
-    }
-    return -1;
-}
-
 void dropId(ReviewStore *store, const NoteId &id)
 {
     const QList<ReviewNote> &notes = store->notes();
@@ -190,10 +164,12 @@ void MainWindow::refreshNotes()
 {
     const bool editing = m_editor->hasFocus();
     const QString typed = m_editor->toPlainText();
-    m_noteLock = true;
+    const int slot = m_notes->currentRow();
+    const int oldCount = m_notes->count();
     const NoteId picked = selectedId(m_notes);
+    m_noteLock = true;
     fillNotes();
-    restoreNoteRow(keptRow(m_notes, picked, m_store->notes(), typed, editing), editing);
+    restoreNoteRow(keptNote(slot, oldCount, picked.path, picked.oldSide, picked.line, typed, editing), editing);
     placeNoteRows();
     m_noteLock = false;
 }
