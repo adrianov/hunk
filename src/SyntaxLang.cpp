@@ -91,6 +91,7 @@ const Ext kExts[] = {
     {"html", Lang::Html}, {"htm", Lang::Html}, {"xml", Lang::Html}, {"svg", Lang::Html}, {"vue", Lang::Html},
     {"json", Lang::Json}, {"yml", Lang::Yaml}, {"yaml", Lang::Yaml},
     {"sql", Lang::Sql}, {"php", Lang::Php}, {"lua", Lang::Lua}, {"ex", Lang::Elixir}, {"exs", Lang::Elixir},
+    {"md", Lang::Markdown}, {"markdown", Lang::Markdown},
 };
 
 QString baseName(const QString &path)
@@ -152,6 +153,8 @@ Rule systemRule(Lang lang)
         return {nullptr, "<!--", "-->", nullptr, Html};
     case Lang::Sql:
         return {"--", "/*", "*/", kSql, Fold};
+    case Lang::Markdown:
+        return {nullptr, nullptr, nullptr, nullptr, Md};
     default:
         return {};
     }

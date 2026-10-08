@@ -5,6 +5,7 @@
 
 #include "DiffColors.hpp"
 
+#include <QFont>
 #include <QFontMetrics>
 #include <QPainter>
 
@@ -145,10 +146,31 @@ QList<Piece> sidePieces(const QString &text, const QList<WordSpan> &words, const
     return pieceList(text, words, syn, wrapLine(text, font, width));
 }
 
+namespace {
+
+QFont pieceFont(const QFont &base, SynKind kind)
+{
+    QFont font = base;
+    font.setBold(kind == SynKind::Strong);
+    font.setItalic(kind == SynKind::Emph);
+    font.setStrikeOut(kind == SynKind::Strike);
+    return font;
+}
+
+QColor pieceColor(SynKind kind, const QColor &plain)
+{
+    if (kind == SynKind::Plain || kind == SynKind::Strong || kind == SynKind::Emph || kind == SynKind::Strike)
+        return plain;
+    return synColor(kind);
+}
+
+} // namespace
+
 void paintCode(QPainter &painter, int x, int top, int lineH, const QString &text, const QList<Piece> &pieces,
                const QColor &plain, const QColor &wordBg)
 {
-    const QFontMetrics metrics(painter.font());
+    const QFont base = painter.font();
+    const QFontMetrics metrics(base);
     int baseline = top;
     int drawX = x;
     bool lined = false;
@@ -162,8 +184,8 @@ void paintCode(QPainter &painter, int x, int top, int lineH, const QString &text
         }
         if (piece.end <= piece.start)
             continue;
-        const QColor color = piece.kind == SynKind::Plain ? plain : synColor(piece.kind);
-        paintPiece(painter, &drawX, baseline, top, lineH, text.mid(piece.start, piece.end - piece.start), color,
-                   piece.changed, wordBg);
+        painter.setFont(pieceFont(base, piece.kind));
+        paintPiece(painter, &drawX, baseline, top, lineH, text.mid(piece.start, piece.end - piece.start),
+                   pieceColor(piece.kind, plain), piece.changed, wordBg);
     }
 }

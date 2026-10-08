@@ -54,7 +54,7 @@ SynKind identKind(const QString &text, int start, int end, const Rule &rule)
     const QStringView word = QStringView(text).sliced(start, end - start);
     if (listed(rule.words, word, (rule.flags & Fold) != 0))
         return SynKind::Keyword;
-    if ((rule.flags & Html) != 0)
+    if ((rule.flags & (Html | Md)) != 0)
         return SynKind::Plain;
     if (leadCall(text, start))
         return SynKind::Method;

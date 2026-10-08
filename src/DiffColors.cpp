@@ -44,6 +44,9 @@ QColor synColor(SynKind kind)
         return kSynMethod;
     case SynKind::Variable:
         return kSynVariable;
+    case SynKind::Strong:
+    case SynKind::Emph:
+    case SynKind::Strike:
     case SynKind::Plain:
         return kText;
     }

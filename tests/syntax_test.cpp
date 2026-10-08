@@ -137,6 +137,9 @@ void testRename()
 
 } // namespace
 
+int mdTests();
+int emphTests();
+
 int main(int argc, char **argv)
 {
     QCoreApplication app(argc, argv);
@@ -150,6 +153,8 @@ int main(int argc, char **argv)
     testBlock();
     testCppName();
     testPlain();
+    g_fails += mdTests();
+    g_fails += emphTests();
     testApos();
     testRename();
     Q_UNUSED(app);

@@ -50,15 +50,24 @@ int takeToken(const QString &text, int index, const Rule &rule, Scan *scan, QLis
     return eatWord(text, index, rule, out);
 }
 
+int nextMark(const QString &text, int index, const Rule &rule, Scan *scan, QList<SynSpan> *out)
+{
+    if (const int next = eatMarkdown(text, index, rule, scan, out); next != index)
+        return next;
+    return takeToken(text, index, rule, scan, out);
+}
+
 void scanLine(const QString &text, const Rule &rule, Scan *scan, QList<SynSpan> *out)
 {
     int index = 0;
     if (scan->block)
         index = resumeBlock(text, rule, scan, out);
+    else if (scan->triple && (scan->quote == '`' || scan->quote == '~'))
+        index = resumeFence(text, scan, out);
     else if (scan->triple)
         index = resumeString(text, scan, out);
     while (index < text.size() && !scan->block && !scan->triple) {
-        const int next = takeToken(text, index, rule, scan, out);
+        const int next = nextMark(text, index, rule, scan, out);
         index = next == index ? index + 1 : next;
     }
 }
