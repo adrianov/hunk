@@ -11,6 +11,7 @@
 #include <QListWidget>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QVariant>
 
 namespace {
 
@@ -36,6 +37,8 @@ QLabel *noteText(const ReviewNote &note, QWidget *parent)
 {
     auto *label = new QLabel(noteLabel(note), parent);
     label->setAttribute(Qt::WA_TransparentForMouseEvents);
+    label->setMinimumWidth(0);
+    label->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     if (!note.inDiff) {
         QPalette palette = label->palette();
         palette.setColor(QPalette::WindowText, kMuted);
@@ -64,9 +67,11 @@ ListedRow noteRow(QListWidget *list, QListWidgetItem *item, const ReviewNote &no
     auto *layout = new QHBoxLayout(row);
     layout->setContentsMargins(2, 0, 2, 0);
     layout->setSpacing(6);
+    auto *text = noteText(note, row);
     auto *drop = noteDelete(row);
-    layout->addWidget(noteText(note, row), 1);
+    layout->addWidget(text, 1);
     layout->addWidget(drop);
+    row->setProperty("noteText", QVariant::fromValue(static_cast<QObject *>(text)));
     row->setToolTip(note.body);
     row->installEventFilter(new PickRow(list, item, row));
     return {row, drop};
@@ -126,6 +131,11 @@ void dropId(ReviewStore *store, const NoteId &id)
 
 } // namespace
 
+QLabel *rowLabel(const QWidget *row)
+{
+    return qobject_cast<QLabel *>(row->property("noteText").value<QObject *>());
+}
+
 void MainWindow::addListedNote(int index)
 {
     const ReviewNote note = m_store->notes().at(index);
@@ -133,7 +143,7 @@ void MainWindow::addListedNote(int index)
     const NoteId id = noteId(note);
     tagId(item, id);
     const ListedRow listed = noteRow(m_notes, item, note);
-    item->setSizeHint(listed.row->sizeHint());
+    item->setSizeHint(QSize(0, listed.row->sizeHint().height()));
     m_notes->addItem(item);
     m_notes->setItemWidget(item, listed.row);
     connect(listed.drop, &QPushButton::clicked, this, [this, id]() { dropId(m_store, id); }, Qt::QueuedConnection);

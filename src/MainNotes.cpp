@@ -20,9 +20,7 @@ QString notePreview(const QString &body)
     const QString preview = body.trimmed().split(QLatin1Char('\n')).value(0);
     if (preview.isEmpty())
         return {};
-    if (preview.size() <= 72)
-        return QStringLiteral("  —  ") + preview;
-    return QStringLiteral("  —  ") + preview.left(69) + QStringLiteral("…");
+    return QStringLiteral("  —  ") + preview;
 }
 
 int filledNotes(const QList<ReviewNote> &notes)
@@ -63,7 +61,7 @@ void placeRow(QListWidget *list, int index, bool inDiff)
         return;
     if (row->geometry() != rect)
         row->setGeometry(rect);
-    if (QLabel *label = row->findChild<QLabel *>())
+    if (QLabel *label = rowLabel(row))
         tintLabel(label, noteInk(list, list->hasFocus() && item == list->currentItem(), inDiff));
 }
 

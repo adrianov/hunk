@@ -86,7 +86,7 @@ void MainWindow::noteBodyEdited(int index)
     if (index < 0 || index >= m_notes->count() || index >= m_store->notes().size())
         return;
     if (QWidget *row = m_notes->itemWidget(m_notes->item(index))) {
-        if (auto *label = row->findChild<QLabel *>())
+        if (QLabel *label = rowLabel(row))
             label->setText(noteLabel(m_store->notes().at(index)));
     }
     updateStatus();
