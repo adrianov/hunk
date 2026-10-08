@@ -1,18 +1,7 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #include "GitDetail.hpp"
-
-QString branchPointLabel(const QString &root)
-{
-    const QString parent = parentRef(root);
-    if (parent.isEmpty())
-        return branchPointName();
-    return branchPointName() + QStringLiteral(" (") + parent + QLatin1Char(')');
-}
-
-bool isBranchPoint(const QString &ref)
-{
-    const QString text = ref.trimmed();
-    return text == branchPointName() || text.startsWith(branchPointName() + QStringLiteral(" ("));
-}
 
 namespace {
 
@@ -35,12 +24,49 @@ bool mergeBase(GitResult &result, const QString &left, const QString &headRef, Q
 
 QString resolveLeft(GitResult &result, const QString &headRef)
 {
-    if (!isBranchPoint(result.baseRef))
+    if (!isBranchPoint(result.root, headRef, result.baseRef))
         return result.baseRef;
     const QString point = branchPoint(result.root, headRef);
     if (point.isEmpty())
         result.error = QStringLiteral("Cannot find branching point");
     return point;
+}
+
+QStringList conflictNames(const QString &out)
+{
+    const QStringList lines = out.split(QLatin1Char('\n'));
+    QStringList files;
+    for (int index = 1; index < lines.size(); ++index) {
+        const QString line = lines.at(index).trimmed();
+        if (line.isEmpty())
+            break;
+        files.push_back(line);
+    }
+    return files;
+}
+
+QString conflictLabel(const QString &target, const QStringList &files)
+{
+    QString text = QStringLiteral("Conflicts with ") + target;
+    if (files.isEmpty())
+        return text;
+    const QStringList shown = files.mid(0, 3);
+    text += QStringLiteral(": ") + shown.join(QStringLiteral(", "));
+    if (files.size() > shown.size())
+        text += QStringLiteral(" +%1").arg(files.size() - shown.size());
+    return text;
+}
+
+void noteConflicts(GitResult &result, const QString &headRef)
+{
+    const QString target = isBranchPoint(result.root, headRef, result.baseRef) ? parentRef(result.root) : result.baseRef;
+    if (target.isEmpty())
+        return;
+    const GitCmd merged = runGit(result.root, {QStringLiteral("merge-tree"), QStringLiteral("--write-tree"),
+                                                QStringLiteral("--name-only"), target, headRef});
+    if (merged.code != 1)
+        return;
+    result.conflict = conflictLabel(target, conflictNames(merged.out));
 }
 
 void setMergeLabels(GitResult &result, const QString &headRef, const QString &leftShort)
@@ -76,6 +102,7 @@ bool fillMerge(GitResult &result, QStringList *args)
     if (!mergeBase(result, left, headRef, &leftCommit, &leftShort))
         return false;
     setMergeLabels(result, headRef, leftShort);
+    noteConflicts(result, headRef);
     addRange(args, result, leftCommit, headRef);
     return true;
 }

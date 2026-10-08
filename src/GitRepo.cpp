@@ -1,3 +1,6 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #include "GitRepo.hpp"
 
 #include "GitDetail.hpp"
@@ -44,7 +47,7 @@ bool readHead(GitResult &result, QString *headShort)
     const GitCmd head = runGit(result.root, {QStringLiteral("rev-parse"), QStringLiteral("--short"), QStringLiteral("HEAD")});
     if (head.code != 0) {
         result.error = head.err.isEmpty() ? QStringLiteral("No commits yet") : head.err;
-        result.bases = baseChoices(result.root);
+        result.bases = baseChoices(result.root, result.branch);
         result.branches = branchRefs(result.root, result.branch);
         return false;
     }
@@ -119,11 +122,14 @@ void fillIgnored(GitResult &result)
 
 void pickRefs(GitResult &result, const QString &baseRef, const QString &headRef)
 {
-    result.bases = baseChoices(result.root);
-    result.branches = branchRefs(result.root, result.branch);
+    result.drift = branchDrift(result.root);
     result.headRef = headRef.trimmed().isEmpty() ? result.branch : headRef.trimmed();
+    result.bases = baseChoices(result.root, result.headRef);
+    result.branches = branchRefs(result.root, result.branch);
     const QString base = baseRef.trimmed();
-    result.baseRef = base.isEmpty() || isBranchPoint(base) ? branchPointLabel(result.root) : base;
+    result.baseRef = base.isEmpty() || isBranchPoint(result.root, result.headRef, base)
+                         ? branchPointLabel(result.root, result.headRef)
+                         : base;
 }
 
 GitResult loadGit(const QString &startPath, DiffMode mode, const QString &baseRef, const QString &headRef,

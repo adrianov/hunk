@@ -1,3 +1,6 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #include "GitDetail.hpp"
 
 #include <QProcess>
@@ -110,9 +113,9 @@ QStringList baseRefs(const QString &root)
     return bases;
 }
 
-QStringList baseChoices(const QString &root)
+QStringList baseChoices(const QString &root, const QString &headRef)
 {
-    QStringList bases{branchPointLabel(root)};
+    QStringList bases{branchPointLabel(root, headRef)};
     for (const QString &name : baseRefs(root)) {
         if (!bases.contains(name))
             bases << name;

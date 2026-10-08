@@ -1,3 +1,6 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
 #pragma once
 
 #include <QObject>
@@ -18,6 +21,8 @@ struct GitResult {
     QString leftLabel;
     QString rightLabel;
     QString title;
+    QString conflict;
+    QString drift;
     QString diffText;
     QString error;
     QString diskStamp;
