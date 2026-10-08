@@ -65,7 +65,7 @@ private:
     QAction *makeCopy();
     QAction *makeQuit();
     void showAbout();
-    void addHelpMenu();
+    void addAbout(QMenu *view);
     void addMenus(QAction *openAct, QAction *refreshAct, QAction *quitAct, QAction *commentAct, QAction *copyAct);
     void addThemeMenu(QMenu *view);
     void addThemeAction(QMenu *menu, QActionGroup *group, ThemePick pick, const QString &label);

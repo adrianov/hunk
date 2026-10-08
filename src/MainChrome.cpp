@@ -130,9 +130,12 @@ void MainWindow::showAbout()
                            .arg(QCoreApplication::applicationVersion()));
 }
 
-void MainWindow::addHelpMenu()
+void MainWindow::addAbout(QMenu *view)
 {
-    auto *about = menuBar()->addMenu(QStringLiteral("Help"))->addAction(QStringLiteral("About Hunk"));
+#ifndef Q_OS_MACOS
+    view = menuBar()->addMenu(QStringLiteral("Help"));
+#endif
+    auto *about = view->addAction(QStringLiteral("About Hunk"));
     about->setMenuRole(QAction::AboutRole);
     connect(about, &QAction::triggered, this, &MainWindow::showAbout);
 }
@@ -146,7 +149,7 @@ void MainWindow::buildReviews()
     view->addAction(m_dock->toggleViewAction());
     view->addSeparator();
     addThemeMenu(view);
-    addHelpMenu();
+    addAbout(view);
 }
 
 void MainWindow::openTreeItem(QTreeWidgetItem *item)

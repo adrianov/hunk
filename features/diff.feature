@@ -156,7 +156,7 @@ Feature: Diff view
 
   Scenario: About Hunk
     Given hunk is open
-    When I choose About
+    When I choose About from the application menu on macOS, or from Help on Linux
     Then a dialog shows the Hunk version and the copyright
 
   Scenario: Theme follows the system
