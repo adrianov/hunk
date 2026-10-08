@@ -130,7 +130,6 @@ private:
     bool commentLine(int file, int row, bool *oldSide, int *line, QString *snippet) const;
     void copyReviews();
     void showStatus(const QString &text);
-    void prepareStat();
     void showLineStat();
     void updateStatus();
     void pushNoteKeys();

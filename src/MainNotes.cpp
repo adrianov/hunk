@@ -149,13 +149,6 @@ void MainWindow::showStatus(const QString &text)
     statusBar()->showMessage(line);
 }
 
-void MainWindow::prepareStat()
-{
-    m_stat = new QLabel(this);
-    m_stat->setTextFormat(Qt::RichText);
-    statusBar()->addPermanentWidget(m_stat);
-}
-
 void MainWindow::showLineStat()
 {
     if (!m_stat)

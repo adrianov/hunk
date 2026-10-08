@@ -11,6 +11,7 @@
 #include <QComboBox>
 #include <QDockWidget>
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QMenuBar>
@@ -22,21 +23,42 @@
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
+namespace {
+
+QTreeWidget *fileTree(QWidget *parent)
+{
+    auto *tree = new QTreeWidget(parent);
+    tree->setHeaderHidden(true);
+    tree->setIndentation(14);
+    installSeenRows(tree);
+    return tree;
+}
+
+QLabel *lineStat(QWidget *parent)
+{
+    auto *stat = new QLabel(parent);
+    stat->setTextFormat(Qt::RichText);
+    stat->setContentsMargins(8, 4, 8, 4);
+    return stat;
+}
+
+} // namespace
+
 QWidget *MainWindow::makeFilePane()
 {
     m_filter = new QLineEdit(this);
     m_filter->setPlaceholderText(QStringLiteral("Filter files"));
     m_filter->setClearButtonEnabled(true);
-    m_tree = new QTreeWidget(this);
-    m_tree->setHeaderHidden(true);
-    m_tree->setIndentation(14);
-    installSeenRows(m_tree);
+    m_tree = fileTree(this);
     auto *left = new QWidget(this);
     auto *layout = new QVBoxLayout(left);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     layout->addWidget(m_filter);
     layout->addWidget(m_tree, 1);
+    m_stat = lineStat(left);
+    layout->addWidget(m_stat);
+    showLineStat();
     return left;
 }
 
