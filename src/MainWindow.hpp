@@ -2,6 +2,7 @@
 
 #include "DiffDoc.hpp"
 
+#include <QFileSystemWatcher>
 #include <QMainWindow>
 #include <QTimer>
 
@@ -77,6 +78,9 @@ private:
     void scheduleWatch();
     void finishWatch();
     void watchApp(Qt::ApplicationState state);
+    void clearDisk();
+    void armDisk();
+    void noteDisk(const QString &path);
     void reloadIfRangeChanged();
     void chooseRepo();
     void onReady(const GitResult &result);
@@ -119,6 +123,8 @@ private:
     QString m_appliedStamp;
     QString m_appliedDiff;
     QTimer m_watch;
+    QFileSystemWatcher m_disk;
+    QString m_gitDir;
     int m_scrollKeep = 0;
     bool m_loading = false;
     bool m_quiet = false;

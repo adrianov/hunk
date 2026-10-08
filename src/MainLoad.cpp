@@ -22,10 +22,13 @@ void MainWindow::reloadIfRangeChanged()
 
 void MainWindow::rememberRoot(const QString &root)
 {
+    const bool moved = m_root != root;
     m_root = root;
     if (!m_smoke)
         QSettings().setValue(QStringLiteral("lastRepo"), m_root);
     m_store->setRepo(m_root);
+    if (moved)
+        armDisk();
 }
 
 namespace {

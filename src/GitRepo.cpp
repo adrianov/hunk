@@ -102,7 +102,7 @@ QString stampKey(DiffMode mode, const QString &baseRef, const QString &headRef, 
 bool reuseDiff(GitResult &result, DiffMode mode, const QString &baseRef, const QString &headRef, const QString &previous,
                bool quiet)
 {
-    result.diskStamp = workStamp(result.root);
+    result.diskStamp = workStamp(result.root, baseRef, headRef);
     result.stamp = stampKey(mode, baseRef.trimmed(), headRef.trimmed(), result.diskStamp);
     if (!quiet)
         return false;

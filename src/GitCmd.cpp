@@ -141,17 +141,6 @@ QString branchPoint(const QString &root, const QString &headRef)
     return base.code == 0 ? base.out.trimmed() : QString();
 }
 
-QString workStamp(const QString &root)
-{
-    const GitCmd head = runGit(root, {QStringLiteral("rev-parse"), QStringLiteral("HEAD")});
-    if (head.code != 0)
-        return {};
-    const GitCmd status = runGit(root, {QStringLiteral("status"), QStringLiteral("--porcelain"), QStringLiteral("-uno")});
-    if (status.code != 0)
-        return {};
-    return head.out.trimmed() + QLatin1Char('\n') + status.out;
-}
-
 GitCmd runGit(const QString &cwd, const QStringList &args)
 {
     QProcess process;

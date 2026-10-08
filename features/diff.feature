@@ -23,6 +23,11 @@ Feature: Diff view
     Then the diff updates
     And the scroll position stays
 
+  Scenario: A moved base updates the diff
+    Given the merge request is on screen
+    When the selected base moves to another commit
+    Then the diff updates
+
   Scenario: Unchanged lines collapse between changes
     Given a diff with a long stretch of unchanged lines
     Then those lines are hidden

@@ -34,6 +34,7 @@ add_executable(hunk
   src/MainReview.cpp
   src/MainLoad.cpp
   src/MainWatch.cpp
+  src/MainDisk.cpp
   src/Theme.cpp
   src/DiffCanvas.cpp
   src/DiffScroll.cpp
@@ -47,6 +48,7 @@ add_executable(hunk
   src/DiffColors.cpp
   src/GitRepo.cpp
   src/GitCmd.cpp
+  src/GitStamp.cpp
   src/GitRange.cpp
   src/ReviewStore.cpp
 )

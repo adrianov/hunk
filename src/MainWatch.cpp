@@ -73,10 +73,8 @@ void MainWindow::scheduleWatch()
 
 void MainWindow::finishWatch()
 {
-    if (!m_watchAgain) {
-        scheduleWatch();
+    if (!m_watchAgain)
         return;
-    }
     m_watchAgain = false;
     reloadQuiet();
 }

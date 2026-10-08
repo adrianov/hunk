@@ -52,8 +52,9 @@ MainWindow::MainWindow(bool smoke, QWidget *parent)
 void MainWindow::wireStore()
 {
     m_watch.setSingleShot(true);
-    m_watch.setInterval(1000);
+    m_watch.setInterval(400);
     connect(&m_watch, &QTimer::timeout, this, &MainWindow::reloadQuiet);
+    connect(&m_disk, &QFileSystemWatcher::directoryChanged, this, &MainWindow::noteDisk);
     connect(qApp, &QGuiApplication::applicationStateChanged, this, &MainWindow::watchApp);
     connect(m_git, &GitRepo::ready, this, &MainWindow::onReady);
     connect(m_store, &ReviewStore::structureChanged, this, &MainWindow::notesChanged);
@@ -134,6 +135,7 @@ void MainWindow::openAt(const QString &path)
     m_appliedDiff.clear();
     m_title.clear();
     m_watch.stop();
+    clearDisk();
     reload(false);
 }
 

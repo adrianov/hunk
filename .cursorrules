@@ -13,7 +13,8 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/MainNotes.cpp` — review list
 - `src/MainReview.cpp` — comment and copy
 - `src/MainLoad.cpp` — git result applied to the window
-- `src/MainWatch.cpp` — quiet reload on focus and while files change
+- `src/MainWatch.cpp` — quiet reload on focus and when watched paths change
+- `src/MainDisk.cpp` — filesystem watch for the worktree and git refs
 - `src/MainDetail.hpp` — theme and note label
 - `src/Theme.cpp` — dark palette
 - `src/DiffCanvas.cpp` / `DiffCanvas.hpp` — diff view state
@@ -35,6 +36,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/DiffLayout.cpp` — per-file line wrap cache and band relayout
 - `src/GitRepo.cpp` / `GitRepo.hpp` — background git load
 - `src/GitCmd.cpp` / `GitDetail.hpp` — git process, base, and branch refs
+- `src/GitStamp.cpp` — head, worktree status, and resolved base commit
 - `src/GitRange.cpp` — merge-request range from base to branch
 - `src/ReviewStore.cpp` / `ReviewStore.hpp` — comments in QSettings
 - `src/ReviewNote.hpp` — one comment
