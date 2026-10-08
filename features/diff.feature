@@ -33,6 +33,11 @@ Feature: Diff view
     When I view that file again
     Then the highlight is gone
 
+  Scenario: An update does not mark every reviewed file
+    Given the file list remembers reviews from an older version
+    When I open hunk after those marks are updated
+    Then those files are not highlighted
+
   Scenario: A save in another program updates the diff
     Given the merge request is on screen
     When another program saves a tracked file
