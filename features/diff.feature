@@ -127,6 +127,12 @@ Feature: Diff view
     Then the rest of the line continues on the next lines in that pane
     And the other pane stays beside it
 
+  Scenario: Drag the border between the panes
+    Given a diff with a left and a right pane
+    When I drag the border between those panes
+    Then the border stays where I leave it
+    And lines wrap inside each pane
+
   Scenario: Ruby names on an added line
     Given a diff of "lib/app.rb"
     When a line adds "def greet(name)"

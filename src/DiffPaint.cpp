@@ -48,7 +48,7 @@ void DiffCanvas::paintSingle(QPainter &painter, const Band &band, const FileDiff
 
 void DiffCanvas::paintPair(QPainter &painter, const Band &band, const FileDiff &file, const DiffRow &row, int viewW)
 {
-    const int paneW = viewW / 2;
+    const int paneW = pairSplit(viewW);
     const bool leftNote = row.leftNum > 0 && m_notes.contains(noteKey(file.path(), true, row.leftNum));
     const bool rightNote = row.rightNum > 0 && m_notes.contains(noteKey(file.path(), false, row.rightNum));
     paintOneSide(painter, 0, paneW, leftStyle(row.kind), row.heat, row.leftText, row.leftNum, row.leftPiece, leftNote,

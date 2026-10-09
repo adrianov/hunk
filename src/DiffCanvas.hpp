@@ -19,6 +19,7 @@ class QPainter;
 enum class SideStyle { Empty, Plain, Add, Del };
 
 // Side-by-side diff. Both panes stay on screen; long lines wrap inside the pane.
+// Drag the line between the panes to give one side more room.
 class DiffCanvas : public QAbstractScrollArea {
     Q_OBJECT
 public:
@@ -67,6 +68,10 @@ private:
 
     void ensureFont();
     void prepareWidth();
+    int clampSplit(int viewW, int x) const;
+    int pairSplit(int viewW) const;
+    bool layoutStale() const;
+    int sideOrigin(bool single, int x, bool *left) const;
     void dropPieces();
     void rebuild();
     void relayoutFile(int fileIndex);
@@ -106,12 +111,20 @@ private:
                        const QString &text, const QList<Piece> &pieces);
     void paintFileHeader(QPainter &painter, const QRect &rect, const FileDiff &file, const QFont &font);
     bool pressIgnored(QMouseEvent *mouse) const;
+    bool onSplit(const Band *band, int x) const;
+    bool grabSplit(const Band *band, int x);
+    bool dragSplit(int x, QMouseEvent *mouse);
+    void moveSplit(int x);
+    void hoverMouse(QMouseEvent *mouse);
+    void commitSplit();
+    bool releaseSplit(QMouseEvent *mouse);
     void chooseRow(const Band &band, int x);
     void hoverRow(const Band *band);
     void hoverCursor(const Band *band, int x);
     bool openFold(const Band *band, int x);
     void setHover(int file, int row);
     void onPress(QMouseEvent *mouse);
+    void pressAt(QMouseEvent *mouse, int x, int y);
     void onMove(QMouseEvent *mouse);
     void pressRow(const Band &band, int x, int y, QMouseEvent *mouse);
     void clearMark();
@@ -148,6 +161,10 @@ private:
     int m_gutterW = 56;
     int m_docH = 0;
     int m_viewW = -1;
+    double m_split = 0.5;
+    int m_splitW = -1;
+    bool m_dragSplit = false;
+    int m_splitDx = 0;
     QTimer m_wrapTimer;
     int m_selFile = -1;
     int m_selRow = -1;

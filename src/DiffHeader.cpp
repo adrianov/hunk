@@ -54,13 +54,14 @@ void paintLabelBar(QPainter &painter, int y, int height, int viewW)
     painter.drawLine(0, y + height - 1, viewW, y + height - 1);
 }
 
-void paintPairLabels(QPainter &painter, int y, int height, int viewW, const QString &left, const QString &right)
+void paintPairLabels(QPainter &painter, int y, int height, int leftW, int viewW, const QString &left,
+                     const QString &right)
 {
-    const int paneW = viewW / 2;
-    painter.drawText(QRect(12, y, paneW - 16, height), Qt::AlignVCenter | Qt::AlignLeft, left);
-    painter.drawText(QRect(paneW + 12, y, paneW - 16, height), Qt::AlignVCenter | Qt::AlignLeft, right);
+    const int rightW = viewW - leftW;
+    painter.drawText(QRect(12, y, leftW - 16, height), Qt::AlignVCenter | Qt::AlignLeft, left);
+    painter.drawText(QRect(leftW + 12, y, rightW - 16, height), Qt::AlignVCenter | Qt::AlignLeft, right);
     painter.setPen(kLine);
-    painter.drawLine(paneW, y, paneW, y + height);
+    painter.drawLine(leftW, y, leftW, y + height);
 }
 
 } // namespace
@@ -93,7 +94,7 @@ void DiffCanvas::paintLabels(QPainter &painter, const Band &band, const FileDiff
                          m_rightLabel + QStringLiteral(" (new file)"));
         return;
     }
-    paintPairLabels(painter, band.y, band.h, viewW, m_leftLabel, m_rightLabel);
+    paintPairLabels(painter, band.y, band.h, pairSplit(viewW), viewW, m_leftLabel, m_rightLabel);
 }
 
 void DiffCanvas::paintNoteBand(QPainter &painter, const Band &band, const FileDiff &file, int viewW)

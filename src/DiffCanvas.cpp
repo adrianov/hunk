@@ -103,8 +103,9 @@ void DiffCanvas::wrapRow(DiffRow *row, bool single)
         row->rightPiece = sidePieces(row->rightText, row->rightSpans, row->rightSyn, m_mono, paneText(width, m_gutterW));
         return;
     }
-    row->leftPiece = sidePieces(row->leftText, row->leftSpans, row->leftSyn, m_mono, paneText(width / 2, m_gutterW));
-    row->rightPiece = sidePieces(row->rightText, row->rightSpans, row->rightSyn, m_mono, paneText(width - width / 2, m_gutterW));
+    const int left = pairSplit(width);
+    row->leftPiece = sidePieces(row->leftText, row->leftSpans, row->leftSyn, m_mono, paneText(left, m_gutterW));
+    row->rightPiece = sidePieces(row->rightText, row->rightSpans, row->rightSyn, m_mono, paneText(width - left, m_gutterW));
 }
 
 int DiffCanvas::rowHeight(const DiffRow &row, bool single) const

@@ -59,14 +59,15 @@ void DiffCanvas::dropPieces()
     }
 }
 
-// Line pieces depend only on the pane width. Drop them when that width changes.
+// Line pieces depend on each pane's width. Drop them when that width changes.
 void DiffCanvas::prepareWidth()
 {
-    const int width = qMax(1, viewport()->width());
-    if (m_viewW == width)
+    if (!layoutStale())
         return;
+    const int width = qMax(1, viewport()->width());
     dropPieces();
     m_viewW = width;
+    m_splitW = pairSplit(width);
 }
 
 void DiffCanvas::publishLayout()
@@ -100,7 +101,7 @@ void DiffCanvas::appendTail(const QList<Band> &tail, int delta)
 
 void DiffCanvas::relayoutFile(int fileIndex)
 {
-    if (qMax(1, viewport()->width()) != m_viewW) {
+    if (layoutStale()) {
         rebuild();
         return;
     }

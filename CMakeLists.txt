@@ -65,6 +65,7 @@ add_executable(hunk
   src/DiffCanvas.cpp
   src/DiffScroll.cpp
   src/DiffInput.cpp
+  src/DiffSplit.cpp
   src/DiffSelect.cpp
   src/DiffMark.cpp
   src/DiffHeader.cpp

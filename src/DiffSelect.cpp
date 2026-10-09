@@ -14,20 +14,6 @@
 
 namespace {
 
-struct PaneHit {
-    bool left = false;
-    int origin = 0;
-};
-
-PaneHit paneHit(bool single, int viewW, int x)
-{
-    const int paneW = single ? viewW : viewW / 2;
-    PaneHit hit;
-    hit.left = !single && x < paneW;
-    hit.origin = hit.left || single ? 0 : paneW;
-    return hit;
-}
-
 int cutAt(const QFontMetrics &metrics, const QString &text, int start, int end, int local)
 {
     int pos = start;
@@ -95,13 +81,14 @@ DiffCanvas::TextMark DiffCanvas::textAt(int x, int y) const
     if (!band || band->kind != Band::Row)
         return mark;
     const FileDiff &file = m_doc.files.at(band->file);
-    const PaneHit pane = paneHit(file.singlePane(), viewport()->width(), x);
+    bool left = false;
+    const int origin = sideOrigin(file.singlePane(), x, &left);
     mark.file = band->file;
     mark.row = band->row;
-    mark.old = pane.left;
-    if (x - pane.origin < m_gutterW)
+    mark.old = left;
+    if (x - origin < m_gutterW)
         return mark;
-    return codeAt(mark, file.rows.at(band->row), x - pane.origin - m_gutterW - 8, y - band->y);
+    return codeAt(mark, file.rows.at(band->row), x - origin - m_gutterW - 8, y - band->y);
 }
 
 void DiffCanvas::beginText(int x, int y, bool extend)

@@ -17,12 +17,10 @@ const DiffCanvas::Band *DiffCanvas::bandAt(int y) const
 
 bool DiffCanvas::inGutter(const FileDiff &file, int x, bool *oldSide) const
 {
-    const int viewW = viewport()->width();
-    const int paneW = file.singlePane() ? viewW : viewW / 2;
-    const bool left = !file.singlePane() && x < paneW;
+    bool left = false;
+    const int origin = sideOrigin(file.singlePane(), x, &left);
     if (oldSide)
         *oldSide = left;
-    const int origin = left ? 0 : (file.singlePane() ? 0 : paneW);
     return x - origin >= 0 && x - origin < m_gutterW;
 }
 
@@ -55,6 +53,14 @@ void DiffCanvas::pressRow(const Band &band, int x, int y, QMouseEvent *mouse)
     beginText(x, y, mouse->modifiers().testFlag(Qt::ShiftModifier));
 }
 
+void DiffCanvas::pressAt(QMouseEvent *mouse, int x, int y)
+{
+    const Band *band = bandAt(y);
+    if (!band || openFold(band, x) || grabSplit(band, x) || band->kind != Band::Row)
+        return;
+    pressRow(*band, x, y, mouse);
+}
+
 void DiffCanvas::onPress(QMouseEvent *mouse)
 {
     if (pressIgnored(mouse))
@@ -62,16 +68,14 @@ void DiffCanvas::onPress(QMouseEvent *mouse)
     setFocus();
     const int x = int(mouse->position().x());
     const int y = int(mouse->position().y()) + verticalScrollBar()->value();
-    const Band *band = bandAt(y);
-    if (!band || openFold(band, x) || band->kind != Band::Row)
-        return;
-    pressRow(*band, x, y, mouse);
+    pressAt(mouse, x, y);
 }
 
 void DiffCanvas::clearHover()
 {
     m_hoverFile = m_hoverRow = -1;
-    viewport()->unsetCursor();
+    if (!m_dragSplit)
+        viewport()->unsetCursor();
     viewport()->update();
 }
 
@@ -97,7 +101,9 @@ void DiffCanvas::hoverCursor(const Band *band, int x)
     const bool gutter = file >= 0 && inGutter(m_doc.files.at(file), x, nullptr);
     const bool fold = band && band->kind == Band::Fold;
     Qt::CursorShape shape = Qt::ArrowCursor;
-    if (gutter || fold)
+    if (onSplit(band, x))
+        shape = Qt::SplitHCursor;
+    else if (gutter || fold)
         shape = Qt::PointingHandCursor;
     else if (file >= 0)
         shape = Qt::IBeamCursor;
@@ -108,6 +114,8 @@ void DiffCanvas::onMove(QMouseEvent *mouse)
 {
     const int x = int(mouse->position().x());
     const int y = int(mouse->position().y()) + verticalScrollBar()->value();
+    if (dragSplit(x, mouse))
+        return;
     if (m_dragText && mouse->buttons().testFlag(Qt::LeftButton)) {
         dragText(x, y);
         return;
@@ -127,7 +135,8 @@ bool DiffCanvas::viewportEvent(QEvent *event)
         onPress(static_cast<QMouseEvent *>(event));
         return true;
     case QEvent::MouseButtonRelease:
-        endText(static_cast<QMouseEvent *>(event));
+        if (!releaseSplit(static_cast<QMouseEvent *>(event)))
+            endText(static_cast<QMouseEvent *>(event));
         return true;
     case QEvent::MouseButtonDblClick:
         pickWord(static_cast<QMouseEvent *>(event));
