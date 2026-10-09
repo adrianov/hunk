@@ -13,7 +13,7 @@ Copyright © 2026 Peter Adrianov. Licensed under the [MIT License](LICENSE).
 - Compare **merge request** (three-dot from the base, including uncommitted changes on the current branch; base defaults to the branch this work was cut from), **uncommitted** (`git diff HEAD`), or **staged**. The status bar names the target when the merge request would conflict with it
 - Switching back reloads the diff. Saves of tracked files from other programs, and a base that moves, show up while Hunk stays open. Ignored files are left alone. An unchanged diff stays put, including the scroll position
 - Under the file list, each file's added and removed counts are green and red, and the total stays visible. The status bar says how many commits local `main` or `master` is ahead of or behind its origin
-- Click a line number to comment. Comments stay in app settings, not in the repo
+- Click a line number to comment. Double-click a comment in the review list to show that line in the diff. Comments stay in app settings, not in the repo
 - Select text in either pane and copy it from the pane menu or with Ctrl+C
 - **Copy reviews** writes markdown with `` `path:line` `` and the line text
 - Diff flags match a review diff: `-w -W --no-prefix --diff-algorithm=histogram`

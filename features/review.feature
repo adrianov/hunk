@@ -21,6 +21,11 @@ Feature: Review comments
     When I copy reviews
     Then the clipboard does not explain what `(old)` means
 
+  Scenario: Double-click a comment shows that line
+    Given a review comments on a diff line
+    When I double-click that comment
+    Then the diff shows that line
+
   Scenario: Each review line can be deleted
     Given the review list has a comment
     Then that line has its own delete control, inset from the row edge

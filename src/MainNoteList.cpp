@@ -151,8 +151,15 @@ void MainWindow::restoreNoteRow(int row, bool editing)
         m_editor->setFocus();
 }
 
+void MainWindow::jumpNote(QListWidgetItem *item)
+{
+    if (item)
+        showNote(m_notes->row(item));
+}
+
 void MainWindow::fillNotes()
 {
+    connect(m_notes, &QListWidget::itemDoubleClicked, this, &MainWindow::jumpNote, Qt::UniqueConnection);
     m_notes->clear();
     for (int index = 0; index < m_store->notes().size(); ++index)
         addListedNote(index);

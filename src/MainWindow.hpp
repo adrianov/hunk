@@ -26,6 +26,7 @@ class QEvent;
 class QLabel;
 class QLineEdit;
 class QListWidget;
+class QListWidgetItem;
 class QMenu;
 class QPlainTextEdit;
 class QPushButton;
@@ -86,6 +87,7 @@ private:
     void restoreWindow();
     void openTreeItem(QTreeWidgetItem *item);
     void showNote(int row);
+    void jumpNote(QListWidgetItem *item);
     void loadNote(int row);
     void saveNote();
     void reloadFresh();

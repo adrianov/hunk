@@ -7,6 +7,7 @@
 #include "MainSeen.hpp"
 #include "ReviewStore.hpp"
 
+#include <QAbstractItemView>
 #include <QAction>
 #include <QCheckBox>
 #include <QComboBox>
@@ -108,6 +109,7 @@ QHBoxLayout *reviewButtons(QPushButton *copy, QCheckBox *cleanup)
 QWidget *MainWindow::reviewPanel()
 {
     m_notes = new QListWidget(this);
+    m_notes->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_editor = makeEditor(this);
     m_copy = new QPushButton(QStringLiteral("Copy reviews"), this);
     setButtonIcon(m_copy, buttonIcon(ButtonIcon::Copy));
