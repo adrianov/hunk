@@ -10,6 +10,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/Smoke.cpp` / `Smoke.hpp` — offscreen `--smoke` check
 - `src/MainWindow.cpp` / `MainWindow.hpp` — window lifecycle
 - `src/MainActions.cpp` / `BarIcon.cpp` — menus, toolbar, and button icons
+- `src/MainRecent.cpp` — File menu recent repositories
 - `src/MainChrome.cpp` — file pane, review dock, and the about dialog
 - `src/MainTree.cpp` — folder tree
 - `src/MainSeen.cpp` / `MainSeen.hpp` / `MainHeat.cpp` — files and lines changed since review

@@ -81,6 +81,8 @@ void MainWindow::addMenus(QAction *openAct, QAction *refreshAct, QAction *quitAc
 {
     auto *fileMenu = menuBar()->addMenu(QStringLiteral("File"));
     fileMenu->addAction(openAct);
+    m_recent = fileMenu->addMenu(QStringLiteral("Open Recent"));
+    connect(m_recent, &QMenu::aboutToShow, this, &MainWindow::fillRecent);
     fileMenu->addAction(refreshAct);
     fileMenu->addSeparator();
     fileMenu->addAction(quitAct);

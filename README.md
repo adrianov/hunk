@@ -6,7 +6,7 @@ Copyright © 2026 Peter Adrianov. Licensed under the [MIT License](LICENSE).
 
 ## Features
 
-- Open a git repository and read the branch like a pull request. The toolbar shows the repository path in the normal text color. The dock on macOS shows the Hunk icon in the system rounded shape, and the taskbar on Linux shows it
+- Open a git repository and read the branch like a pull request. File → Open Recent lists repositories you opened, newest first. The toolbar shows the repository path in the normal text color. The dock on macOS shows the Hunk icon in the system rounded shape, and the taskbar on Linux shows it
 - File list grouped by folder, two panes with a draggable border (double-click evens it), wrapped lines, syntax colors (keywords, methods, variables, strings, comments, and markdown headings, bold, italic, strike, code, and links), word highlights, sticky file header. A file you already reviewed is highlighted when its diff changes again. Lines from that review stay a lighter green and red; lines changed since then are stronger
 - A changed block stays open when it has 500 unchanged lines or fewer, matching the diff's own context. Longer blocks collapse to a few lines beside each change, and lines outside the block stay folded. Click the bar to show them, or the side arrows to show 20 lines and leave the rest folded
 - New files use one pane

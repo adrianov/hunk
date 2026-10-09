@@ -13,6 +13,13 @@ Feature: Diff view
     And the dock or taskbar shows the Hunk icon
     And on macOS the dock icon has the system rounded shape
 
+  Scenario: Open Recent reopens a repository
+    Given I have opened more than one repository
+    When I open the File menu
+    Then Open Recent lists those repositories, newest first
+    When I choose one
+    Then that repository is on screen
+
   Scenario: Opening another repository watches that one
     Given a repository is on screen
     When I open a different repository

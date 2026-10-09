@@ -44,6 +44,7 @@ add_executable(hunk
   src/Smoke.cpp
   src/MainWindow.cpp
   src/MainActions.cpp
+  src/MainRecent.cpp
   src/BarIcon.cpp
   src/MainChrome.cpp
   src/MainTree.cpp

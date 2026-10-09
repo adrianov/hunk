@@ -107,6 +107,10 @@ private:
     void applyWatch(const GitResult &result);
     void reloadIfRangeChanged();
     void chooseRepo();
+    void fillRecent();
+    void addRecent(const QString &path);
+    void rememberRecent(const QString &root);
+    void openRecent();
     void onReady(const GitResult &result);
     bool keepQuiet(const GitResult &result);
     bool stopForError(const GitResult &result);
@@ -145,6 +149,7 @@ private:
     QComboBox *m_mode = nullptr;
     QComboBox *m_base = nullptr;
     QComboBox *m_head = nullptr;
+    QMenu *m_recent = nullptr;
     QLabel *m_repoLabel = nullptr;
     QLabel *m_stat = nullptr;
     QListWidget *m_notes = nullptr;
