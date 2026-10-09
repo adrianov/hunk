@@ -132,6 +132,8 @@ Feature: Diff view
     When I drag the border between those panes
     Then the border stays where I leave it
     And lines wrap inside each pane
+    When I double-click that border
+    Then the panes are equal again
 
   Scenario: Ruby names on an added line
     Given a diff of "lib/app.rb"

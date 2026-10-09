@@ -19,7 +19,7 @@ class QPainter;
 enum class SideStyle { Empty, Plain, Add, Del };
 
 // Side-by-side diff. Both panes stay on screen; long lines wrap inside the pane.
-// Drag the line between the panes to give one side more room.
+// Drag the line between the panes to give one side more room. Double-click it to split them evenly.
 class DiffCanvas : public QAbstractScrollArea {
     Q_OBJECT
 public:
@@ -118,6 +118,7 @@ private:
     void hoverMouse(QMouseEvent *mouse);
     void commitSplit();
     bool releaseSplit(QMouseEvent *mouse);
+    bool evenSplit(QMouseEvent *mouse);
     void chooseRow(const Band &band, int x);
     void hoverRow(const Band *band);
     void hoverCursor(const Band *band, int x);

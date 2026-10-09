@@ -110,13 +110,9 @@ void DiffCanvas::takeWord(const TextMark &hit)
 
 void DiffCanvas::pickWord(QMouseEvent *mouse)
 {
-    if (pressIgnored(mouse))
+    if (pressIgnored(mouse) || evenSplit(mouse))
         return;
-    const int x = int(mouse->position().x());
-    const int y = int(mouse->position().y()) + verticalScrollBar()->value();
-    if (onSplit(bandAt(y), x))
-        return;
-    const TextMark hit = textAt(x, y);
+    const TextMark hit = textAt(int(mouse->position().x()), int(mouse->position().y()) + verticalScrollBar()->value());
     if (!hit.code)
         return;
     takeWord(hit);

@@ -105,3 +105,14 @@ bool DiffCanvas::releaseSplit(QMouseEvent *mouse)
     hoverMouse(mouse);
     return true;
 }
+
+bool DiffCanvas::evenSplit(QMouseEvent *mouse)
+{
+    const int y = int(mouse->position().y()) + verticalScrollBar()->value();
+    if (!onSplit(bandAt(y), int(mouse->position().x())))
+        return false;
+    m_split = 0.5;
+    commitSplit();
+    hoverMouse(mouse);
+    return true;
+}
