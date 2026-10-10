@@ -23,11 +23,36 @@ NSString *appPath()
     return [path.pathExtension isEqualToString:@"app"] ? path : nil;
 }
 
+NSImage *sharpIcon(NSImage *source)
+{
+    const NSInteger side = 1024;
+    source.size = NSMakeSize(side, side);
+    NSBitmapImageRep *rep = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL
+                                                                     pixelsWide:side
+                                                                     pixelsHigh:side
+                                                                   bitsPerSample:8
+                                                                 samplesPerPixel:4
+                                                                        hasAlpha:YES
+                                                                        isPlanar:NO
+                                                                  colorSpaceName:NSDeviceRGBColorSpace
+                                                                     bytesPerRow:0
+                                                                    bitsPerPixel:0];
+    rep.size = NSMakeSize(side, side);
+    [NSGraphicsContext saveGraphicsState];
+    [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithBitmapImageRep:rep]];
+    [source drawInRect:NSMakeRect(0, 0, side, side)];
+    [NSGraphicsContext restoreGraphicsState];
+    NSImage *image = [[[NSImage alloc] initWithSize:rep.size] autorelease];
+    [image addRepresentation:rep];
+    [rep release];
+    return image;
+}
+
 } // namespace
 
 void applyMacIcon()
 {
     NSString *path = appPath();
     if (path)
-        [NSApp setApplicationIconImage:[[NSWorkspace sharedWorkspace] iconForFile:path]];
+        [NSApp setApplicationIconImage:sharpIcon([[NSWorkspace sharedWorkspace] iconForFile:path])];
 }
