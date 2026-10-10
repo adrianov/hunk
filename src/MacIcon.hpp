@@ -3,4 +3,7 @@
 
 #pragma once
 
+class QPixmap;
+
 void applyMacIcon();
+QPixmap macAppIcon();

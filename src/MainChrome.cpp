@@ -8,16 +8,13 @@
 #include "ReviewStore.hpp"
 
 #include <QAbstractItemView>
-#include <QAction>
 #include <QCheckBox>
 #include <QComboBox>
-#include <QCoreApplication>
 #include <QDockWidget>
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QMenuBar>
-#include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QScrollBar>
@@ -84,25 +81,6 @@ QWidget *MainWindow::reviewPanel()
     return panel;
 }
 
-void MainWindow::showAbout()
-{
-    QMessageBox::about(this, QStringLiteral("About Hunk"),
-                       QStringLiteral("<p><b>Hunk %1</b></p>"
-                                      "<p>Local merge-request diff for macOS and Linux.</p>"
-                                      "<p>Copyright © 2026 Peter Adrianov<br>MIT License</p>")
-                           .arg(QCoreApplication::applicationVersion()));
-}
-
-void MainWindow::addAbout(QMenu *view)
-{
-#ifndef Q_OS_MACOS
-    view = menuBar()->addMenu(QStringLiteral("Help"));
-#endif
-    auto *about = view->addAction(QStringLiteral("About Hunk"));
-    about->setMenuRole(QAction::AboutRole);
-    connect(about, &QAction::triggered, this, &MainWindow::showAbout);
-}
-
 void MainWindow::buildReviews()
 {
     m_dock = new QDockWidget(QStringLiteral("Reviews"), this);
@@ -132,12 +110,14 @@ void MainWindow::openTreeItem(QTreeWidgetItem *item)
 void MainWindow::wireTree()
 {
     connect(m_filter, &QLineEdit::textChanged, this, &MainWindow::rebuildTree);
+    connect(m_search, &QLineEdit::textChanged, this, &MainWindow::rebuildTree);
     connect(m_unhide, &QPushButton::clicked, this, &MainWindow::unhideReviewed);
     m_tree->viewport()->installEventFilter(this);
     connect(m_tree, &QTreeWidget::itemClicked, this, &MainWindow::openTreeItem);
     connect(m_tree, &QTreeWidget::customContextMenuRequested, this, &MainWindow::filePathMenu);
     connect(m_diff, &DiffCanvas::fileScrolled, this, &MainWindow::selectTreeFile);
     connect(m_diff, &DiffCanvas::commentRequested, this, &MainWindow::commentAt);
+    connect(m_diff, &DiffCanvas::reviewRequested, this, &MainWindow::hideReviewed);
 }
 
 void MainWindow::wireNotes()

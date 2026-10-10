@@ -3,6 +3,8 @@
 
 #include "MacIcon.hpp"
 
+#include <QPixmap>
+
 #include <mach-o/dyld.h>
 
 #import <AppKit/AppKit.h>
@@ -55,4 +57,13 @@ void applyMacIcon()
     NSString *path = appPath();
     if (path)
         [NSApp setApplicationIconImage:sharpIcon([[NSWorkspace sharedWorkspace] iconForFile:path])];
+}
+
+QPixmap macAppIcon()
+{
+    NSData *data = [[NSApp applicationIconImage] TIFFRepresentation];
+    QPixmap pixmap;
+    if (data)
+        pixmap.loadFromData(reinterpret_cast<const uchar *>(data.bytes), static_cast<uint>(data.length));
+    return pixmap;
 }
