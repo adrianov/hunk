@@ -47,6 +47,47 @@ void testQuoted(const DiffDoc &doc)
     CHECK(findLine(doc, QStringLiteral("my file.cpp"), false, 2).row == 0);
 }
 
+void testRenameTitle()
+{
+    FileDiff file;
+    file.oldPath = QStringLiteral("lib/metrics/build.rb");
+    file.newPath = QStringLiteral("lib/metrics/base.rb");
+    CHECK(file.title() == QStringLiteral("lib/metrics/build.rb → base.rb"));
+    CHECK(file.shortName() == QStringLiteral("build.rb → base.rb"));
+}
+
+DiffDoc splitRename()
+{
+    return parseDiff(QStringLiteral(R"(diff --git build.rb build.rb
+deleted file mode 100644
+--- build.rb
++++ /dev/null
+@@ -1 +0,0 @@
+-old
+diff --git base.rb base.rb
+new file mode 100644
+--- /dev/null
++++ base.rb
+@@ -0,0 +1 @@
++new
+)"));
+}
+
+void testJoinRename()
+{
+    DiffDoc doc = splitRename();
+    CHECK(joinRename(&doc, QStringLiteral("build.rb"), QStringLiteral("base.rb"), QStringLiteral(R"(diff --git build.rb base.rb
+--- build.rb
++++ base.rb
+@@ -1 +1 @@
+-old
++new
+)")));
+    const FileDiff file = doc.files.value(0);
+    CHECK(doc.files.size() == 1 && file.title() == QStringLiteral("build.rb → base.rb"));
+    CHECK(!file.added && !file.removed && file.rows.size() == 1);
+}
+
 void testBinary(const FileDiff &file)
 {
     CHECK(file.binary);
@@ -64,5 +105,7 @@ int fileTests()
     testRenamedRest(doc.files.at(2));
     testQuoted(doc);
     testBinary(doc.files.at(4));
+    testRenameTitle();
+    testJoinRename();
     return g_fails;
 }

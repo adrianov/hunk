@@ -13,3 +13,6 @@ void fillGaps(FileDiff *file, const QStringList &left, const QStringList &right)
 
 // Find a commented line. `oldSide` uses the pre-change line number.
 LineHit findLine(const DiffDoc &doc, const QString &path, bool oldSide, int line);
+
+// Replace a deleted path and an added path with one rename parsed from `diffText`.
+bool joinRename(DiffDoc *doc, const QString &oldPath, const QString &newPath, const QString &diffText);

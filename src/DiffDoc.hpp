@@ -77,15 +77,7 @@ struct FileDiff {
         return oldPath;
     }
 
-    QString title() const
-    {
-        const bool oldOk = !oldPath.isEmpty() && oldPath != QLatin1String("/dev/null");
-        const bool newOk = !newPath.isEmpty() && newPath != QLatin1String("/dev/null");
-        if (oldOk && newOk && oldPath != newPath)
-            return oldPath + QStringLiteral(" → ") + newPath;
-        return path();
-    }
-
+    QString title() const;
     QString shortName() const;
 
     QString folder() const

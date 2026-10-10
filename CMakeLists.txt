@@ -100,6 +100,7 @@ add_executable(hunk
   src/DiffSyntax.cpp
   src/DiffColors.cpp
   src/GitRepo.cpp
+  src/GitRename.cpp
   src/GitBlob.cpp
   src/GitCmd.cpp
   src/GitStamp.cpp

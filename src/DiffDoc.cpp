@@ -64,6 +64,16 @@ QList<int> listedOrder(const DiffDoc &doc)
     return order;
 }
 
+QString FileDiff::title() const
+{
+    if (!isRename(*this))
+        return path();
+    const int slash = oldPath.lastIndexOf(QLatin1Char('/'));
+    if (slash >= 0 && newPath.startsWith(oldPath.left(slash + 1)))
+        return oldPath + QStringLiteral(" → ") + newPath.mid(slash + 1);
+    return oldPath + QStringLiteral(" → ") + newPath;
+}
+
 QString FileDiff::shortName() const
 {
     if (!isRename(*this))

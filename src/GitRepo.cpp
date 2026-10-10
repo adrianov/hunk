@@ -11,6 +11,8 @@
 #include <QFutureWatcher>
 #include <QtConcurrent>
 
+void joinIndexRenames(GitResult *result);
+
 namespace {
 
 bool readCwd(GitResult &result, const QString &startPath, QString *cwd)
@@ -97,6 +99,7 @@ bool runDiff(GitResult &result, const QStringList &args)
     }
     result.diffText = diff.out;
     result.doc = parseDiff(result.diffText);
+    joinIndexRenames(&result);
     fillDocGaps(&result.doc, result);
     return true;
 }

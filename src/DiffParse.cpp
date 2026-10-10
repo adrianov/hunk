@@ -114,6 +114,42 @@ void takeRow(ParseCursor &cur, const QString &line)
     pushRow(cur, kind, expandTabs(line.mid(1)));
 }
 
+namespace {
+
+int indexOf(const DiffDoc &doc, const QString &path, bool removed)
+{
+    for (int index = 0; index < doc.files.size(); ++index) {
+        const FileDiff &file = doc.files.at(index);
+        if (file.removed == removed && file.added != removed && file.path() == path)
+            return index;
+    }
+    return -1;
+}
+
+} // namespace
+
+bool joinRename(DiffDoc *doc, const QString &oldPath, const QString &newPath, const QString &diffText)
+{
+    const int removed = indexOf(*doc, oldPath, true);
+    const int added = indexOf(*doc, newPath, false);
+    if (removed < 0 || added < 0 || removed == added)
+        return false;
+    const DiffDoc part = parseDiff(diffText);
+    FileDiff file;
+    if (part.files.size() == 1)
+        file = part.files.at(0);
+    file.oldPath = oldPath;
+    file.newPath = newPath;
+    file.added = false;
+    file.removed = false;
+    const int drop = qMax(removed, added);
+    const int keep = qMin(removed, added);
+    doc->files.removeAt(drop);
+    doc->files.removeAt(keep);
+    doc->files.insert(keep, file);
+    return true;
+}
+
 DiffDoc parseDiff(const QString &raw)
 {
     DiffDoc doc;
