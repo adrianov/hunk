@@ -84,6 +84,7 @@ Feature: Diff view
     When I type in Search in files
     Then the list shows only files whose content matches
     And the diff highlights that text
+    And matched lines are shown, not folded
     And Filter files still limits that list by name
 
   Scenario: A new file uses one pane

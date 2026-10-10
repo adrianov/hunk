@@ -21,3 +21,6 @@ constexpr int kFoldWide = 500;
 // When lines outside a block were loaded, a block of at most kFoldWide unchanged lines stays open.
 // Longer blocks, lines outside the block, and a file whose outside lines were not loaded collapse.
 QList<FoldSpan> foldSpans(const QList<DiffRow> &rows, const QSet<int> &open);
+
+// `open`, plus every folded stretch that contains a hit, so those lines stay visible.
+QSet<int> unfoldHits(const QList<DiffRow> &rows, const QSet<int> &open, const QSet<int> &hits);

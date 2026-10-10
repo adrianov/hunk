@@ -56,13 +56,16 @@ bool searchedRow(const DiffRow &row, const QString &query)
 QSet<int> DiffCanvas::pinnedRows(int fileIndex) const
 {
     QSet<int> open = m_open.value(fileIndex);
+    QSet<int> hits;
     const FileDiff &file = m_doc.files.at(fileIndex);
     for (int index = 0; index < file.rows.size(); ++index) {
         const DiffRow &row = file.rows.at(index);
-        if (notedRow(file, row, m_notes) || searchedRow(row, m_search))
+        if (notedRow(file, row, m_notes))
             open.insert(index);
+        if (searchedRow(row, m_search))
+            hits.insert(index);
     }
-    return open;
+    return unfoldHits(file.rows, open, hits);
 }
 
 void DiffCanvas::showHidden(int file, int first, int last)

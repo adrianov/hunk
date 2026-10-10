@@ -66,6 +66,15 @@ void testGapFold()
     CHECK(spans.at(1).last == 49);
 }
 
+void testGapSearch()
+{
+    const FileDiff file = gapFile();
+    const QList<FoldSpan> spans = foldSpans(file.rows, unfoldHits(file.rows, {}, {10}));
+    CHECK(spans.size() == 1);
+    CHECK(spans.at(0).first == 42);
+    CHECK(foldSpans(file.rows, unfoldHits(file.rows, {}, {37})).size() == 2);
+}
+
 void testGapRest()
 {
     QSet<int> open;
@@ -82,6 +91,7 @@ void testGaps()
     testGapSkip();
     testGapShape();
     testGapFold();
+    testGapSearch();
     testGapRest();
 }
 

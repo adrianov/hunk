@@ -106,3 +106,21 @@ QList<FoldSpan> foldSpans(const QList<DiffRow> &rows, const QSet<int> &open)
     }
     return spans;
 }
+
+QSet<int> unfoldHits(const QList<DiffRow> &rows, const QSet<int> &open, const QSet<int> &hits)
+{
+    QSet<int> pinned = open;
+    pinned.unite(hits);
+    if (hits.isEmpty())
+        return pinned;
+    for (const FoldSpan &span : foldSpans(rows, open)) {
+        int row = span.first;
+        while (row <= span.last && !hits.contains(row))
+            ++row;
+        if (row > span.last)
+            continue;
+        for (int at = span.first; at <= span.last; ++at)
+            pinned.insert(at);
+    }
+    return pinned;
+}
