@@ -4,13 +4,13 @@
 #include "MdRead.hpp"
 
 #include "DiffColors.hpp"
+#include "MdHtml.hpp"
 #include "SyntaxRule.hpp"
 
 #include <QDir>
 #include <QFileInfo>
 #include <QStringList>
-#include <QTextBrowser>
-#include <QUrl>
+#include <QWebEngineView>
 
 namespace {
 
@@ -28,24 +28,6 @@ QString sideDoc(const FileDiff &file, bool left)
 QString docDir(const QString &root, const FileDiff &file)
 {
     return QFileInfo(QDir(root).filePath(file.path())).absolutePath();
-}
-
-QString mdCss()
-{
-    return QStringLiteral("p, li, h1, h2, h3, h4, h5, h6, pre, blockquote, td, th { color: %1; } a { color: %2; }")
-        .arg(kText.name(), kAccent.name());
-}
-
-void tuneBrowser(QTextBrowser *view)
-{
-    view->setReadOnly(true);
-    view->setOpenExternalLinks(true);
-    view->setFrameShape(QFrame::NoFrame);
-    view->document()->setDocumentMargin(18);
-    QPalette palette = view->palette();
-    palette.setColor(QPalette::Base, kBg);
-    palette.setColor(QPalette::Text, kText);
-    view->setPalette(palette);
 }
 
 } // namespace
@@ -68,14 +50,9 @@ ReadText readFile(const FileDiff &file, const QString &root)
     return text;
 }
 
-void fillBrowser(QTextBrowser *view, const QString &text, const QString &dir)
+void fillBrowser(QWebEngineView *view, const QString &text, const QString &dir)
 {
-    tuneBrowser(view);
-    QTextDocument *document = view->document();
-    document->setDefaultStyleSheet(mdCss());
-    const QString base = dir.endsWith(QLatin1Char('/')) ? dir : dir + QLatin1Char('/');
-    document->setBaseUrl(QUrl::fromLocalFile(base));
-    view->setMarkdown(text);
+    showMarkdown(view, text, dir, kBg.lightness() < 128);
 }
 
 void tintWidget(QWidget *widget, const QColor &color)

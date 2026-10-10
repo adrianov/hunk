@@ -13,7 +13,7 @@ class QLabel;
 class QPushButton;
 class QSplitter;
 class QStackedWidget;
-class QTextBrowser;
+class QWebEngineView;
 
 // Source or rendered view for the markdown file currently in the diff.
 class MdView : public QWidget {
@@ -32,9 +32,12 @@ private:
     void buildBar();
     void wireSwitch();
     void buildPage();
-    QWidget *buildPane(QTextBrowser **browser, QLabel **caption);
+    QWidget *buildPane(QLabel **caption);
+    void ensureBrowser(QWebEngineView **view, QWidget *pane);
     void choose(int id);
     void apply();
+    void showTitle(const FileDiff &file);
+    void coverHeader();
     void showDocs(const FileDiff &file);
     const FileDiff *currentFile() const;
 
@@ -47,13 +50,14 @@ private:
     QWidget *m_leftPane = nullptr;
     QWidget *m_rightPane = nullptr;
     QLabel *m_title = nullptr;
+    QLabel *m_counts = nullptr;
     QLabel *m_leftCaption = nullptr;
     QLabel *m_rightCaption = nullptr;
     QPushButton *m_source = nullptr;
     QPushButton *m_rendered = nullptr;
     QButtonGroup *m_modes = nullptr;
-    QTextBrowser *m_left = nullptr;
-    QTextBrowser *m_right = nullptr;
+    QWebEngineView *m_left = nullptr;
+    QWebEngineView *m_right = nullptr;
     QString m_root;
     QString m_dir;
     QString m_leftName;

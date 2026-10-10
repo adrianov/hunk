@@ -8,7 +8,7 @@
 #include <QColor>
 #include <QString>
 
-class QTextBrowser;
+class QWebEngineView;
 class QWidget;
 
 bool markdownFile(const FileDiff &file);
@@ -22,6 +22,6 @@ struct ReadText {
 };
 
 ReadText readFile(const FileDiff &file, const QString &root);
-void fillBrowser(QTextBrowser *view, const QString &text, const QString &dir);
+void fillBrowser(QWebEngineView *view, const QString &text, const QString &dir);
 void tintWidget(QWidget *widget, const QColor &color);
 void paintGround(QWidget *widget);

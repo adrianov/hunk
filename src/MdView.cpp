@@ -11,7 +11,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QStackedWidget>
-#include <QTextBrowser>
+#include <QWebEngineView>
 #include <QVBoxLayout>
 
 MdView::MdView(DiffCanvas *canvas, QWidget *parent)
@@ -60,18 +60,18 @@ void MdView::choose(int id)
         return;
     m_on = on;
     apply();
-    if (m_on)
+    if (m_on && m_left)
         (m_rightPane->isVisible() ? m_right : m_left)->setFocus();
 }
 
 void MdView::showDocs(const FileDiff &file)
 {
     const ReadText text = readFile(file, m_root);
-    m_title->setText(file.title());
-    m_title->setToolTip(file.title());
     m_dir = text.dir;
     m_leftText = text.left;
     m_rightText = text.right;
+    ensureBrowser(&m_left, m_leftPane);
+    ensureBrowser(&m_right, m_rightPane);
     fillBrowser(m_left, text.left, text.dir);
     fillBrowser(m_right, text.right, text.dir);
     m_leftPane->setVisible(text.pair || text.oldOnly);
@@ -87,16 +87,33 @@ void MdView::apply()
     const FileDiff *file = currentFile();
     const bool md = file && markdownFile(*file);
     m_bar->setVisible(md);
-    if (md) {
-        m_title->setText(file->title());
-        m_title->setToolTip(file->title());
-    }
+    if (md)
+        showTitle(*file);
     if (!md || !m_on) {
         m_stack->setCurrentWidget(m_canvas);
+        coverHeader();
         return;
     }
     showDocs(*file);
     m_stack->setCurrentWidget(m_page);
+    coverHeader();
+}
+
+void MdView::showTitle(const FileDiff &file)
+{
+    m_title->setText(file.title());
+    m_title->setToolTip(file.title());
+    m_counts->setText(QStringLiteral("<span style=\"color:%1\">+%2</span>  <span style=\"color:%3\">−%4</span>")
+                          .arg(kAddFg.name(), QString::number(file.adds), kDelFg.name(), QString::number(file.dels)));
+}
+
+void MdView::coverHeader()
+{
+    const int header = m_canvas->headerHeight();
+    const bool cover = m_bar->isVisible() && !m_on;
+    static_cast<QVBoxLayout *>(layout())->setSpacing(cover ? -header : 0);
+    if (cover)
+        m_bar->raise();
 }
 
 void MdView::track(int file, const DiffDoc &doc, const QString &root)
@@ -132,6 +149,8 @@ void MdView::applyTheme()
     tintWidget(m_leftCaption, kMuted);
     tintWidget(m_rightCaption, kMuted);
     paintGround(m_page);
-    fillBrowser(m_left, m_leftText, m_dir);
-    fillBrowser(m_right, m_rightText, m_dir);
+    if (m_left)
+        fillBrowser(m_left, m_leftText, m_dir);
+    if (m_right)
+        fillBrowser(m_right, m_rightText, m_dir);
 }

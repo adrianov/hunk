@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 6.9 REQUIRED COMPONENTS Core Concurrent Widgets Svg)
+find_package(Qt6 6.9 REQUIRED COMPONENTS Core Concurrent Widgets Svg WebEngineWidgets)
 
 include(FetchContent)
 set(QLEMENTINE_SANDBOX OFF CACHE BOOL "" FORCE)
@@ -19,6 +19,20 @@ FetchContent_Declare(Qlementine
   GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(Qlementine)
+
+set(CMARK_TESTS OFF CACHE BOOL "" FORCE)
+set(CMARK_SHARED OFF CACHE BOOL "" FORCE)
+set(CMARK_STATIC ON CACHE BOOL "" FORCE)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+set(CMAKE_AUTOMOC OFF)
+FetchContent_Declare(cmark_gfm
+  GIT_REPOSITORY https://github.com/github/cmark-gfm.git
+  GIT_TAG 0.29.0.gfm.13
+  GIT_SHALLOW TRUE
+  PATCH_COMMAND sed -i.bak "/ext_scanners\\.re/d" extensions/CMakeLists.txt
+)
+FetchContent_MakeAvailable(cmark_gfm)
+set(CMAKE_AUTOMOC ON)
 
 add_library(hunk_core STATIC
   src/DiffDoc.cpp
@@ -47,6 +61,7 @@ add_executable(hunk
   src/MainRecent.cpp
   src/BarIcon.cpp
   src/MainChrome.cpp
+  src/MainAbout.cpp
   src/MainFilePane.cpp
   src/MainTree.cpp
   src/MainHide.cpp
@@ -70,8 +85,10 @@ add_executable(hunk
   src/MdView.cpp
   src/MdChrome.cpp
   src/MdRead.cpp
+  src/MdHtml.cpp
   src/DiffScroll.cpp
   src/DiffInput.cpp
+  src/DiffTitle.cpp
   src/DiffSplit.cpp
   src/DiffSelect.cpp
   src/DiffMark.cpp
@@ -92,13 +109,36 @@ add_executable(hunk
   src/GitPoint.cpp
   src/GitFork.cpp
   src/ReviewStore.cpp
+  src/ReviewSync.cpp
   src/ReviewShift.cpp
 )
-target_link_libraries(hunk PRIVATE hunk_core Qt6::Widgets Qt6::Concurrent qlementine)
+target_include_directories(hunk PRIVATE
+  ${cmark_gfm_SOURCE_DIR}/src
+  ${cmark_gfm_BINARY_DIR}/src
+  ${cmark_gfm_SOURCE_DIR}/extensions
+)
+target_compile_definitions(hunk PRIVATE CMARK_GFM_STATIC_DEFINE CMARK_GFM_EXTENSIONS_STATIC_DEFINE)
+target_link_libraries(hunk PRIVATE
+  hunk_core Qt6::Widgets Qt6::Concurrent Qt6::WebEngineWidgets qlementine
+  libcmark-gfm-extensions_static libcmark-gfm_static
+)
 target_compile_definitions(hunk PRIVATE HUNK_VERSION="${PROJECT_VERSION}")
 
 set_source_files_properties(icons/hunk.png PROPERTIES QT_RESOURCE_ALIAS hunk.png)
 qt_add_resources(hunk hunk_icons PREFIX "/icons" FILES icons/hunk.png)
+
+set_source_files_properties(third_party/markdown/github-light.css PROPERTIES QT_RESOURCE_ALIAS github-light.css)
+set_source_files_properties(third_party/markdown/github-dark.css PROPERTIES QT_RESOURCE_ALIAS github-dark.css)
+set_source_files_properties(third_party/markdown/highlight.js PROPERTIES QT_RESOURCE_ALIAS highlight.js)
+set_source_files_properties(third_party/markdown/hl-light.css PROPERTIES QT_RESOURCE_ALIAS hl-light.css)
+set_source_files_properties(third_party/markdown/hl-dark.css PROPERTIES QT_RESOURCE_ALIAS hl-dark.css)
+qt_add_resources(hunk hunk_md PREFIX "/md" FILES
+  third_party/markdown/github-light.css
+  third_party/markdown/github-dark.css
+  third_party/markdown/highlight.js
+  third_party/markdown/hl-light.css
+  third_party/markdown/hl-dark.css
+)
 
 if(APPLE)
   configure_file(icons/Info.plist.in ${CMAKE_BINARY_DIR}/Info.plist @ONLY)
@@ -134,6 +174,7 @@ add_executable(hunk_test
   tests/review_test.cpp
   tests/shift_test.cpp
   src/ReviewStore.cpp
+  src/ReviewSync.cpp
   src/ReviewShift.cpp
 )
 target_link_libraries(hunk_test PRIVATE hunk_core Qt6::Core)
