@@ -87,6 +87,7 @@ Feature: Review comments
     And a review comments on a diff line
     When that line stays in the file at a new line
     Then the review stays on the new line
+    And a comment on a span of lines does the same
 
   Scenario: The same text on another line does not take a review
     Given auto cleanup is on

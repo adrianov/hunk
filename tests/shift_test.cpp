@@ -29,11 +29,11 @@ DiffDoc diffOf(const QString &body)
     return parseDiff(QStringLiteral("diff --git a.rb a.rb\n--- a.rb\n+++ a.rb\n") + body);
 }
 
-bool keptAt(const ReviewStore &store, int line, bool inDiff, const char *body)
+bool keptAt(const ReviewStore &store, int line, bool inDiff, const char *body, int end = 0)
 {
     const ReviewNote note = store.notes().value(0);
     return store.notes().size() == 1 && note.line == line && note.inDiff == inDiff
-        && note.body == QLatin1String(body);
+        && note.body == QLatin1String(body) && (end == 0 || note.end == end);
 }
 
 void testShiftedLine()
@@ -70,6 +70,15 @@ QString shiftedRepo(const QString &root)
     return root;
 }
 
+QString spanRepo(const QString &root, const char *text)
+{
+    QSettings::setPath(QSettings::NativeFormat, QSettings::UserScope, root);
+    QFile file(QDir(root).filePath(QStringLiteral("a.rb")));
+    CHECK(file.open(QIODevice::WriteOnly));
+    file.write(text);
+    return root;
+}
+
 void testRangeStays()
 {
     ReviewStore store;
@@ -98,6 +107,29 @@ void testRangeFollows()
     CHECK(store.notes().at(0).end == 4);
 }
 
+void testRangeOutside()
+{
+    QTemporaryDir dir;
+    CHECK(dir.isValid());
+    ReviewStore store;
+    store.setRepo(spanRepo(dir.path(), "intro\none\ntwo\n"));
+    store.ensure(QStringLiteral("a.rb"), false, 8, QStringLiteral("one\ntwo"), 9);
+    store.setBody(0, QStringLiteral("span"));
+    store.sync(diffOf(QStringLiteral("@@ -1 +1 @@\n-intro\n+intro!\n")), true);
+    CHECK(keptAt(store, 2, false, "span", 3));
+}
+
+void testRangeFileChanged()
+{
+    QTemporaryDir dir;
+    CHECK(dir.isValid());
+    ReviewStore store;
+    store.setRepo(spanRepo(dir.path(), "intro\none\ntwo!\n"));
+    store.ensure(QStringLiteral("a.rb"), false, 8, QStringLiteral("one\ntwo"), 9);
+    store.sync(diffOf(QStringLiteral("@@ -1 +1 @@\n-intro\n+intro!\n")), true);
+    CHECK(store.notes().isEmpty());
+}
+
 void testShiftedOutsideDiff()
 {
     QTemporaryDir dir;
@@ -120,6 +152,8 @@ int shiftTests()
     testRangeStays();
     testRangeDrops();
     testRangeFollows();
+    testRangeOutside();
+    testRangeFileChanged();
     testShiftedOutsideDiff();
     return g_fails;
 }

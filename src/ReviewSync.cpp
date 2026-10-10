@@ -39,7 +39,10 @@ int movedSpan(const DiffDoc &doc, const ReviewNote &note, const QString &root, L
     ReviewNote moved = note;
     moved.line = start;
     moved.end = start + (note.end - note.line);
-    return spanText(doc, moved) == note.snippet ? start : 0;
+    const QString diffText = spanText(doc, moved);
+    if (diffText == note.snippet)
+        return start;
+    return diffText.isEmpty() && spanOnDisk(doc, root, moved, cache) ? start : 0;
 }
 
 bool markMissing(ReviewNote *note)
@@ -71,6 +74,16 @@ bool followLine(ReviewNote *note, int line, const DiffDoc &doc)
     return true;
 }
 
+bool takeMoved(ReviewNote *note, int start, const DiffDoc &doc)
+{
+    const bool moved = start != note->line;
+    note->end += start - note->line;
+    note->line = start;
+    if (spanText(doc, *note).isEmpty())
+        return markMissing(note) || moved;
+    return adoptLine(note, note->snippet) || moved;
+}
+
 bool dropStale(QList<ReviewNote> *notes, int index, bool inDiff, const QString &text, bool dropChanged)
 {
     ReviewNote &note = (*notes)[index];
@@ -97,12 +110,8 @@ int syncRange(QList<ReviewNote> *notes, int index, const DiffDoc &doc, const QSt
     if (!text.isEmpty() && (note.snippet.isEmpty() || text == note.snippet))
         return adoptLine(&note, text) ? 1 : 0;
     const int start = movedSpan(doc, note, root, cache);
-    if (start > 0) {
-        note.end += start - note.line;
-        note.line = start;
-        adoptLine(&note, note.snippet);
-        return 1;
-    }
+    if (start > 0)
+        return takeMoved(&note, start, doc) ? 1 : 0;
     return dropStale(notes, index, !text.isEmpty(), text, dropChanged) ? 1 : 0;
 }
 

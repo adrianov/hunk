@@ -168,6 +168,19 @@ int contextShift(const DiffDoc &doc, const ReviewNote &note, const QStringList &
 
 } // namespace
 
+bool spanOnDisk(const DiffDoc &doc, const QString &root, const ReviewNote &note, LineCache *cache)
+{
+    if (root.isEmpty() || note.oldSide || note.line <= 0 || note.end < note.line)
+        return false;
+    const QStringList lines = cachedLines(cache, root, diskPath(doc, note.path));
+    if (note.end > lines.size())
+        return false;
+    QStringList taken;
+    for (int line = note.line; line <= note.end; ++line)
+        taken.append(lines.at(line - 1));
+    return taken.join(QLatin1Char('\n')) == note.snippet;
+}
+
 int shiftedLine(const DiffDoc &doc, const QString &root, const ReviewNote &note, LineCache *cache)
 {
     if (note.snippet.isEmpty() || replacedSnippet(doc, note))

@@ -16,3 +16,6 @@ struct LineCache {
 
 // Line number where the commented text now sits, or 0 when it did not move.
 int shiftedLine(const DiffDoc &doc, const QString &root, const ReviewNote &note, LineCache *cache);
+
+// True when the note's lines still match its snippet in the worktree.
+bool spanOnDisk(const DiffDoc &doc, const QString &root, const ReviewNote &note, LineCache *cache);
