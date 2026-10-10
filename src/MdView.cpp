@@ -109,8 +109,8 @@ void MdView::track(int file, const DiffDoc &doc, const QString &root)
 
 void MdView::reload(const DiffDoc &doc, const QString &root)
 {
-    if (m_file < 0 || m_file >= doc.files.size())
-        m_file = doc.files.isEmpty() ? -1 : 0;
+    if (m_file >= doc.files.size())
+        m_file = -1;
     track(m_file, doc, root);
 }
 

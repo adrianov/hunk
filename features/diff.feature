@@ -245,6 +245,11 @@ Feature: Diff view
     When I choose Source
     Then the diff of that file is on screen again
 
+  Scenario: A rendered file that leaves the diff returns to the source
+    Given I am reading "README.md" rendered
+    When that file is no longer in the diff
+    Then the diff is on screen again
+
   Scenario: About Hunk
     Given hunk is open
     When I choose About from the application menu on macOS, or from Help on Linux
