@@ -11,7 +11,21 @@ Feature: Diff view
     And toolbar labels use the normal text color
     And the Merge request menu uses the same arrow as Base and Branch
     And the dock or taskbar shows the Hunk icon
-    And on macOS the dock icon has the system rounded shape
+    And on macOS the dock and the app switcher show that icon sharp, in the system rounded shape
+
+  Scenario: Opening with no path
+    Given I run hunk with no path
+    Then the last repository opens, or the current directory when none was opened
+
+  Scenario: Open a repository from the File menu
+    Given hunk is open
+    When I choose Open and pick a repository folder
+    Then that repository is on screen
+
+  Scenario: Drop a repository on the window
+    Given hunk is open
+    When I drop a repository folder on the window
+    Then that repository is on screen
 
   Scenario: Open Recent reopens a repository
     Given I have opened more than one repository
@@ -30,16 +44,58 @@ Feature: Diff view
     Then the base selector shows the branch this work was cut from, with ^ or ~N when that cut is an older commit
     And the branch selector shows the current branch
     And the branch list puts the newest change first
-    And typing in either box filters that list without leaving the field
+    And the branch list scrolls with a scrollbar
+    And typing in either box keeps that text and lists matching branches under the field
+    And I can type a ref that is not listed and press Return to use it
     And a branch name stays readable on the toolbar, shortened only when it does not fit there
     And the diff is a merge request between them
     And uncommitted changes on the current branch are included
 
+  Scenario: Uncommitted and staged diffs
+    Given a repository is on screen
+    When I choose Uncommitted
+    Then the diff is staged and unstaged changes against HEAD
+    When I choose Staged
+    Then the diff is staged changes only
+
   Scenario: The file list shows added and removed lines
     Given a diff is on screen
-    Then each file's added count is green and its removed count is red
+    Then files are grouped by folder
+    And each file's added count is green and its removed count is red
     And under the file list the total added lines are green and the total removed lines are red
     And that total stays visible while the file list scrolls
+
+  Scenario: Copy a file path from the list
+    Given a diff of "src/app.rb"
+    When I open the context menu on that file in the file list
+    Then I can copy its relative path
+    And the clipboard contains "src/app.rb"
+
+  Scenario: Filter the file list
+    Given a diff is on screen
+    When I type in Filter files
+    Then the list shows only files whose name matches
+
+  Scenario: A new file uses one pane
+    Given a diff of a file that was added
+    Then that file is shown in one pane
+
+  Scenario: Mark a file reviewed hides it until it changes
+    Given a diff is on screen
+    Then each file has a check mark on the right, labeled Mark as reviewed
+    When I mark a file reviewed
+    Then that file leaves the list and the diff
+    And the totals under the list no longer include it
+    When that file changes
+    Then it shows in the list and the diff again
+    When I open a review comment on a hidden file
+    Then that file is shown again
+
+  Scenario: Unhide reviewed files
+    Given some files are marked reviewed
+    Then the totals bar offers to unhide those reviewed files, on the right
+    When I unhide them
+    Then the full diff is on screen again
 
   Scenario: The main branch differs from its origin
     Given local main or master is ahead of or behind its origin
@@ -121,6 +177,16 @@ Feature: Diff view
     Then that line is shown as removed and added
     And individual words are not highlighted
 
+  Scenario: Changed words are highlighted
+    Given a changed line where a word differs
+    Then that word is highlighted
+    And the rest of the line is not
+
+  Scenario: The file header stays put while scrolling
+    Given a diff of a long file
+    When I scroll inside that file
+    Then its name stays at the top of the diff
+
   Scenario: Copy text from a diff pane
     Given a diff is on screen
     When I select text in the left or the right pane
@@ -169,6 +235,15 @@ Feature: Diff view
     And "italics" is italic
     And "gone" is struck through
     And the "**", "*", and "~~" marks are colored as keywords
+
+  Scenario: A markdown file can be read rendered
+    Given a diff of "README.md"
+    Then Source and Rendered sit above that diff
+    When I choose Rendered
+    Then that file is shown as a rendered document
+    And both sides are shown when the file changed on each side
+    When I choose Source
+    Then the diff of that file is on screen again
 
   Scenario: About Hunk
     Given hunk is open

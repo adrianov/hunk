@@ -3,6 +3,29 @@
 
 Feature: Review comments
 
+  Scenario: Comment on a line number
+    Given a diff of "src/app.rb"
+    When I click the line number on line 1
+    Then I can write a review comment for that line
+
+  Scenario: One comment per line
+    Given a review comments on a diff line
+    When I comment on that line again
+    Then the review list still has one comment for it
+
+  Scenario: Copy a line comment for an agent
+    Given a diff of "src/app.rb"
+    When I comment on line 1
+    And I copy reviews
+    Then the clipboard contains "`src/app.rb:1`"
+    And the clipboard contains that line's text
+
+  Scenario: Comments stay with the app
+    Given I have a review comment
+    When I reopen the repository
+    Then that comment is still there
+    And it was not written into the repository
+
   Scenario: Refresh keeps the comment being edited
     Given I am typing in a review comment
     When the diff refreshes
