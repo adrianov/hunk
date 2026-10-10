@@ -174,6 +174,7 @@ private:
     QListWidget *m_notes = nullptr;
     QPlainTextEdit *m_editor = nullptr;
     QPushButton *m_copy = nullptr;
+    QPushButton *m_clear = nullptr;
     QCheckBox *m_cleanup = nullptr;
     QDockWidget *m_dock = nullptr;
     DiffDoc m_doc;

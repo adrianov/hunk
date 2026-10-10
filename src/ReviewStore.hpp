@@ -20,6 +20,7 @@ public:
     int ensure(const QString &path, bool oldSide, int line, const QString &snippet, int end = 0);
     void setBody(int index, const QString &body);
     void removeAt(int index);
+    void clear();
     void sync(const DiffDoc &doc, bool dropChanged);
 
 signals:

@@ -53,10 +53,14 @@ QCheckBox *makeCleanup(QWidget *parent, bool smoke)
     return box;
 }
 
-QHBoxLayout *reviewButtons(QPushButton *copy, QCheckBox *cleanup)
+QHBoxLayout *reviewButtons(QWidget *parent, QPushButton *&copy, QPushButton *&clear, QCheckBox *cleanup)
 {
+    copy = new QPushButton(QStringLiteral("Copy reviews"), parent);
+    setButtonIcon(copy, buttonIcon(ButtonIcon::Copy));
+    clear = new QPushButton(QStringLiteral("Clear reviews"), parent);
     auto *buttons = new QHBoxLayout();
     buttons->addWidget(copy);
+    buttons->addWidget(clear);
     buttons->addWidget(cleanup);
     buttons->addStretch();
     return buttons;
@@ -69,15 +73,13 @@ QWidget *MainWindow::reviewPanel()
     m_notes = new QListWidget(this);
     m_notes->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_editor = makeEditor(this);
-    m_copy = new QPushButton(QStringLiteral("Copy reviews"), this);
-    setButtonIcon(m_copy, buttonIcon(ButtonIcon::Copy));
     m_cleanup = makeCleanup(this, m_smoke);
     auto *panel = new QWidget(this);
     auto *layout = new QVBoxLayout(panel);
     layout->setContentsMargins(8, 8, 8, 8);
     layout->addWidget(m_notes, 1);
     layout->addWidget(m_editor, 1);
-    layout->addLayout(reviewButtons(m_copy, m_cleanup));
+    layout->addLayout(reviewButtons(this, m_copy, m_clear, m_cleanup));
     return panel;
 }
 
@@ -128,6 +130,7 @@ void MainWindow::wireNotes()
     connect(m_notes, &QListWidget::currentRowChanged, this, &MainWindow::showNote);
     connect(m_editor, &QPlainTextEdit::textChanged, this, &MainWindow::saveNote);
     connect(m_copy, &QPushButton::clicked, this, &MainWindow::copyReviews);
+    connect(m_clear, &QPushButton::clicked, m_store, &ReviewStore::clear);
     connect(m_cleanup, &QCheckBox::toggled, this, [this](bool on) {
         if (!m_smoke)
             QSettings().setValue(QStringLiteral("autoCleanup"), on);

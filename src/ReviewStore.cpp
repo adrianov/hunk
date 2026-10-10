@@ -83,6 +83,16 @@ void ReviewStore::removeAt(int index)
     emit structureChanged();
 }
 
+void ReviewStore::clear()
+{
+    if (m_notes.isEmpty())
+        return;
+    m_timer.stop();
+    m_notes.clear();
+    write();
+    emit structureChanged();
+}
+
 void ReviewStore::sync(const DiffDoc &doc, bool dropChanged)
 {
     if (!applyNotes(&m_notes, doc, m_root, dropChanged))
