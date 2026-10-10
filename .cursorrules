@@ -51,7 +51,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/DiffFold.cpp` / `DiffFold.hpp` — which unchanged lines collapse
 - `src/DiffFoldView.cpp` — fold bar paint and clicks; a search match opens that fold
 - `src/DiffLayout.cpp` — per-file line wrap cache and band relayout
-- `src/GitRepo.cpp` / `GitRepo.hpp` — background git load
+- `src/GitRepo.cpp` / `GitRepo.hpp` / `GitRename.cpp` — background git load; a staged rename stays one file
 - `src/GitBlob.cpp` — file text for each side of a diff
 - `src/GitCmd.cpp` / `GitDetail.hpp` — git process, base and branch refs
 - `src/GitStamp.cpp` — head, worktree status, resolved base, and ignored directories

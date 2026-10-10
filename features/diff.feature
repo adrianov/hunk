@@ -287,3 +287,9 @@ Feature: Diff view
     Given "app.rb" is renamed to "app.cpp"
     Then the old side colors Ruby
     And the new side colors C++
+
+  Scenario: A renamed file stays one file
+    Given a file was renamed and then changed
+    When I view uncommitted changes or this branch's merge request
+    Then the file list shows the old name and the new name
+    And the diff is that one rename
