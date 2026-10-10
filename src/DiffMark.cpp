@@ -110,7 +110,7 @@ void DiffCanvas::takeWord(const TextMark &hit)
 
 void DiffCanvas::pickWord(QMouseEvent *mouse)
 {
-    if (pressIgnored(mouse) || evenSplit(mouse))
+    if (pressIgnored(mouse) || evenSplit(mouse) || headerPress(mouse))
         return;
     const TextMark hit = textAt(int(mouse->position().x()), int(mouse->position().y()) + verticalScrollBar()->value());
     if (!hit.code)
@@ -131,6 +131,19 @@ bool DiffCanvas::markEnds(TextMark *from, TextMark *to) const
         *to = swap;
     }
     return from->row != to->row || from->pos != to->pos;
+}
+
+bool DiffCanvas::markedRows(int file, int row, bool oldSide, int *from, int *to) const
+{
+    TextMark start;
+    TextMark stop;
+    if (!markEnds(&start, &stop) || start.file != file || start.old != oldSide)
+        return false;
+    if (row < start.row || row > stop.row || start.row == stop.row)
+        return false;
+    *from = start.row;
+    *to = stop.row;
+    return true;
 }
 
 bool DiffCanvas::markSpan(int file, int row, bool oldSide, int size, int *start, int *end) const

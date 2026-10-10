@@ -67,10 +67,25 @@ void testExportPlain()
     CHECK(reviewMarkdown(QStringLiteral("t"), {ReviewNote{}}).isEmpty());
 }
 
+void testExportRange()
+{
+    ReviewNote note;
+    note.path = QStringLiteral("src/app.rb");
+    note.line = 2;
+    note.end = 4;
+    note.snippet = QStringLiteral("one\ntwo\nthree");
+    note.body = QStringLiteral("All three.");
+    const QString text = reviewMarkdown(QStringLiteral("t"), {note});
+    CHECK(text.contains(QStringLiteral("`src/app.rb:2-4`")));
+    CHECK(text.contains(QStringLiteral("> one\n> two\n> three\n")));
+    CHECK(text.contains(QStringLiteral("`path:first-last`")));
+}
+
 void testExport()
 {
     testExportOld();
     testExportPlain();
+    testExportRange();
 }
 
 DiffRow wordRow(const char *body)

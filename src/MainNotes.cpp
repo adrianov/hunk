@@ -103,7 +103,7 @@ bool MainWindow::noteEvents(QObject *object, QEvent *event)
 
 QString noteLabel(const ReviewNote &note)
 {
-    QString label = note.path + QLatin1Char(':') + QString::number(note.line);
+    QString label = note.path + QLatin1Char(':') + noteSpan(note);
     if (note.oldSide)
         label += QStringLiteral(" (old)");
     if (!note.inDiff)
@@ -164,8 +164,10 @@ void MainWindow::pushNoteKeys()
 {
     QSet<QString> keys;
     for (const ReviewNote &note : m_store->notes()) {
-        if (note.inDiff)
-            keys.insert(noteKey(note.path, note.oldSide, note.line));
+        if (!note.inDiff)
+            continue;
+        for (int line = note.line; line <= qMax(note.line, note.end); ++line)
+            keys.insert(noteKey(note.path, note.oldSide, line));
     }
     m_diff->setNoteKeys(keys);
 }

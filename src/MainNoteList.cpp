@@ -84,11 +84,12 @@ struct NoteId {
     QString path;
     bool oldSide = false;
     int line = -1;
+    int end = 0;
 };
 
 NoteId noteId(const ReviewNote &note)
 {
-    return {note.path, note.oldSide, note.line};
+    return {note.path, note.oldSide, note.line, note.end > note.line ? note.end : 0};
 }
 
 void tagId(QListWidgetItem *item, const NoteId &id)
@@ -96,6 +97,7 @@ void tagId(QListWidgetItem *item, const NoteId &id)
     item->setData(Qt::UserRole, id.path);
     item->setData(Qt::UserRole + 1, id.oldSide);
     item->setData(Qt::UserRole + 2, id.line);
+    item->setData(Qt::UserRole + 3, id.end);
 }
 
 NoteId selectedId(const QListWidget *list)
@@ -104,7 +106,7 @@ NoteId selectedId(const QListWidget *list)
     if (!current)
         return {};
     return {current->data(Qt::UserRole).toString(), current->data(Qt::UserRole + 1).toBool(),
-            current->data(Qt::UserRole + 2).toInt()};
+            current->data(Qt::UserRole + 2).toInt(), current->data(Qt::UserRole + 3).toInt()};
 }
 
 void dropId(ReviewStore *store, const NoteId &id)
@@ -112,7 +114,8 @@ void dropId(ReviewStore *store, const NoteId &id)
     const QList<ReviewNote> &notes = store->notes();
     for (int index = 0; index < notes.size(); ++index) {
         const ReviewNote &note = notes.at(index);
-        if (note.path == id.path && note.oldSide == id.oldSide && note.line == id.line) {
+        const int end = note.end > note.line ? note.end : 0;
+        if (note.path == id.path && note.oldSide == id.oldSide && note.line == id.line && end == id.end) {
             store->removeAt(index);
             return;
         }
@@ -176,7 +179,8 @@ void MainWindow::refreshNotes()
     const NoteId picked = selectedId(m_notes);
     m_noteLock = true;
     fillNotes();
-    restoreNoteRow(keptNote(slot, oldCount, picked.path, picked.oldSide, picked.line, typed, editing), editing);
+    restoreNoteRow(keptNote(slot, oldCount, picked.path, picked.oldSide, picked.line, picked.end, typed, editing),
+                   editing);
     placeNoteRows();
     m_noteLock = false;
 }

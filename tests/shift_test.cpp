@@ -70,6 +70,34 @@ QString shiftedRepo(const QString &root)
     return root;
 }
 
+void testRangeStays()
+{
+    ReviewStore store;
+    store.ensure(QStringLiteral("a.rb"), false, 1, QStringLiteral("one\ntwo"), 2);
+    store.setBody(0, QStringLiteral("span"));
+    store.sync(diffOf(QStringLiteral("@@ -1,2 +1,2 @@\n one\n two\n")), true);
+    CHECK(keptAt(store, 1, true, "span"));
+    CHECK(store.notes().at(0).end == 2);
+}
+
+void testRangeDrops()
+{
+    ReviewStore store;
+    store.ensure(QStringLiteral("a.rb"), false, 1, QStringLiteral("one\ntwo"), 2);
+    store.sync(diffOf(QStringLiteral("@@ -1,2 +1,2 @@\n one\n-two\n+two!\n")), true);
+    CHECK(store.notes().isEmpty());
+}
+
+void testRangeFollows()
+{
+    ReviewStore store;
+    store.ensure(QStringLiteral("a.rb"), false, 2, QStringLiteral("one\ntwo"), 3);
+    store.setBody(0, QStringLiteral("span"));
+    store.sync(diffOf(QStringLiteral("@@ -1,3 +1,4 @@\n context\n+added\n one\n two\n")), true);
+    CHECK(keptAt(store, 3, true, "span"));
+    CHECK(store.notes().at(0).end == 4);
+}
+
 void testShiftedOutsideDiff()
 {
     QTemporaryDir dir;
@@ -89,6 +117,9 @@ int shiftTests()
     testShiftedLine();
     testChangedLineDrops();
     testDuplicateDrops();
+    testRangeStays();
+    testRangeDrops();
+    testRangeFollows();
     testShiftedOutsideDiff();
     return g_fails;
 }

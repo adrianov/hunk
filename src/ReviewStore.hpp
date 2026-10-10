@@ -17,7 +17,7 @@ public:
 
     void setRepo(const QString &root);
     const QList<ReviewNote> &notes() const { return m_notes; }
-    int ensure(const QString &path, bool oldSide, int line, const QString &snippet);
+    int ensure(const QString &path, bool oldSide, int line, const QString &snippet, int end = 0);
     void setBody(int index, const QString &body);
     void removeAt(int index);
     void sync(const DiffDoc &doc, bool dropChanged);
