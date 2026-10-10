@@ -1,14 +1,14 @@
 // Copyright © 2026 Peter Adrianov
 // SPDX-License-Identifier: MIT
 
+#include "MainRef.hpp"
+
 #include <QAbstractItemView>
 #include <QComboBox>
 #include <QCompleter>
 #include <QLineEdit>
 #include <QMouseEvent>
 #include <QTimer>
-
-void showRefText(QComboBox *box);
 
 class RefPress : public QObject {
 public:

@@ -3,6 +3,8 @@
 
 #include "MainWindow.hpp"
 
+#include "MainRef.hpp"
+
 #include <QGuiApplication>
 #include <QLabel>
 #include <QSizePolicy>

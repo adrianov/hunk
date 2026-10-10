@@ -7,7 +7,6 @@
 
 #include <QIcon>
 
-class QComboBox;
 class QPushButton;
 class QLabel;
 class QWidget;
@@ -25,4 +24,3 @@ void saveThemePick(ThemePick pick);
 QString noteLabel(const ReviewNote &note);
 QLabel *rowLabel(const QWidget *row);
 void useTextColor(QWidget *widget);
-void showRefText(QComboBox *box);

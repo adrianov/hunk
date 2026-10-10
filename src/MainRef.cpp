@@ -3,6 +3,8 @@
 
 #include "MainWindow.hpp"
 
+#include "MainRef.hpp"
+
 #include <QAbstractItemView>
 #include <QComboBox>
 #include <QFontMetrics>
@@ -77,8 +79,6 @@ void fitRefBox(QComboBox *box)
     box->view()->setTextElideMode(Qt::ElideNone);
     finishRefEdit(box);
 }
-
-void watchRefFilter(QComboBox *box);
 
 void addRef(QToolBar *bar, QComboBox **box, const QString &label, const QString &tip)
 {
