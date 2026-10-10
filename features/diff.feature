@@ -44,9 +44,11 @@ Feature: Diff view
     Then the base selector shows the branch this work was cut from, with ^ or ~N when that cut is an older commit
     And the branch selector shows the current branch
     And the branch list puts the newest change first
-    And the branch list scrolls with a scrollbar
-    And typing in either box keeps that text and lists matching branches under the field
+    And the branch list scrolls with a scrollbar on the menu background
+    And the field accepts a typed ref, not only a picked branch
+    And typing in either box keeps that text in the field and lists matching branches under it
     And I can type a ref that is not listed and press Return to use it
+    And Escape puts the previous ref back
     And a branch name stays readable on the toolbar, shortened only when it does not fit there
     And the diff is a merge request between them
     And uncommitted changes on the current branch are included
@@ -61,6 +63,7 @@ Feature: Diff view
   Scenario: The file list shows added and removed lines
     Given a diff is on screen
     Then files are grouped by folder
+    And the diff lists those files in that same order
     And each file's added count is green and its removed count is red
     And under the file list the total added lines are green and the total removed lines are red
     And that total stays visible while the file list scrolls
@@ -76,6 +79,13 @@ Feature: Diff view
     When I type in Filter files
     Then the list shows only files whose name matches
 
+  Scenario: Search the text of listed files
+    Given a diff is on screen
+    When I type in Search in files
+    Then the list shows only files whose content matches
+    And the diff highlights that text
+    And Filter files still limits that list by name
+
   Scenario: A new file uses one pane
     Given a diff of a file that was added
     Then that file is shown in one pane
@@ -83,6 +93,7 @@ Feature: Diff view
   Scenario: Mark a file reviewed hides it until it changes
     Given a diff is on screen
     Then each file has a check mark on the right, labeled Mark as reviewed
+    And the diff file title has that check on the left of the name
     When I mark a file reviewed
     Then that file leaves the list and the diff
     And the totals under the list no longer include it
@@ -93,7 +104,7 @@ Feature: Diff view
 
   Scenario: Unhide reviewed files
     Given some files are marked reviewed
-    Then the totals bar offers to unhide those reviewed files, on the right
+    Then the totals bar has a button to unhide those reviewed files, on the right
     When I unhide them
     Then the full diff is on screen again
 
@@ -238,9 +249,10 @@ Feature: Diff view
 
   Scenario: A markdown file can be read rendered
     Given a diff of "README.md"
-    Then Source and Rendered sit above that diff
+    Then Source and Rendered sit on that file's title, beside its added and removed counts
     When I choose Rendered
-    Then that file is shown as a rendered document
+    Then that file is shown as a GitHub document
+    And headings, tables, and code blocks are styled
     And both sides are shown when the file changed on each side
     When I choose Source
     Then the diff of that file is on screen again
@@ -253,7 +265,7 @@ Feature: Diff view
   Scenario: About Hunk
     Given hunk is open
     When I choose About from the application menu on macOS, or from Help on Linux
-    Then a dialog shows the Hunk version and the copyright
+    Then a dialog shows the Hunk icon, the version, and the copyright
 
   Scenario: Theme follows the system
     Given hunk is open

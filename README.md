@@ -7,23 +7,23 @@ Copyright © 2026 Peter Adrianov. Licensed under the [MIT License](LICENSE).
 ## Features
 
 - Open a git repository and read the branch like a pull request. File → Open Recent lists repositories you opened, newest first. The toolbar shows the repository path in the normal text color. The dock and the app switcher on macOS show the Hunk icon sharp, in the system rounded shape, and the taskbar on Linux shows it
-- File list grouped by folder, two panes with a draggable border (double-click evens it), wrapped lines, syntax colors (keywords, methods, variables, strings, comments, and markdown headings, bold, italic, strike, code, and links), word highlights, sticky file header. A markdown file switches between that diff and the rendered document; a change shows the old and new documents side by side. Right-click a file in the list to copy its relative path. A file you already reviewed is highlighted when its diff changes again. Lines from that review stay a lighter green and red; lines changed since then are stronger
+- File list grouped by folder, and the diff lists files in that same order. Filter files matches names. Search in files, under that, matches file content and highlights it in the diff. Two panes with a draggable border (double-click evens it), wrapped lines, syntax colors (keywords, methods, variables, strings, comments, and markdown headings, bold, italic, strike, code, and links), word highlights, sticky file header. A markdown file's title carries its added and removed counts and switches between that diff and a GitHub-style document (headings, tables, task lists, and highlighted code); a change shows the old and new documents side by side. Right-click a file in the list to copy its relative path. A file you already reviewed is highlighted when its diff changes again. Lines from that review stay a lighter green and red; lines changed since then are stronger
 - A changed block stays open when it has 500 unchanged lines or fewer, matching the diff's own context. Longer blocks collapse to a few lines beside each change, and lines outside the block stay folded. Click the bar to show them, or the side arrows to show 20 lines and leave the rest folded
 - New files use one pane
 - Compare **merge request** (three-dot from the base, including uncommitted changes on the current branch; base defaults to the branch this work was cut from), **uncommitted** (`git diff HEAD`), or **staged**. The status bar names the target when the merge request would conflict with it
 - Switching back reloads the diff. Saves of tracked files from other programs, and a base that moves, show up while Hunk stays open. Ignored files are left alone. An unchanged diff stays put, including the scroll position
-- Under the file list, each file's added and removed counts are green and red, and the total stays visible. A check on the right of a file marks it reviewed and hides it until that file changes. The totals bar can unhide those files. The status bar says how many commits local `main` or `master` is ahead of or behind its origin
+- Under the file list, each file's added and removed counts are green and red, and the total stays visible. A check on the right of a file marks it reviewed and hides it until that file changes. The file title in the diff has the same check on the left of the name. The totals bar has a button to unhide those files. The status bar says how many commits local `main` or `master` is ahead of or behind its origin
 - Click a line number to comment. Double-click a comment in the review list to show that line in the diff. Comments stay in app settings, not in the repo
 - Select text in either pane and copy it from the pane menu or with Ctrl+C
 - **Copy reviews** writes markdown with `` `path:line` `` and the line text
 - Diff flags match a review diff: `-w -W --no-prefix --diff-algorithm=histogram`
-- **About** (the application menu on macOS, **Help** on Linux) shows the version and copyright. **View → Theme** follows the system, or switches to dark or light. Controls use Qlementine, so they match on macOS and Linux. Toolbar buttons use that filled button style. Open, Refresh, and Copy reviews each show a matching icon. Tooltips use the window background and the normal text color. Diff code uses the theme monospace size; the rest of the window uses the theme text size
+- **About** (the application menu on macOS, **Help** on Linux) shows the app icon, the version, and the copyright. **View → Theme** follows the system, or switches to dark or light. Controls use Qlementine, so they match on macOS and Linux. Toolbar buttons use that filled button style. Open, Refresh, and Copy reviews each show a matching icon. Tooltips use the window background and the normal text color. Diff code uses the theme monospace size; the rest of the window uses the theme text size
 
 Untracked files are not part of `git diff`.
 
 ## Build
 
-Needs CMake, a C++20 compiler, Qt 6.9 or newer (Widgets, Svg, Concurrent), and `git`. Qlementine is fetched when configuring.
+Needs CMake, a C++20 compiler, Qt 6.9 or newer (Widgets, Svg, Concurrent, WebEngine), and `git`. Qlementine and cmark-gfm are fetched when configuring.
 
 macOS (Homebrew Qt):
 
@@ -58,7 +58,7 @@ cmake --build build
 
 A path opens that repository as a merge request. With no path, Hunk opens the last repository, or the current directory.
 
-The base box defaults to where the branch left its parent: the parent name when that commit is the branch tip (`origin/main`), or `origin/main^` / `origin/main~4` when it is older. It then lists upstream, `origin/main`, `main`, `origin/master`, and `master` when they exist. The branch box lists local branches with the newest change first, and the current branch selected. That list scrolls with a scrollbar. Typing in either box keeps that text and lists matching branches under the field. Type another ref and press Return.
+The base box defaults to where the branch left its parent: the parent name when that commit is the branch tip (`origin/main`), or `origin/main^` / `origin/main~4` when it is older. It then lists upstream, `origin/main`, `main`, `origin/master`, and `master` when they exist. The branch box lists local branches with the newest change first, and the current branch selected. That list scrolls with a scrollbar on the menu background. The field accepts a typed ref, not only a picked branch. Typing in either box keeps that text and lists matching branches under the field. Type another ref and press Return.
 
 Drop a repository folder on the window to open it.
 
@@ -77,7 +77,7 @@ File references are `path:line` on the new side.
 The nil check is missing when the user is blank.
 ```
 
-A comment on the old side is marked `(old)`, and the copy then explains that marker. Comment with ⌘↩ / Ctrl+Enter on the selected line, or click the line number. One comment per line. Each review line has its own delete control. Auto cleanup, on by default, removes a review when that line's text changes or the line leaves the file. A line that only moves keeps its review, and the comment follows the new line when that text still identifies it. The same text on another line does not take the review.
+A comment on the old side is marked `(old)`, and the copy then explains that marker. Comment with ⌘↩ / Ctrl+Enter on the selected line, or click the line number. One comment per line. Select several lines and click a line number beside that selection to comment the whole interval, copied as `path:first-last`. Each review line has its own delete control. Auto cleanup, on by default, removes a review when that line's text changes or the line leaves the file. A line that only moves keeps its review, and the comment follows the new line when that text still identifies it. The same text on another line does not take the review.
 
 ## Layout
 

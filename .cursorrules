@@ -1,18 +1,19 @@
 # Hunk
 
-Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
+Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:first-last` markdown.
 
 ## Layout
 
 - `src/main.cpp` — process entry
-- `src/MacIcon.mm` / `MacIcon.hpp` — Dock and app-switcher icon on macOS
+- `src/MacIcon.mm` / `MacIcon.hpp` — Dock, app-switcher, and About icon on macOS
 - `icons/` — app icon for the macOS bundle and the Linux menu
 - `src/Smoke.cpp` / `Smoke.hpp` — offscreen `--smoke` check
 - `src/MainWindow.cpp` / `MainWindow.hpp` — window lifecycle
 - `src/MainActions.cpp` / `BarIcon.cpp` — menus, toolbar, and button icons
 - `src/MainRecent.cpp` — File menu recent repositories
-- `src/MainChrome.cpp` — splitter, review dock, and the about dialog
-- `src/MainFilePane.cpp` — file list, the totals bar, and copying a file's relative path
+- `src/MainChrome.cpp` — splitter, review dock, and wiring
+- `src/MainAbout.cpp` — About dialog
+- `src/MainFilePane.cpp` — file list, name filter, content search, the totals bar, and copying a file's relative path
 - `src/MainTree.cpp` — folder tree
 - `src/MainHide.cpp` — hide a reviewed file until it changes, and show it again
 - `src/MainSeen.cpp` / `MainSeen.hpp` / `MainHeat.cpp` — files and lines changed since review, and files hidden until they change
@@ -29,15 +30,15 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/Theme.cpp` — system, dark, and light palettes
 - `src/MainTheme.cpp` — theme menu and live system theme
 - `src/DiffCanvas.cpp` / `DiffCanvas.hpp` — diff view state
-- `src/MdView.cpp` / `MdView.hpp` / `MdChrome.cpp` / `MdRead.cpp` — rendered markdown, and the switch back to the diff
+- `src/MdView.cpp` / `MdView.hpp` / `MdChrome.cpp` / `MdRead.cpp` / `MdHtml.cpp` / `third_party/markdown/` — GitHub markdown preview, and the switch back to the diff
 - `src/DiffScroll.cpp` — scroll and sticky file tracking
-- `src/DiffInput.cpp` — gutter clicks
+- `src/DiffInput.cpp` / `DiffTitle.cpp` — gutter clicks, and the reviewed check on the file title
 - `src/DiffSplit.cpp` — drag the border between panes
 - `src/DiffSelect.cpp` — drag to select text and the copy menu
 - `src/DiffMark.cpp` — word selection and the copied text
 - `src/DiffHeader.cpp` — file header and labels
 - `src/DiffPaint.cpp` — row paint
-- `src/DiffSide.cpp` — one pane, word highlights, selected text
+- `src/DiffSide.cpp` — one pane, word highlights, search highlights, selected text
 - `src/DiffSyntax.cpp` / `DiffSyntax.hpp` — paint syntax colors
 - `src/Syntax.hpp` / `SyntaxRule.hpp` / `SyntaxLang.cpp` / `SyntaxScan.cpp` / `SyntaxText.cpp` / `SyntaxWord.cpp` / `SyntaxMd.cpp` / `SyntaxEmph.cpp` — language tokens
 - `src/DiffColors.cpp` / `DiffColors.hpp` — diff colors
@@ -58,7 +59,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` markdown.
 - `src/GitRef.cpp` — mtime of refs and packed-refs
 - `src/GitRange.cpp` — merge-request range
 - `src/GitPoint.cpp` / `GitFork.cpp` — branching point: the branch this work was cut from, or `branch^` / `branch~N`
-- `src/ReviewStore.cpp` / `ReviewStore.hpp` — comments in QSettings
+- `src/ReviewStore.cpp` / `ReviewStore.hpp` / `ReviewSync.cpp` — comments in QSettings, and keeping them when lines move
 - `src/ReviewShift.cpp` / `ReviewShift.hpp` — moved comment line
 - `src/ReviewNote.hpp` — one comment
 - `src/ReviewExport.cpp` / `ReviewExport.hpp` — agent markdown

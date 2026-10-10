@@ -20,6 +20,14 @@ Feature: Review comments
     Then the clipboard contains "`src/app.rb:1`"
     And the clipboard contains that line's text
 
+  Scenario: A selected span comments the line interval
+    Given a diff of "src/app.rb"
+    When I select the text of lines 2 through 4
+    And I click a line number beside that selection
+    Then the review comment refers to lines 2 through 4
+    When I copy reviews
+    Then the clipboard contains "`src/app.rb:2-4`"
+
   Scenario: Comments stay with the app
     Given I have a review comment
     When I reopen the repository
