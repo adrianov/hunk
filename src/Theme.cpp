@@ -9,9 +9,12 @@
 #include <oclero/qlementine/style/Theme.hpp>
 
 #include <QApplication>
+#include <QEvent>
+#include <QPainter>
 #include <QPalette>
 #include <QSettings>
 #include <QStyleHints>
+#include <QStyleOption>
 #include <QToolTip>
 
 namespace {
@@ -53,6 +56,28 @@ public:
         if (hint == SH_ComboBox_Popup)
             return 0;
         return QlementineStyle::styleHint(hint, option, widget, data);
+    }
+
+    // The menu panel is drawn only when SH_ComboBox_Popup is set, and that hint hides the scrollbar.
+    void polish(QWidget *widget) override
+    {
+        QlementineStyle::polish(widget);
+        if (!widget->inherits("QComboBoxPrivateContainer") || widget->property("hunkMenu").toBool())
+            return;
+        widget->setProperty("hunkMenu", true);
+        widget->installEventFilter(this);
+    }
+
+    bool eventFilter(QObject *watched, QEvent *event) override
+    {
+        if (event->type() != QEvent::Paint || !watched->property("hunkMenu").toBool())
+            return QlementineStyle::eventFilter(watched, event);
+        auto *popup = static_cast<QWidget *>(watched);
+        QPainter painter(popup);
+        QStyleOption option;
+        option.initFrom(popup);
+        drawPrimitive(PE_PanelMenu, &option, &painter, popup);
+        return true;
     }
 };
 
