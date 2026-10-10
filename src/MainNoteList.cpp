@@ -68,12 +68,12 @@ ListedRow noteRow(QListWidget *list, QListWidgetItem *item, const ReviewNote &no
 {
     auto *row = new QWidget;
     auto *layout = new QHBoxLayout(row);
-    layout->setContentsMargins(8, 4, 10, 4);
+    layout->setContentsMargins(10, 4, 8, 4);
     layout->setSpacing(6);
     auto *text = noteText(note, row);
     auto *drop = noteDelete(row);
-    layout->addWidget(text, 1);
     layout->addWidget(drop);
+    layout->addWidget(text, 1);
     row->setProperty("noteText", QVariant::fromValue(static_cast<QObject *>(text)));
     row->setToolTip(note.body);
     row->installEventFilter(new PickRow(list, item, row));
