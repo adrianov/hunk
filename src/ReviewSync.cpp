@@ -28,23 +28,6 @@ QString spanText(const DiffDoc &doc, const ReviewNote &note)
     return lines.join(QLatin1Char('\n'));
 }
 
-int movedSpan(const DiffDoc &doc, const ReviewNote &note, const QString &root, LineCache *cache)
-{
-    ReviewNote head = note;
-    head.end = 0;
-    head.snippet = note.snippet.section(QLatin1Char('\n'), 0, 0);
-    const int start = shiftedLine(doc, root, head, cache);
-    if (start <= 0)
-        return 0;
-    ReviewNote moved = note;
-    moved.line = start;
-    moved.end = start + (note.end - note.line);
-    const QString diffText = spanText(doc, moved);
-    if (diffText == note.snippet)
-        return start;
-    return diffText.isEmpty() && spanOnDisk(doc, root, moved, cache) ? start : 0;
-}
-
 bool markMissing(ReviewNote *note)
 {
     if (!note->inDiff)
@@ -109,7 +92,7 @@ int syncRange(QList<ReviewNote> *notes, int index, const DiffDoc &doc, const QSt
     const QString text = spanText(doc, note);
     if (!text.isEmpty() && (note.snippet.isEmpty() || text == note.snippet))
         return adoptLine(&note, text) ? 1 : 0;
-    const int start = movedSpan(doc, note, root, cache);
+    const int start = spanShift(doc, root, note, cache);
     if (start > 0)
         return takeMoved(&note, start, doc) ? 1 : 0;
     return dropStale(notes, index, !text.isEmpty(), text, dropChanged) ? 1 : 0;

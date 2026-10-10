@@ -3,23 +3,10 @@
 
 #include "ReviewShift.hpp"
 
-#include "DiffDetail.hpp"
 #include "DiffParse.hpp"
-
-#include <QDir>
-#include <QFile>
+#include "ReviewMatch.hpp"
 
 namespace {
-
-bool sameFile(const FileDiff &file, const QString &path)
-{
-    return file.path() == path || file.oldPath == path || file.newPath == path;
-}
-
-QString sideText(const DiffRow &row, bool oldSide)
-{
-    return oldSide ? row.leftText : row.rightText;
-}
 
 void addMatch(QList<int> *lines, int line, const QString &text, const QString &snippet)
 {
@@ -39,49 +26,12 @@ QList<int> diffMatches(const DiffDoc &doc, const ReviewNote &note)
     return lines;
 }
 
-QString diskPath(const DiffDoc &doc, const QString &path)
-{
-    for (const FileDiff &file : doc.files) {
-        if (sameFile(file, path))
-            return file.path();
-    }
-    return path;
-}
-
-QString trimmedLine(QFile *file)
-{
-    QString text = QString::fromUtf8(file->readLine());
-    if (text.endsWith(QLatin1Char('\n')))
-        text.chop(1);
-    if (text.endsWith(QLatin1Char('\r')))
-        text.chop(1);
-    return expandTabs(text);
-}
-
-QStringList readLines(const QString &root, const QString &path)
-{
-    QStringList lines;
-    QFile file(QDir(root).filePath(path));
-    if (!file.open(QIODevice::ReadOnly))
-        return lines;
-    while (!file.atEnd())
-        lines.push_back(trimmedLine(&file));
-    return lines;
-}
-
-QStringList cachedLines(LineCache *cache, const QString &root, const QString &path)
-{
-    if (!cache->files.contains(path))
-        cache->files.insert(path, readLines(root, path));
-    return cache->files.value(path);
-}
-
 QList<int> fileMatches(const QString &root, const DiffDoc &doc, const ReviewNote &note, LineCache *cache)
 {
     QList<int> lines;
     if (root.isEmpty() || note.oldSide)
         return lines;
-    const QStringList text = cachedLines(cache, root, diskPath(doc, note.path));
+    const QStringList text = cachedFile(doc, root, note.path, cache);
     for (int index = 0; index < text.size(); ++index)
         addMatch(&lines, index + 1, text.at(index), note.snippet);
     return lines;
@@ -168,19 +118,6 @@ int contextShift(const DiffDoc &doc, const ReviewNote &note, const QStringList &
 
 } // namespace
 
-bool spanOnDisk(const DiffDoc &doc, const QString &root, const ReviewNote &note, LineCache *cache)
-{
-    if (root.isEmpty() || note.oldSide || note.line <= 0 || note.end < note.line)
-        return false;
-    const QStringList lines = cachedLines(cache, root, diskPath(doc, note.path));
-    if (note.end > lines.size())
-        return false;
-    QStringList taken;
-    for (int line = note.line; line <= note.end; ++line)
-        taken.append(lines.at(line - 1));
-    return taken.join(QLatin1Char('\n')) == note.snippet;
-}
-
 int shiftedLine(const DiffDoc &doc, const QString &root, const ReviewNote &note, LineCache *cache)
 {
     if (note.snippet.isEmpty() || replacedSnippet(doc, note))
@@ -188,5 +125,5 @@ int shiftedLine(const DiffDoc &doc, const QString &root, const ReviewNote &note,
     const int only = chosenLine(diffMatches(doc, note) + fileMatches(root, doc, note, cache), note.line);
     if (only > 0 || root.isEmpty() || note.oldSide)
         return only;
-    return contextShift(doc, note, cachedLines(cache, root, diskPath(doc, note.path)));
+    return contextShift(doc, note, cachedFile(doc, root, note.path, cache));
 }

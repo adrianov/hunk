@@ -111,6 +111,7 @@ add_executable(hunk
   src/ReviewStore.cpp
   src/ReviewSync.cpp
   src/ReviewShift.cpp
+  src/ReviewSpan.cpp
 )
 target_include_directories(hunk PRIVATE
   ${cmark_gfm_SOURCE_DIR}/src
@@ -176,6 +177,7 @@ add_executable(hunk_test
   src/ReviewStore.cpp
   src/ReviewSync.cpp
   src/ReviewShift.cpp
+  src/ReviewSpan.cpp
 )
 target_link_libraries(hunk_test PRIVATE hunk_core Qt6::Core)
 
