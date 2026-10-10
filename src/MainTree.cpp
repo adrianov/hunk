@@ -3,15 +3,15 @@
 
 #include "MainWindow.hpp"
 
+#include "DiffCanvas.hpp"
 #include "DiffColors.hpp"
 #include "MainSeen.hpp"
 #include "MdView.hpp"
 
 #include <QHash>
 #include <QLineEdit>
+#include <QStringList>
 #include <QTreeWidget>
-
-#include <algorithm>
 
 namespace {
 
@@ -19,15 +19,6 @@ struct Group {
     QString folder;
     QList<int> files;
 };
-
-bool folderBefore(const Group &left, const Group &right)
-{
-    if (left.folder.isEmpty())
-        return !right.folder.isEmpty();
-    if (right.folder.isEmpty())
-        return false;
-    return left.folder.localeAwareCompare(right.folder) < 0;
-}
 
 bool matchesQuery(const FileDiff &file, const QString &query)
 {
@@ -45,16 +36,41 @@ void addFile(QList<Group> *groups, QHash<QString, int> *index, int fileIndex, co
     (*groups)[index->value(folder)].files.push_back(fileIndex);
 }
 
-QList<Group> collectGroups(const DiffDoc &doc, const QString &query, const QHash<QString, QString> &hidden)
+QString diffText(const FileDiff &file)
+{
+    QStringList lines;
+    for (const DiffRow &row : file.rows) {
+        if (row.leftNum > 0)
+            lines.append(row.leftText);
+        if (row.rightNum > 0 && row.rightText != row.leftText)
+            lines.append(row.rightText);
+    }
+    return lines.join(QLatin1Char('\n'));
+}
+
+bool matchesBody(const FileDiff &file, const QString &query, QHash<QString, QString> *cache)
+{
+    if (query.isEmpty())
+        return true;
+    if (file.binary)
+        return false;
+    auto found = cache->find(file.path());
+    if (found == cache->end())
+        found = cache->insert(file.path(), diffText(file));
+    return found->contains(query, Qt::CaseInsensitive);
+}
+
+QList<Group> collectGroups(const DiffDoc &doc, const QString &query, const QString &search,
+                           const QHash<QString, QString> &hidden, QHash<QString, QString> *cache)
 {
     QList<Group> groups;
     QHash<QString, int> index;
-    for (int fileIndex = 0; fileIndex < doc.files.size(); ++fileIndex) {
+    for (int fileIndex : listedOrder(doc)) {
         const FileDiff &file = doc.files.at(fileIndex);
-        if (!fileHidden(file, hidden) && matchesQuery(file, query))
-            addFile(&groups, &index, fileIndex, file.folder());
+        if (fileHidden(file, hidden) || !matchesQuery(file, query) || !matchesBody(file, search, cache))
+            continue;
+        addFile(&groups, &index, fileIndex, file.folder());
     }
-    std::sort(groups.begin(), groups.end(), folderBefore);
     return groups;
 }
 
@@ -116,10 +132,12 @@ void MainWindow::markSeenFile(int file)
 
 void MainWindow::rebuildTree()
 {
+    m_diff->setSearch(m_search->text().trimmed());
     m_navLock = true;
     m_tree->setProperty("checkHot", 0);
     m_tree->clear();
-    for (const Group &group : collectGroups(m_doc, m_filter->text().trimmed(), m_hidden))
+    for (const Group &group :
+         collectGroups(m_doc, m_filter->text().trimmed(), m_search->text().trimmed(), m_hidden, &m_bodies))
         addFolder(m_tree, group, m_doc, m_seen);
     m_tree->expandAll();
     m_navLock = false;

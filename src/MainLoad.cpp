@@ -90,6 +90,7 @@ void MainWindow::applyBases(const GitResult &result)
 void MainWindow::showLoadError(const GitResult &result)
 {
     m_doc = {};
+    m_bodies.clear();
     m_title.clear();
     m_conflict.clear();
     m_drift.clear();
@@ -110,25 +111,30 @@ void MainWindow::showLoadError(const GitResult &result)
 
 void MainWindow::showLoadedDiff(const GitResult &result)
 {
-    const int scroll = m_quiet ? m_diff->scrollTop() : m_scrollKeep;
     m_title = result.title;
     m_conflict = result.conflict;
     m_drift = result.drift;
     m_doc = result.doc;
+    m_bodies.clear();
     applySeen(&m_doc, m_seen);
     m_store->sync(m_doc, m_cleanup->isChecked());
     rebuildTree();
-    if (m_doc.files.isEmpty())
-        m_diff->setMessage(QStringLiteral("No changes."));
-    else {
-        m_diff->setDoc(m_doc, result.leftLabel, result.rightLabel, hiddenIndexes(m_doc, m_hidden));
-        m_diff->setScrollTop(scroll);
-    }
+    showDiff(result, m_quiet ? m_diff->scrollTop() : m_scrollKeep);
     m_md->setLabels(result.leftLabel, result.rightLabel);
     m_md->reload(m_doc, m_root);
     keepShownFile();
     pushNoteKeys();
     showLoadedTitle();
+}
+
+void MainWindow::showDiff(const GitResult &result, int scroll)
+{
+    if (m_doc.files.isEmpty()) {
+        m_diff->setMessage(QStringLiteral("No changes."));
+        return;
+    }
+    m_diff->setDoc(m_doc, result.leftLabel, result.rightLabel, hiddenIndexes(m_doc, m_hidden));
+    m_diff->setScrollTop(scroll);
 }
 
 void MainWindow::showLoadedTitle()

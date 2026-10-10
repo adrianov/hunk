@@ -18,12 +18,12 @@
 
 namespace {
 
-QLineEdit *fileFilter(QWidget *parent)
+QLineEdit *fileField(QWidget *parent, const QString &placeholder)
 {
-    auto *filter = new QLineEdit(parent);
-    filter->setPlaceholderText(QStringLiteral("Filter files"));
-    filter->setClearButtonEnabled(true);
-    return filter;
+    auto *field = new QLineEdit(parent);
+    field->setPlaceholderText(placeholder);
+    field->setClearButtonEnabled(true);
+    return field;
 }
 
 QTreeWidget *fileTree(QWidget *parent)
@@ -47,10 +47,17 @@ QLabel *lineStat(QWidget *parent)
 QPushButton *hideReset(QWidget *parent)
 {
     auto *button = new QPushButton(parent);
-    button->setFlat(true);
     button->setCursor(Qt::PointingHandCursor);
     button->setVisible(false);
     return button;
+}
+
+void stackFields(QVBoxLayout *layout, QWidget *parent, QLineEdit **filter, QLineEdit **search)
+{
+    *filter = fileField(parent, QStringLiteral("Filter files"));
+    *search = fileField(parent, QStringLiteral("Search in files"));
+    layout->addWidget(*filter);
+    layout->addWidget(*search);
 }
 
 QWidget *statBar(QWidget *parent, QLabel *stat, QPushButton *unhide)
@@ -80,13 +87,12 @@ QString listedPath(const QTreeWidget *tree, const DiffDoc &doc, const QPoint &po
 
 QWidget *MainWindow::makeFilePane()
 {
-    m_filter = fileFilter(this);
     m_tree = fileTree(this);
     auto *left = new QWidget(this);
     auto *layout = new QVBoxLayout(left);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
-    layout->addWidget(m_filter);
+    stackFields(layout, this, &m_filter, &m_search);
     layout->addWidget(m_tree, 1);
     m_stat = lineStat(left);
     m_unhide = hideReset(left);

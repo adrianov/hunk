@@ -29,17 +29,22 @@ public:
     void setDoc(const DiffDoc &doc, const QString &leftLabel, const QString &rightLabel, const QSet<int> &skip);
     void setSkipped(const QSet<int> &files);
     void setNoteKeys(const QSet<QString> &keys);
+    void setSearch(const QString &text);
     void showFile(int file);
     void showRow(int file, int row, bool oldSide);
     int scrollTop() const;
     void setScrollTop(int y);
+    int headerHeight() const { return m_headerH; }
+    void markReviewed(int file) { if (file >= 0) emit reviewRequested(file); }
     bool hasSelection() const { return m_selFile >= 0 && m_selRow >= 0; }
     int selectedFile() const { return m_selFile; }
     int selectedRow() const { return m_selRow; }
     bool selectedOldSide() const { return m_selOld; }
+    bool markedRows(int file, int row, bool oldSide, int *from, int *to) const;
 
 signals:
     void commentRequested(int file, int row, bool oldSide);
+    void reviewRequested(int file);
     void fileScrolled(int file);
 
 protected:
@@ -110,8 +115,20 @@ private:
                       bool oldSide);
     void paintTextMark(QPainter &painter, int cellX, int cellW, int top, int height, int file, int row, bool oldSide,
                        const QString &text, const QList<Piece> &pieces);
-    void paintFileHeader(QPainter &painter, const QRect &rect, const FileDiff &file, const QFont &font);
+    void paintSearch(QPainter &painter, int cellX, int cellW, int top, int height, const QString &text,
+                     const QList<Piece> &pieces);
+    void paintFileHeader(QPainter &painter, const QRect &rect, const FileDiff &file, const QFont &font, bool hot);
+    QRect titleCheck(const QRect &header) const;
+    bool stickyZone(int viewY, int scrollY) const;
+    int stuckTitle(int scrollY, QRect *check) const;
+    int bandTitle(int viewY, int scrollY, QRect *check) const;
+    int titleFile(int viewY, QRect *check) const;
+    bool titlePress(int x, int viewY);
+    bool hoverTitle(int x, int viewY);
+    void takePress(QMouseEvent *mouse);
+    void trackHover(QMouseEvent *mouse, int x, int y);
     bool pressIgnored(QMouseEvent *mouse) const;
+    bool headerPress(QMouseEvent *mouse) const;
     bool onSplit(const Band *band, int x) const;
     bool grabSplit(const Band *band, int x);
     bool dragSplit(int x, QMouseEvent *mouse);
@@ -152,6 +169,7 @@ private:
     QString m_leftLabel;
     QString m_rightLabel;
     QString m_message;
+    QString m_search;
     QList<Band> m_bands;
     QSet<QString> m_notes;
     QSet<int> m_skip;
@@ -177,5 +195,6 @@ private:
     bool m_dragText = false;
     int m_hoverFile = -1;
     int m_hoverRow = -1;
+    int m_checkFile = -1;
     int m_lastFile = -1;
 };

@@ -118,7 +118,33 @@ void paintRuns(QPainter &painter, const QFontMetrics &metrics, const QString &te
     }
 }
 
+void paintQuery(QPainter &painter, const QFontMetrics &metrics, const QString &text, const QList<Piece> &pieces, int x,
+                int top, int lineH, const QString &query, const QColor &color)
+{
+    int from = 0;
+    while (from < text.size()) {
+        const int at = text.indexOf(query, from, Qt::CaseInsensitive);
+        if (at < 0)
+            return;
+        paintRuns(painter, metrics, text, pieces, x, top, lineH, at, at + query.size(), color);
+        from = at + query.size();
+    }
+}
+
 } // namespace
+
+void DiffCanvas::paintSearch(QPainter &painter, int cellX, int cellW, int top, int height, const QString &text,
+                             const QList<Piece> &pieces)
+{
+    if (m_search.isEmpty() || text.isEmpty())
+        return;
+    painter.save();
+    painter.setClipRect(cellX + m_gutterW, top, qMax(1, cellW - m_gutterW), height);
+    painter.setPen(Qt::NoPen);
+    paintQuery(painter, QFontMetrics(m_mono), text, pieces, cellX + m_gutterW + 8, top, m_rowH, m_search,
+               QColor(226, 168, 32, 150));
+    painter.restore();
+}
 
 void DiffCanvas::paintTextMark(QPainter &painter, int cellX, int cellW, int top, int height, int file, int row,
                                bool oldSide, const QString &text, const QList<Piece> &pieces)
@@ -143,6 +169,7 @@ void DiffCanvas::paintOneSide(QPainter &painter, int cellX, int cellW, SideStyle
 {
     const SideColors colors = colorsFor(style, heat);
     fillCell(painter, cellX, cellW, top, height, m_gutterW, colors);
+    paintSearch(painter, cellX, cellW, top, height, text, pieces);
     paintTextMark(painter, cellX, cellW, top, height, file, row, oldSide, text, pieces);
     if (note)
         paintNoteDot(painter, cellX, top, m_rowH);

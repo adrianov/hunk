@@ -37,6 +37,20 @@ void paintFoldEdges(QPainter &painter, const QRect &rect, int count)
     painter.drawText(rect.adjusted(0, 0, -8, 0), Qt::AlignVCenter | Qt::AlignRight, up);
 }
 
+bool notedRow(const FileDiff &file, const DiffRow &row, const QSet<QString> &notes)
+{
+    return (row.leftNum > 0 && notes.contains(noteKey(file.path(), true, row.leftNum)))
+        || (row.rightNum > 0 && notes.contains(noteKey(file.path(), false, row.rightNum)));
+}
+
+bool searchedRow(const DiffRow &row, const QString &query)
+{
+    if (query.isEmpty())
+        return false;
+    return (row.leftNum > 0 && row.leftText.contains(query, Qt::CaseInsensitive))
+        || (row.rightNum > 0 && row.rightText.contains(query, Qt::CaseInsensitive));
+}
+
 } // namespace
 
 QSet<int> DiffCanvas::pinnedRows(int fileIndex) const
@@ -45,9 +59,7 @@ QSet<int> DiffCanvas::pinnedRows(int fileIndex) const
     const FileDiff &file = m_doc.files.at(fileIndex);
     for (int index = 0; index < file.rows.size(); ++index) {
         const DiffRow &row = file.rows.at(index);
-        const bool left = row.leftNum > 0 && m_notes.contains(noteKey(file.path(), true, row.leftNum));
-        const bool right = row.rightNum > 0 && m_notes.contains(noteKey(file.path(), false, row.rightNum));
-        if (left || right)
+        if (notedRow(file, row, m_notes) || searchedRow(row, m_search))
             open.insert(index);
     }
     return open;
