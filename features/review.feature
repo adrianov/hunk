@@ -65,6 +65,12 @@ Feature: Review comments
     And that text stays readable when the line is selected
     And the line shows as much of the comment as fits
 
+  Scenario: Clear all reviews
+    Given the review list has comments
+    When I choose Clear reviews
+    Then the review list is empty
+    And those comments are gone from the diff
+
   Scenario: Auto cleanup starts on
     Given the review list is open
     Then auto cleanup of changed lines is on
@@ -81,6 +87,7 @@ Feature: Review comments
     And a review comments on a diff line
     When that line leaves the file
     Then the review is removed
+    And a span that leaves the diff but remains unchanged in the file stays
 
   Scenario: A shifted line keeps its review
     Given auto cleanup is on
@@ -88,6 +95,7 @@ Feature: Review comments
     When that line stays in the file at a new line
     Then the review stays on the new line
     And a comment on a span of lines does the same
+    And that span still follows when its first line also appears elsewhere
 
   Scenario: The same text on another line does not take a review
     Given auto cleanup is on
@@ -95,12 +103,14 @@ Feature: Review comments
     When that line's text changes
     And the same text remains on another line
     Then the review is removed
+    And the same span of lines elsewhere does not take that review either
 
   Scenario: Auto cleanup can stay off
     Given auto cleanup is off
     And a review comments on a diff line
     When that line's text changes
     Then the review stays
+    And a comment on a span of lines stays too, with the new text
 
   Scenario: A line that leaves the diff can stay
     Given auto cleanup is off

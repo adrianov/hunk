@@ -60,7 +60,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/GitRange.cpp` — merge-request range
 - `src/GitPoint.cpp` / `GitFork.cpp` — branching point: the branch this work was cut from, or `branch^` / `branch~N`
 - `src/ReviewStore.cpp` / `ReviewStore.hpp` / `ReviewSync.cpp` — comments in QSettings, and keeping them when lines move
-- `src/ReviewShift.cpp` / `ReviewShift.hpp` — moved comment line
+- `src/ReviewShift.cpp` / `ReviewShift.hpp` / `ReviewSpan.cpp` / `ReviewMatch.hpp` — moved comment line or span
 - `src/ReviewNote.hpp` — one comment
 - `src/ReviewExport.cpp` / `ReviewExport.hpp` — agent markdown
 - `tests/parse_test.cpp` / `file_test.cpp` / `fold_test.cpp` / `gap_test.cpp` / `review_test.cpp` / `shift_test.cpp` — parser, fold, gap, and review checks

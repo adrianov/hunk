@@ -77,7 +77,7 @@ File references are `path:line` on the new side.
 The nil check is missing when the user is blank.
 ```
 
-A comment on the old side is marked `(old)`, and the copy then explains that marker. Comment with ⌘↩ / Ctrl+Enter on the selected line, or click the line number. One comment per line. Select several lines and click a line number beside that selection to comment the whole interval, copied as `path:first-last`. Each review line has its own delete control. Auto cleanup, on by default, removes a review when that line's text changes or the line leaves the file. A line that only moves keeps its review, and the comment follows the new line when that text still identifies it. The same text on another line does not take the review.
+A comment on the old side is marked `(old)`, and the copy then explains that marker. Comment with ⌘↩ / Ctrl+Enter on the selected line, or click the line number. One comment per line. Select several lines and click a line number beside that selection to comment the whole interval, copied as `path:first-last`. Each review line has its own delete control. Clear reviews removes every comment. Auto cleanup, on by default, removes a review when that line's text changes or the line leaves the file. A line that only moves keeps its review, and the comment follows the new line when that text still identifies it. A span follows the same way when the whole interval still matches, even if its first line appears more than once. A span that leaves the diff but is unchanged in the file stays. The same text, or the same span, on another line does not take the review.
 
 ## Layout
 
