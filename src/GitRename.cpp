@@ -27,19 +27,23 @@ QStringList cachedArgs()
             QStringLiteral("-z"), QStringLiteral("--find-renames"), QStringLiteral("--diff-filter=R")};
 }
 
-// Left side is the same revision as the rest of the diff: HEAD, or this branch's merge base.
-QStringList pairArgs(const QString &leftRev, const QString &oldPath, const QString &newPath)
+// Empty rightRev is the worktree. ":" is the index, so a staged diff stays off the worktree file.
+QStringList pairArgs(const QString &leftRev, const QString &rightRev, const QString &oldPath, const QString &newPath)
 {
-    return {QStringLiteral("diff"), QStringLiteral("-w"), QStringLiteral("-W"), QStringLiteral("--no-prefix"),
-            QStringLiteral("--diff-algorithm=histogram"), leftRev + QLatin1Char(':') + oldPath, QStringLiteral("--"),
-            newPath};
+    QStringList args{QStringLiteral("diff"), QStringLiteral("-w"), QStringLiteral("-W"), QStringLiteral("--no-prefix"),
+                     QStringLiteral("--diff-algorithm=histogram"), leftRev + QLatin1Char(':') + oldPath};
+    if (rightRev == QLatin1String(":"))
+        args << QLatin1Char(':') + newPath;
+    else
+        args << QStringLiteral("--") << newPath;
+    return args;
 }
 
 void joinOne(GitResult *result, const QString &status, const QString &oldPath, const QString &newPath)
 {
     if (!status.startsWith(QLatin1Char('R')) || !renameSplit(result->doc, oldPath, newPath))
         return;
-    const GitCmd diff = runGit(result->root, pairArgs(result->leftRev, oldPath, newPath));
+    const GitCmd diff = runGit(result->root, pairArgs(result->leftRev, result->rightRev, oldPath, newPath));
     if (diff.code == 0)
         joinRename(&result->doc, oldPath, newPath, diff.out);
 }
@@ -51,11 +55,18 @@ void joinListed(GitResult *result, const QString &out)
         joinOne(result, parts.at(index), parts.at(index + 1), parts.at(index + 2));
 }
 
+bool joinable(const GitResult &result)
+{
+    if (!result.error.isEmpty() || result.leftRev.isEmpty())
+        return false;
+    return result.rightRev.isEmpty() || result.rightRev == QLatin1String(":");
+}
+
 } // namespace
 
 void joinIndexRenames(GitResult *result)
 {
-    if (!result->rightRev.isEmpty() || result->leftRev.isEmpty() || !result->error.isEmpty())
+    if (!joinable(*result))
         return;
     const GitCmd names = runGit(result->root, cachedArgs());
     if (names.code != 0)
