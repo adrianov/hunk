@@ -105,21 +105,6 @@ public:
 
 } // namespace
 
-void paintReviewCheck(QPainter *painter, const QRect &rect, bool hot, bool selected, const QColor &selectedInk)
-{
-    painter->save();
-    painter->setRenderHint(QPainter::Antialiasing);
-    QColor fill = kAccent;
-    fill.setAlpha(hot && !selected ? 48 : 0);
-    const QColor ink = selected ? selectedInk : (hot ? kText : kMuted);
-    painter->setPen(selected ? ink : (hot ? kAccent : kLine));
-    painter->setBrush(fill);
-    painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1), 4, 4);
-    painter->setPen(ink);
-    painter->drawText(rect, Qt::AlignCenter, QStringLiteral("✓"));
-    painter->restore();
-}
-
 QRect fileCheckRect(const QRect &row)
 {
     constexpr int side = 22;

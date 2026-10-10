@@ -4,7 +4,6 @@
 #include "DiffCanvas.hpp"
 
 #include "DiffColors.hpp"
-#include "MainSeen.hpp"
 
 #include <QFontMetrics>
 #include <QPainter>

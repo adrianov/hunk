@@ -10,11 +10,8 @@
 #include <QRect>
 #include <QSet>
 
-class QPainter;
 class QTreeWidget;
 class QWidget;
-
-void paintReviewCheck(QPainter *painter, const QRect &rect, bool hot, bool selected, const QColor &selectedInk);
 
 QString changeStamp(const FileDiff &file);
 QHash<QString, QString> readSeen(const QString &root);

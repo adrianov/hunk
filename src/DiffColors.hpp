@@ -7,6 +7,9 @@
 
 #include <QColor>
 
+class QPainter;
+class QRect;
+
 extern QColor kBg;
 extern QColor kHeaderBg;
 extern QColor kGutter;
@@ -33,3 +36,4 @@ extern QColor kSynVariable;
 
 QColor synColor(SynKind kind);
 void useDiffColors(bool dark);
+void paintReviewCheck(QPainter *painter, const QRect &rect, bool hot, bool selected, const QColor &selectedInk);

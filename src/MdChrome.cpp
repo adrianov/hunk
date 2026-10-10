@@ -5,7 +5,6 @@
 
 #include "DiffCanvas.hpp"
 #include "DiffColors.hpp"
-#include "MainSeen.hpp"
 #include "MdHtml.hpp"
 #include "MdRead.hpp"
 

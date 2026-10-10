@@ -41,7 +41,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/DiffSide.cpp` — one pane, word highlights, search highlights, selected text
 - `src/DiffSyntax.cpp` / `DiffSyntax.hpp` — paint syntax colors
 - `src/Syntax.hpp` / `SyntaxRule.hpp` / `SyntaxLang.cpp` / `SyntaxScan.cpp` / `SyntaxText.cpp` / `SyntaxWord.cpp` / `SyntaxMd.cpp` / `SyntaxEmph.cpp` — language tokens
-- `src/DiffColors.cpp` / `DiffColors.hpp` — diff colors
+- `src/DiffColors.cpp` / `DiffColors.hpp` — diff colors and the reviewed check
 - `src/DiffDoc.cpp` / `DiffDoc.hpp` — file and row model
 - `src/DiffParse.cpp` / `DiffParse.hpp` — unified diff walk
 - `src/DiffGap.cpp` — unchanged lines the diff skipped
@@ -49,7 +49,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/WordDiff.cpp` — word highlights
 - `src/DiffZip.cpp` — paired delete and add lines
 - `src/DiffFold.cpp` / `DiffFold.hpp` — which unchanged lines collapse
-- `src/DiffFoldView.cpp` — fold bar paint and clicks
+- `src/DiffFoldView.cpp` — fold bar paint and clicks; a search match opens that fold
 - `src/DiffLayout.cpp` — per-file line wrap cache and band relayout
 - `src/GitRepo.cpp` / `GitRepo.hpp` — background git load
 - `src/GitBlob.cpp` — file text for each side of a diff
