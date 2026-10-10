@@ -5,7 +5,7 @@ Feature: Diff view
 
   Scenario: Run hunk in a repository
     Given I run hunk in a git repository
-    Then the window shows that repository's merge request
+    Then the window shows the last diff mode, or that repository's merge request
     And the window title shows the full path to that repository
     And the toolbar shows the path to that repository
     And toolbar labels use the normal text color
@@ -57,6 +57,7 @@ Feature: Diff view
     Given a repository is on screen
     When I choose Uncommitted
     Then the diff is staged and unstaged changes against HEAD
+    And Uncommitted is still selected the next time hunk opens
     When I choose Staged
     Then the diff is staged changes only
 

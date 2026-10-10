@@ -23,17 +23,6 @@
 #include <QStatusBar>
 #include <QUrl>
 
-namespace {
-
-void selectMerge(QComboBox *mode)
-{
-    mode->blockSignals(true);
-    mode->setCurrentIndex(static_cast<int>(DiffMode::MergeRequest));
-    mode->blockSignals(false);
-}
-
-} // namespace
-
 MainWindow::MainWindow(bool smoke, QWidget *parent)
     : QMainWindow(parent)
     , m_smoke(smoke)
@@ -116,14 +105,14 @@ void MainWindow::restoreWindow()
 
 void MainWindow::reloadFresh()
 {
+    if (!m_smoke)
+        QSettings().setValue(QStringLiteral("mode"), m_mode->currentIndex());
     reload(false);
 }
 
 void MainWindow::openStart(const QString &path)
 {
     if (!path.isEmpty()) {
-        if (!m_smoke)
-            selectMerge(m_mode);
         openAt(path);
         return;
     }
