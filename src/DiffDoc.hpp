@@ -113,6 +113,9 @@ struct DiffDoc {
     QList<FileDiff> files;
 };
 
+// File indexes in the same order as the file list: root first, then folders.
+QList<int> listedOrder(const DiffDoc &doc);
+
 struct LineHit {
     int file = -1;
     int row = -1;

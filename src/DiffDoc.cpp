@@ -3,6 +3,10 @@
 
 #include "DiffDoc.hpp"
 
+#include <QHash>
+
+#include <algorithm>
+
 namespace {
 
 QString baseName(const QString &path)
@@ -19,6 +23,46 @@ bool isRename(const FileDiff &file)
 }
 
 } // namespace
+
+namespace {
+
+struct FileGroup {
+    QString folder;
+    QList<int> files;
+};
+
+bool folderBefore(const FileGroup &left, const FileGroup &right)
+{
+    if (left.folder.isEmpty())
+        return !right.folder.isEmpty();
+    if (right.folder.isEmpty())
+        return false;
+    return left.folder.localeAwareCompare(right.folder) < 0;
+}
+
+void addListed(QList<FileGroup> *groups, QHash<QString, int> *index, int fileIndex, const QString &folder)
+{
+    if (!index->contains(folder)) {
+        index->insert(folder, groups->size());
+        groups->push_back(FileGroup{folder, {}});
+    }
+    (*groups)[index->value(folder)].files.push_back(fileIndex);
+}
+
+} // namespace
+
+QList<int> listedOrder(const DiffDoc &doc)
+{
+    QList<FileGroup> groups;
+    QHash<QString, int> index;
+    for (int fileIndex = 0; fileIndex < doc.files.size(); ++fileIndex)
+        addListed(&groups, &index, fileIndex, doc.files.at(fileIndex).folder());
+    std::sort(groups.begin(), groups.end(), folderBefore);
+    QList<int> order;
+    for (const FileGroup &group : groups)
+        order += group.files;
+    return order;
+}
 
 QString FileDiff::shortName() const
 {
