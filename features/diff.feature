@@ -293,3 +293,6 @@ Feature: Diff view
     When I view uncommitted changes or this branch's merge request
     Then the file list shows the old name and the new name
     And the diff is that one rename
+    When I choose Staged
+    Then the file list shows the old name and the new name
+    And the diff is the staged copy of that rename
