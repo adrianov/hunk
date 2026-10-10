@@ -130,13 +130,23 @@ void DiffCanvas::paintDoc(QPainter &painter)
     paintSticky(painter, scrollY);
 }
 
+QString canvasNotice(const QString &message, bool files, bool bands)
+{
+    if (!message.isEmpty())
+        return message;
+    if (files && !bands)
+        return QStringLiteral("Reviewed files stay hidden until they change.");
+    return {};
+}
+
 void DiffCanvas::paintContents()
 {
     QPainter painter(viewport());
     painter.fillRect(viewport()->rect(), kBg);
-    if (!m_message.isEmpty()) {
-        paintMessage(painter, viewport()->rect(), font(), m_message);
+    const QString notice = canvasNotice(m_message, !m_doc.files.isEmpty(), !m_bands.isEmpty());
+    if (notice.isEmpty()) {
+        paintDoc(painter);
         return;
     }
-    paintDoc(painter);
+    paintMessage(painter, viewport()->rect(), font(), notice);
 }

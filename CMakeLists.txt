@@ -47,7 +47,9 @@ add_executable(hunk
   src/MainRecent.cpp
   src/BarIcon.cpp
   src/MainChrome.cpp
+  src/MainFilePane.cpp
   src/MainTree.cpp
+  src/MainHide.cpp
   src/MainSeen.cpp
   src/MainFileRow.cpp
   src/MainHeat.cpp
@@ -58,12 +60,16 @@ add_executable(hunk
   src/MainLoad.cpp
   src/MainPath.cpp
   src/MainRef.cpp
+  src/MainRefFilter.cpp
   src/MainWatch.cpp
   src/MainDisk.cpp
   src/MainDiskWalk.cpp
   src/Theme.cpp
   src/MainTheme.cpp
   src/DiffCanvas.cpp
+  src/MdView.cpp
+  src/MdChrome.cpp
+  src/MdRead.cpp
   src/DiffScroll.cpp
   src/DiffInput.cpp
   src/DiffSplit.cpp

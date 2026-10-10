@@ -12,18 +12,19 @@
 namespace {
 
 constexpr int seenVersion = 3;
+constexpr int hiddenVersion = 1;
 
 QString seenKey(const QString &root)
 {
     return QString::fromLatin1(QCryptographicHash::hash(root.toUtf8(), QCryptographicHash::Sha1).toHex());
 }
 
-bool keepSeen(QSettings *settings)
+bool keepGroup(QSettings *settings, int version)
 {
-    if (settings->value(QStringLiteral("version")).toInt() == seenVersion)
+    if (settings->value(QStringLiteral("version")).toInt() == version)
         return true;
     settings->remove(QString());
-    settings->setValue(QStringLiteral("version"), seenVersion);
+    settings->setValue(QStringLiteral("version"), version);
     return false;
 }
 
@@ -36,15 +37,13 @@ QHash<QString, QString> stampsFrom(const QByteArray &raw)
     return seen;
 }
 
-} // namespace
-
-QHash<QString, QString> readSeen(const QString &root)
+QHash<QString, QString> readGroup(const QString &root, const QString &group, int version)
 {
     if (root.isEmpty())
         return {};
     QSettings settings;
-    settings.beginGroup(QStringLiteral("seenFiles"));
-    if (!keepSeen(&settings)) {
+    settings.beginGroup(group);
+    if (!keepGroup(&settings, version)) {
         settings.endGroup();
         return {};
     }
@@ -53,22 +52,60 @@ QHash<QString, QString> readSeen(const QString &root)
     return stampsFrom(raw);
 }
 
-void writeSeen(const QString &root, const QHash<QString, QString> &seen)
+void writeGroup(const QString &root, const QString &group, int version, const QHash<QString, QString> &stamps)
 {
     QJsonObject object;
-    for (auto it = seen.cbegin(); it != seen.cend(); ++it)
+    for (auto it = stamps.cbegin(); it != stamps.cend(); ++it)
         object.insert(it.key(), it.value());
     QSettings settings;
-    settings.beginGroup(QStringLiteral("seenFiles"));
-    settings.setValue(QStringLiteral("version"), seenVersion);
+    settings.beginGroup(group);
+    settings.setValue(QStringLiteral("version"), version);
     settings.setValue(seenKey(root), QJsonDocument(object).toJson(QJsonDocument::Compact));
     settings.endGroup();
+}
+
+} // namespace
+
+QHash<QString, QString> readSeen(const QString &root)
+{
+    return readGroup(root, QStringLiteral("seenFiles"), seenVersion);
+}
+
+void writeSeen(const QString &root, const QHash<QString, QString> &seen)
+{
+    writeGroup(root, QStringLiteral("seenFiles"), seenVersion, seen);
+}
+
+QHash<QString, QString> readHidden(const QString &root)
+{
+    return readGroup(root, QStringLiteral("hiddenFiles"), hiddenVersion);
+}
+
+void writeHidden(const QString &root, const QHash<QString, QString> &hidden)
+{
+    writeGroup(root, QStringLiteral("hiddenFiles"), hiddenVersion, hidden);
 }
 
 bool staleFile(const FileDiff &file, const QHash<QString, QString> &seen)
 {
     const QString prior = seen.value(file.path());
     return !prior.isEmpty() && prior != changeStamp(file);
+}
+
+bool fileHidden(const FileDiff &file, const QHash<QString, QString> &hidden)
+{
+    const QString prior = hidden.value(file.path());
+    return !prior.isEmpty() && prior == changeStamp(file);
+}
+
+QSet<int> hiddenIndexes(const DiffDoc &doc, const QHash<QString, QString> &hidden)
+{
+    QSet<int> skip;
+    for (int index = 0; index < doc.files.size(); ++index) {
+        if (fileHidden(doc.files.at(index), hidden))
+            skip.insert(index);
+    }
+    return skip;
 }
 
 QColor staleBg(const QWidget *tree)

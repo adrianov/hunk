@@ -4,7 +4,7 @@
 #include "MainWindow.hpp"
 
 #include "DiffCanvas.hpp"
-#include "MainSeen.hpp"
+#include "MdView.hpp"
 #include "ReviewStore.hpp"
 
 #include <QAbstractItemView>
@@ -14,7 +14,6 @@
 #include <QCoreApplication>
 #include <QDockWidget>
 #include <QHBoxLayout>
-#include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QMenuBar>
@@ -27,51 +26,13 @@
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
-namespace {
-
-QTreeWidget *fileTree(QWidget *parent)
-{
-    auto *tree = new QTreeWidget(parent);
-    tree->setHeaderHidden(true);
-    tree->setIndentation(14);
-    installSeenRows(tree);
-    return tree;
-}
-
-QLabel *lineStat(QWidget *parent)
-{
-    auto *stat = new QLabel(parent);
-    stat->setTextFormat(Qt::RichText);
-    stat->setContentsMargins(8, 4, 8, 4);
-    return stat;
-}
-
-} // namespace
-
-QWidget *MainWindow::makeFilePane()
-{
-    m_filter = new QLineEdit(this);
-    m_filter->setPlaceholderText(QStringLiteral("Filter files"));
-    m_filter->setClearButtonEnabled(true);
-    m_tree = fileTree(this);
-    auto *left = new QWidget(this);
-    auto *layout = new QVBoxLayout(left);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-    layout->addWidget(m_filter);
-    layout->addWidget(m_tree, 1);
-    m_stat = lineStat(left);
-    layout->addWidget(m_stat);
-    showLineStat();
-    return left;
-}
-
 void MainWindow::buildDiffPane()
 {
     m_diff = new DiffCanvas(this);
+    m_md = new MdView(m_diff, this);
     auto *split = new QSplitter(this);
     split->addWidget(makeFilePane());
-    split->addWidget(m_diff);
+    split->addWidget(m_md);
     split->setStretchFactor(0, 0);
     split->setStretchFactor(1, 1);
     split->setSizes({280, 1000});
@@ -165,12 +126,16 @@ void MainWindow::openTreeItem(QTreeWidgetItem *item)
     m_navLock = true;
     m_diff->showFile(index);
     m_navLock = false;
+    m_md->track(index, m_doc, m_root);
 }
 
 void MainWindow::wireTree()
 {
     connect(m_filter, &QLineEdit::textChanged, this, &MainWindow::rebuildTree);
+    connect(m_unhide, &QPushButton::clicked, this, &MainWindow::unhideReviewed);
+    m_tree->viewport()->installEventFilter(this);
     connect(m_tree, &QTreeWidget::itemClicked, this, &MainWindow::openTreeItem);
+    connect(m_tree, &QTreeWidget::customContextMenuRequested, this, &MainWindow::filePathMenu);
     connect(m_diff, &DiffCanvas::fileScrolled, this, &MainWindow::selectTreeFile);
     connect(m_diff, &DiffCanvas::commentRequested, this, &MainWindow::commentAt);
 }

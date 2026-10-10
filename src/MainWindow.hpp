@@ -13,6 +13,7 @@
 #include <QTimer>
 
 class DiffCanvas;
+class MdView;
 class GitRepo;
 class QAction;
 class QActionGroup;
@@ -127,6 +128,15 @@ private:
     void rebuildTree();
     void loadSeen();
     void markSeenFile(int file);
+    void hideReviewed(int file);
+    void unhideReviewed();
+    void revealReviewed(int file);
+    void applyHidden();
+    void keepShownFile();
+    bool fileCheckEvent(QObject *object, QEvent *event);
+    bool takeCheck(QEvent *event);
+    void hoverCheck(const QPoint &pos);
+    QString fileTip(const QTreeWidgetItem *item) const;
     void fillNotes();
     void refreshNotes();
     int keptNote(int slot, int oldCount, const QString &path, bool oldSide, int line, const QString &body, bool editing);
@@ -138,14 +148,16 @@ private:
     bool commentLine(int file, int row, bool *oldSide, int *line, QString *snippet) const;
     void copyReviews();
     void showStatus(const QString &text);
-    void showLineStat();
+    int showLineStat();
     void updateStatus();
     void pushNoteKeys();
     void selectTreeFile(int file);
+    void filePathMenu(const QPoint &pos);
 
     GitRepo *m_git = nullptr;
     ReviewStore *m_store = nullptr;
     DiffCanvas *m_diff = nullptr;
+    MdView *m_md = nullptr;
     QTreeWidget *m_tree = nullptr;
     QLineEdit *m_filter = nullptr;
     QComboBox *m_mode = nullptr;
@@ -154,6 +166,7 @@ private:
     QMenu *m_recent = nullptr;
     QLabel *m_repoLabel = nullptr;
     QLabel *m_stat = nullptr;
+    QPushButton *m_unhide = nullptr;
     QListWidget *m_notes = nullptr;
     QPlainTextEdit *m_editor = nullptr;
     QPushButton *m_copy = nullptr;
@@ -161,6 +174,7 @@ private:
     QDockWidget *m_dock = nullptr;
     DiffDoc m_doc;
     QHash<QString, QString> m_seen;
+    QHash<QString, QString> m_hidden;
     QString m_root;
     QString m_startPath;
     QString m_title;

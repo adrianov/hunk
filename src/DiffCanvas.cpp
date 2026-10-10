@@ -68,6 +68,7 @@ void DiffCanvas::setMessage(const QString &text)
     m_wrapTimer.stop();
     m_message = text;
     m_doc = {};
+    m_skip.clear();
     m_open.clear();
     m_wrapW.clear();
     m_viewW = -1;
@@ -79,11 +80,12 @@ void DiffCanvas::setMessage(const QString &text)
     viewport()->update();
 }
 
-void DiffCanvas::setDoc(const DiffDoc &doc, const QString &leftLabel, const QString &rightLabel)
+void DiffCanvas::setDoc(const DiffDoc &doc, const QString &leftLabel, const QString &rightLabel, const QSet<int> &skip)
 {
     m_wrapTimer.stop();
     m_message.clear();
     m_doc = doc;
+    m_skip = skip;
     m_open = QVector<QSet<int>>(m_doc.files.size());
     m_wrapW = QVector<int>(m_doc.files.size(), -1);
     m_viewW = -1;
@@ -93,6 +95,16 @@ void DiffCanvas::setDoc(const DiffDoc &doc, const QString &leftLabel, const QStr
     m_selFile = m_selRow = m_hoverFile = m_hoverRow = m_lastFile = -1;
     clearMark();
     rebuild();
+}
+
+void DiffCanvas::setSkipped(const QSet<int> &files)
+{
+    if (m_skip == files || m_doc.files.isEmpty())
+        return;
+    const int y = scrollTop();
+    m_skip = files;
+    rebuild();
+    setScrollTop(y);
 }
 
 void DiffCanvas::wrapRow(DiffRow *row, bool single)
@@ -137,8 +149,10 @@ void DiffCanvas::rebuild()
     prepareWidth();
     m_bands.clear();
     int y = 8;
-    for (int fileIndex = 0; fileIndex < m_doc.files.size(); ++fileIndex)
-        addFileBands(fileIndex, &y);
+    for (int fileIndex = 0; fileIndex < m_doc.files.size(); ++fileIndex) {
+        if (!m_skip.contains(fileIndex))
+            addFileBands(fileIndex, &y);
+    }
     m_docH = y + 12;
     publishLayout();
 }

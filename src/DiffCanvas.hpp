@@ -26,7 +26,8 @@ public:
     explicit DiffCanvas(QWidget *parent = nullptr);
 
     void setMessage(const QString &text);
-    void setDoc(const DiffDoc &doc, const QString &leftLabel, const QString &rightLabel);
+    void setDoc(const DiffDoc &doc, const QString &leftLabel, const QString &rightLabel, const QSet<int> &skip);
+    void setSkipped(const QSet<int> &files);
     void setNoteKeys(const QSet<QString> &keys);
     void showFile(int file);
     void showRow(int file, int row, bool oldSide);
@@ -153,6 +154,7 @@ private:
     QString m_message;
     QList<Band> m_bands;
     QSet<QString> m_notes;
+    QSet<int> m_skip;
     QVector<QSet<int>> m_open;
     QVector<int> m_wrapW;
     QFont m_mono;

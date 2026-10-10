@@ -5,6 +5,7 @@
 
 #include "DiffCanvas.hpp"
 #include "MainDetail.hpp"
+#include "MdView.hpp"
 
 #include <QGuiApplication>
 #include <QStyleHints>
@@ -25,6 +26,7 @@ void MainWindow::repaintTheme()
     if (!m_diff)
         return;
     m_diff->update();
+    m_md->applyTheme();
     showLineStat();
     showRepoPath();
     rebuildTree();

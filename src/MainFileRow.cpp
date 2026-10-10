@@ -49,17 +49,49 @@ int statWidth(const QFontMetrics &metrics, const QModelIndex &index)
 }
 
 void paintFileText(QPainter *painter, const QStyleOptionViewItem &opt, const QRect &textRect, const QModelIndex &index,
-                   const QString &name)
+                   const QString &name, int reserve)
 {
     painter->save();
-    painter->setClipRect(textRect);
+    painter->setClipRect(textRect.adjusted(0, 0, -reserve, 0));
     painter->setFont(opt.font);
-    const QString shown =
-        opt.fontMetrics.elidedText(name, Qt::ElideRight, qMax(0, textRect.width() - statWidth(opt.fontMetrics, index)));
+    const QString shown = opt.fontMetrics.elidedText(
+        name, Qt::ElideRight, qMax(0, textRect.width() - statWidth(opt.fontMetrics, index) - reserve));
     int x = textRect.left();
     drawChunk(painter, &x, textRect, shown, nameInk(opt, index), opt.fontMetrics);
     drawStats(painter, &x, textRect, index, opt.fontMetrics);
     painter->restore();
+}
+
+bool checkHot(const QStyleOptionViewItem &opt, const QModelIndex &index)
+{
+    return opt.widget && opt.widget->property("checkHot").value<quintptr>() == quintptr(index.internalPointer());
+}
+
+void paintCheck(QPainter *painter, const QStyleOptionViewItem &opt, const QRect &rect, bool hot)
+{
+    const bool selected = opt.state.testFlag(QStyle::State_Selected);
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing);
+    QColor fill = kAccent;
+    fill.setAlpha(hot && !selected ? 48 : 0);
+    const QColor ink = selected ? opt.palette.color(QPalette::HighlightedText) : (hot ? kText : kMuted);
+    painter->setPen(selected ? ink : (hot ? kAccent : kLine));
+    painter->setBrush(fill);
+    painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1), 4, 4);
+    painter->setPen(ink);
+    painter->drawText(rect, Qt::AlignCenter, QStringLiteral("✓"));
+    painter->restore();
+}
+
+void paintRowFace(QPainter *painter, QStyleOptionViewItem *opt, const QModelIndex &index)
+{
+    const QBrush brush = index.data(Qt::BackgroundRole).value<QBrush>();
+    if (brush.style() == Qt::NoBrush || opt->state.testFlag(QStyle::State_Selected)) {
+        opt->text.clear();
+        opt->widget->style()->drawControl(QStyle::CE_ItemViewItem, opt, painter, opt->widget);
+        return;
+    }
+    painter->fillRect(opt->rect, brush);
 }
 
 class SeenRow : public QStyledItemDelegate {
@@ -72,18 +104,22 @@ public:
         initStyleOption(&opt, index);
         const QRect textRect = opt.widget->style()->subElementRect(QStyle::SE_ItemViewItemText, &opt, opt.widget);
         const QString name = opt.text;
-        const QBrush brush = index.data(Qt::BackgroundRole).value<QBrush>();
-        if (brush.style() == Qt::NoBrush || opt.state.testFlag(QStyle::State_Selected)) {
-            opt.text.clear();
-            opt.widget->style()->drawControl(QStyle::CE_ItemViewItem, &opt, painter, opt.widget);
-        } else {
-            painter->fillRect(opt.rect, brush);
-        }
-        paintFileText(painter, opt, textRect, index, name);
+        const bool file = index.data(Qt::UserRole).toInt() >= 0;
+        const QRect check = fileCheckRect(opt.rect);
+        paintRowFace(painter, &opt, index);
+        paintFileText(painter, opt, textRect, index, name, file ? check.width() + 8 : 0);
+        if (file)
+            paintCheck(painter, opt, check, checkHot(opt, index));
     }
 };
 
 } // namespace
+
+QRect fileCheckRect(const QRect &row)
+{
+    constexpr int side = 22;
+    return QRect(row.right() - 8 - side, row.top() + (row.height() - side) / 2, side, side);
+}
 
 void installSeenRows(QTreeWidget *tree)
 {

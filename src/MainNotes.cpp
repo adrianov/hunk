@@ -7,6 +7,7 @@
 #include "DiffColors.hpp"
 #include "DiffParse.hpp"
 #include "MainDetail.hpp"
+#include "MdView.hpp"
 #include "ReviewStore.hpp"
 
 #include <QEvent>
@@ -83,6 +84,8 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
 {
     if (object == m_repoLabel && event->type() == QEvent::Resize)
         showRepoPath();
+    if (fileCheckEvent(object, event))
+        return true;
     return noteEvents(object, event);
 }
 
@@ -128,8 +131,11 @@ void MainWindow::loadNote(int row)
         m_noteLock = false;
     }
     const LineHit hit = findLine(m_doc, note.path, note.oldSide, note.line);
-    if (hit.file >= 0)
+    if (hit.file >= 0) {
+        m_md->showSource();
+        revealReviewed(hit.file);
         m_diff->showRow(hit.file, hit.row, note.oldSide);
+    }
 }
 
 void MainWindow::saveNote()
@@ -149,26 +155,9 @@ void MainWindow::showStatus(const QString &text)
     statusBar()->showMessage(line);
 }
 
-void MainWindow::showLineStat()
-{
-    if (!m_stat)
-        return;
-    int adds = 0;
-    int dels = 0;
-    for (const FileDiff &file : m_doc.files) {
-        adds += file.adds;
-        dels += file.dels;
-    }
-    m_stat->setText(QStringLiteral("<span style=\"color:%1\">+%2</span>  <span style=\"color:%3\">−%4</span>")
-                        .arg(kAddFg.name(), QString::number(adds), kDelFg.name(), QString::number(dels)));
-}
-
 void MainWindow::updateStatus()
 {
-    showLineStat();
-    showStatus(QStringLiteral("%1 files    %2 comments")
-                   .arg(m_doc.files.size())
-                   .arg(filledNotes(m_store->notes())));
+    showStatus(QStringLiteral("%1 files    %2 comments").arg(showLineStat()).arg(filledNotes(m_store->notes())));
 }
 
 void MainWindow::pushNoteKeys()

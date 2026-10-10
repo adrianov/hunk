@@ -5,6 +5,7 @@
 
 #include "DiffColors.hpp"
 #include "MainSeen.hpp"
+#include "MdView.hpp"
 
 #include <QHash>
 #include <QLineEdit>
@@ -44,13 +45,13 @@ void addFile(QList<Group> *groups, QHash<QString, int> *index, int fileIndex, co
     (*groups)[index->value(folder)].files.push_back(fileIndex);
 }
 
-QList<Group> collectGroups(const DiffDoc &doc, const QString &query)
+QList<Group> collectGroups(const DiffDoc &doc, const QString &query, const QHash<QString, QString> &hidden)
 {
     QList<Group> groups;
     QHash<QString, int> index;
     for (int fileIndex = 0; fileIndex < doc.files.size(); ++fileIndex) {
         const FileDiff &file = doc.files.at(fileIndex);
-        if (matchesQuery(file, query))
+        if (!fileHidden(file, hidden) && matchesQuery(file, query))
             addFile(&groups, &index, fileIndex, file.folder());
     }
     std::sort(groups.begin(), groups.end(), folderBefore);
@@ -97,6 +98,7 @@ void addFolder(QTreeWidget *tree, const Group &group, const DiffDoc &doc, const 
 void MainWindow::loadSeen()
 {
     m_seen = readSeen(m_root);
+    m_hidden = readHidden(m_root);
 }
 
 void MainWindow::markSeenFile(int file)
@@ -115,8 +117,9 @@ void MainWindow::markSeenFile(int file)
 void MainWindow::rebuildTree()
 {
     m_navLock = true;
+    m_tree->setProperty("checkHot", 0);
     m_tree->clear();
-    for (const Group &group : collectGroups(m_doc, m_filter->text().trimmed()))
+    for (const Group &group : collectGroups(m_doc, m_filter->text().trimmed(), m_hidden))
         addFolder(m_tree, group, m_doc, m_seen);
     m_tree->expandAll();
     m_navLock = false;
@@ -136,4 +139,5 @@ void MainWindow::selectTreeFile(int file)
         }
     }
     m_navLock = false;
+    m_md->track(file, m_doc, m_root);
 }

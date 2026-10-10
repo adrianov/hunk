@@ -5,6 +5,7 @@
 
 #include "DiffCanvas.hpp"
 #include "GitRepo.hpp"
+#include "MdView.hpp"
 #include "MainSeen.hpp"
 #include "ReviewStore.hpp"
 
@@ -103,6 +104,7 @@ void MainWindow::showLoadError(const GitResult &result)
         m_repoLabel->setText(result.root);
     }
     statusBar()->showMessage(result.error);
+    m_md->reload(m_doc, m_root);
     emit loaded(false);
 }
 
@@ -119,9 +121,12 @@ void MainWindow::showLoadedDiff(const GitResult &result)
     if (m_doc.files.isEmpty())
         m_diff->setMessage(QStringLiteral("No changes."));
     else {
-        m_diff->setDoc(m_doc, result.leftLabel, result.rightLabel);
+        m_diff->setDoc(m_doc, result.leftLabel, result.rightLabel, hiddenIndexes(m_doc, m_hidden));
         m_diff->setScrollTop(scroll);
     }
+    m_md->setLabels(result.leftLabel, result.rightLabel);
+    m_md->reload(m_doc, m_root);
+    keepShownFile();
     pushNoteKeys();
     showLoadedTitle();
 }
