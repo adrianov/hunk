@@ -116,7 +116,8 @@ void DiffCanvas::paintSticky(QPainter &painter, int scrollY)
         return;
     QFont headerFont = font();
     headerFont.setBold(true);
-    paintFileHeader(painter, QRect(0, 0, viewport()->width(), m_headerH), m_doc.files.at(file), headerFont);
+    paintFileHeader(painter, QRect(0, 0, viewport()->width(), m_headerH), m_doc.files.at(file), headerFont,
+                    file == m_checkFile);
 }
 
 void DiffCanvas::paintDoc(QPainter &painter)

@@ -4,6 +4,7 @@
 #include "DiffCanvas.hpp"
 
 #include "DiffColors.hpp"
+#include "MainSeen.hpp"
 
 #include <QFontMetrics>
 #include <QPainter>
@@ -40,11 +41,15 @@ void drawStats(QPainter &painter, const QRect &rect, int baseline, const StatTex
     painter.drawText(rect.right() - 24 - stat.minusW - stat.plusW, baseline, stat.plus);
 }
 
+constexpr int kCheckX = 10;
+constexpr int kCheckSide = 22;
+constexpr int kTitleX = kCheckX + kCheckSide + 8;
+
 void drawTitle(QPainter &painter, const QRect &rect, const QFontMetrics &metrics, const QString &title, int statsW)
 {
     painter.setPen(kFile);
-    painter.drawText(rect.adjusted(12, 0, -statsW, 0), Qt::AlignVCenter | Qt::AlignLeft,
-                     metrics.elidedText(title, Qt::ElideMiddle, qMax(20, rect.width() - statsW - 16)));
+    painter.drawText(rect.adjusted(kTitleX, 0, -statsW, 0), Qt::AlignVCenter | Qt::AlignLeft,
+                     metrics.elidedText(title, Qt::ElideMiddle, qMax(20, rect.width() - statsW - kTitleX - 4)));
 }
 
 void paintLabelBar(QPainter &painter, int y, int height, int viewW)
@@ -66,7 +71,12 @@ void paintPairLabels(QPainter &painter, int y, int height, int leftW, int viewW,
 
 } // namespace
 
-void DiffCanvas::paintFileHeader(QPainter &painter, const QRect &rect, const FileDiff &file, const QFont &font)
+QRect DiffCanvas::titleCheck(const QRect &header) const
+{
+    return QRect(header.left() + kCheckX, header.top() + (header.height() - kCheckSide) / 2, kCheckSide, kCheckSide);
+}
+
+void DiffCanvas::paintFileHeader(QPainter &painter, const QRect &rect, const FileDiff &file, const QFont &font, bool hot)
 {
     painter.fillRect(rect, kHeaderBg);
     painter.fillRect(rect.left(), rect.top(), 3, rect.height(), kAccent);
@@ -74,6 +84,7 @@ void DiffCanvas::paintFileHeader(QPainter &painter, const QRect &rect, const Fil
     const QFontMetrics metrics(font);
     const StatText stat = measureStats(metrics, file);
     drawStats(painter, rect, headerBaseline(rect, metrics), stat);
+    paintReviewCheck(&painter, titleCheck(rect), hot, false, kText);
     drawTitle(painter, rect, metrics, file.title(), stat.plusW + stat.minusW + 28);
 }
 
@@ -81,7 +92,7 @@ void DiffCanvas::paintHeaderBand(QPainter &painter, const Band &band, const File
 {
     QFont headerFont = font();
     headerFont.setBold(true);
-    paintFileHeader(painter, QRect(0, band.y, viewW, band.h), file, headerFont);
+    paintFileHeader(painter, QRect(0, band.y, viewW, band.h), file, headerFont, band.file == m_checkFile);
 }
 
 void DiffCanvas::paintLabels(QPainter &painter, const Band &band, const FileDiff &file, int viewW)

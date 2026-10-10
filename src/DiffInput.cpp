@@ -26,8 +26,11 @@ bool DiffCanvas::inGutter(const FileDiff &file, int x, bool *oldSide) const
 
 bool DiffCanvas::pressIgnored(QMouseEvent *mouse) const
 {
-    if (mouse->button() != Qt::LeftButton || !m_message.isEmpty())
-        return true;
+    return mouse->button() != Qt::LeftButton || !m_message.isEmpty();
+}
+
+bool DiffCanvas::headerPress(QMouseEvent *mouse) const
+{
     return headerStuck(verticalScrollBar()->value()) && mouse->position().y() < m_headerH;
 }
 
@@ -46,8 +49,8 @@ void DiffCanvas::chooseRow(const Band &band, int x)
 void DiffCanvas::pressRow(const Band &band, int x, int y, QMouseEvent *mouse)
 {
     if (inGutter(m_doc.files.at(band.file), x, nullptr)) {
-        clearMark();
         chooseRow(band, x);
+        clearMark();
         return;
     }
     beginText(x, y, mouse->modifiers().testFlag(Qt::ShiftModifier));
@@ -66,14 +69,14 @@ void DiffCanvas::onPress(QMouseEvent *mouse)
     if (pressIgnored(mouse))
         return;
     setFocus();
-    const int x = int(mouse->position().x());
-    const int y = int(mouse->position().y()) + verticalScrollBar()->value();
-    pressAt(mouse, x, y);
+    takePress(mouse);
 }
 
 void DiffCanvas::clearHover()
 {
     m_hoverFile = m_hoverRow = -1;
+    m_checkFile = -1;
+    setToolTip(QString());
     if (!m_dragSplit)
         viewport()->unsetCursor();
     viewport()->update();
@@ -110,6 +113,15 @@ void DiffCanvas::hoverCursor(const Band *band, int x)
     viewport()->setCursor(shape);
 }
 
+void DiffCanvas::trackHover(QMouseEvent *mouse, int x, int y)
+{
+    if (hoverTitle(x, int(mouse->position().y())))
+        return;
+    const Band *band = bandAt(y);
+    hoverRow(band);
+    hoverCursor(band, x);
+}
+
 void DiffCanvas::onMove(QMouseEvent *mouse)
 {
     const int x = int(mouse->position().x());
@@ -120,9 +132,7 @@ void DiffCanvas::onMove(QMouseEvent *mouse)
         dragText(x, y);
         return;
     }
-    const Band *band = bandAt(y);
-    hoverRow(band);
-    hoverCursor(band, x);
+    trackHover(mouse, x, y);
 }
 
 bool DiffCanvas::viewportEvent(QEvent *event)

@@ -69,18 +69,8 @@ bool checkHot(const QStyleOptionViewItem &opt, const QModelIndex &index)
 
 void paintCheck(QPainter *painter, const QStyleOptionViewItem &opt, const QRect &rect, bool hot)
 {
-    const bool selected = opt.state.testFlag(QStyle::State_Selected);
-    painter->save();
-    painter->setRenderHint(QPainter::Antialiasing);
-    QColor fill = kAccent;
-    fill.setAlpha(hot && !selected ? 48 : 0);
-    const QColor ink = selected ? opt.palette.color(QPalette::HighlightedText) : (hot ? kText : kMuted);
-    painter->setPen(selected ? ink : (hot ? kAccent : kLine));
-    painter->setBrush(fill);
-    painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1), 4, 4);
-    painter->setPen(ink);
-    painter->drawText(rect, Qt::AlignCenter, QStringLiteral("✓"));
-    painter->restore();
+    paintReviewCheck(painter, rect, hot, opt.state.testFlag(QStyle::State_Selected),
+                     opt.palette.color(QPalette::HighlightedText));
 }
 
 void paintRowFace(QPainter *painter, QStyleOptionViewItem *opt, const QModelIndex &index)
@@ -114,6 +104,21 @@ public:
 };
 
 } // namespace
+
+void paintReviewCheck(QPainter *painter, const QRect &rect, bool hot, bool selected, const QColor &selectedInk)
+{
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing);
+    QColor fill = kAccent;
+    fill.setAlpha(hot && !selected ? 48 : 0);
+    const QColor ink = selected ? selectedInk : (hot ? kText : kMuted);
+    painter->setPen(selected ? ink : (hot ? kAccent : kLine));
+    painter->setBrush(fill);
+    painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1), 4, 4);
+    painter->setPen(ink);
+    painter->drawText(rect, Qt::AlignCenter, QStringLiteral("✓"));
+    painter->restore();
+}
 
 QRect fileCheckRect(const QRect &row)
 {
