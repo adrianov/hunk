@@ -5,7 +5,6 @@
 
 #include <QAbstractItemView>
 #include <QComboBox>
-#include <QCompleter>
 #include <QFontMetrics>
 #include <QKeyEvent>
 #include <QLabel>
@@ -79,20 +78,7 @@ void fitRefBox(QComboBox *box)
     finishRefEdit(box);
 }
 
-void watchRefFilter(QComboBox *box)
-{
-    QCompleter *found = box->completer();
-    found->setCompletionMode(QCompleter::PopupCompletion);
-    found->setFilterMode(Qt::MatchContains);
-    found->setCaseSensitivity(Qt::CaseInsensitive);
-    found->setModelSorting(QCompleter::UnsortedModel);
-    found->popup()->setFocusPolicy(Qt::NoFocus);
-    found->popup()->setTextElideMode(Qt::ElideNone);
-    QObject::connect(box->lineEdit(), &QLineEdit::textEdited, box, [box] {
-        box->completer()->popup()->setMinimumWidth(box->width());
-    });
-    showRefText(box);
-}
+void watchRefFilter(QComboBox *box);
 
 void addRef(QToolBar *bar, QComboBox **box, const QString &label, const QString &tip)
 {
@@ -101,6 +87,7 @@ void addRef(QToolBar *bar, QComboBox **box, const QString &label, const QString 
     bar->addWidget(caption);
     *box = new QComboBox(bar);
     (*box)->setEditable(true);
+    (*box)->setMaxVisibleItems(24);
     (*box)->setMinimumWidth(160);
     (*box)->setToolTip(tip);
     bar->addWidget(*box);

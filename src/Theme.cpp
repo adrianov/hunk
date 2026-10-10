@@ -46,6 +46,14 @@ public:
         palette.setColor(QPalette::All, QPalette::ToolTipText, toolTipForegroundColor());
         QToolTip::setPalette(palette);
     }
+
+    int styleHint(StyleHint hint, const QStyleOption *option, const QWidget *widget,
+                  QStyleHintReturn *data) const override
+    {
+        if (hint == SH_ComboBox_Popup)
+            return 0;
+        return QlementineStyle::styleHint(hint, option, widget, data);
+    }
 };
 
 AppStyle *appStyle()
