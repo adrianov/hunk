@@ -5,8 +5,7 @@
 
 #include "DiffPopup.hpp"
 #include "LangDef.hpp"
-#include "RubyDetail.hpp"
-#include "SyntaxRule.hpp"
+#include "LangTune.hpp"
 
 #include <QCursor>
 #include <QPointer>
@@ -28,13 +27,13 @@ void DiffCanvas::onScroll()
 
 bool DiffCanvas::seekBusy(const QString &name) const
 {
-    return name.isEmpty() || m_root.isEmpty() || rubySought(m_root, name) || m_seeking.contains(name);
+    return name.isEmpty() || m_root.isEmpty() || langSought(m_root, name) || m_seeking.contains(name);
 }
 
 void DiffCanvas::afterSeek(const QString &name)
 {
     m_seeking.remove(name);
-    if (m_defWait && m_defName == name && !m_defTimer.isActive())
+    if (m_defWait && langSeek(m_root, m_defPath, m_defLine, m_defName) == name && !m_defTimer.isActive())
         showDef();
     finishJump();
 }
@@ -47,7 +46,7 @@ void DiffCanvas::seek(const QString &name)
     const QString root = m_root;
     QPointer<DiffCanvas> alive(this);
     QThreadPool::globalInstance()->start([alive, root, name] {
-        rubyEnsure(root, name);
+        langEnsure(root, name);
         if (alive)
             QMetaObject::invokeMethod(alive.data(), [alive, name] { if (alive) alive->afterSeek(name); }, Qt::QueuedConnection);
     });
@@ -55,10 +54,11 @@ void DiffCanvas::seek(const QString &name)
 
 bool DiffCanvas::awaitSeek()
 {
-    if (rubySought(m_root, m_defName))
+    const QString name = langSeek(m_root, m_defPath, m_defLine, m_defName);
+    if (name.isEmpty() || langSought(m_root, name))
         return false;
     m_defWait = true;
-    seek(m_defName);
+    seek(name);
     return true;
 }
 

@@ -4,8 +4,7 @@
 #include "DiffCanvas.hpp"
 
 #include "LangDef.hpp"
-#include "RubyDetail.hpp"
-#include "SyntaxRule.hpp"
+#include "LangTune.hpp"
 
 #include <QCursor>
 #include <QGuiApplication>
@@ -19,7 +18,8 @@ bool DiffCanvas::jumpMod(Qt::KeyboardModifiers mods) const
 
 bool DiffCanvas::canFollow() const
 {
-    if (m_defName.isEmpty() || m_root.isEmpty() || !rubySought(m_root, m_defName))
+    const QString name = langSeek(m_root, m_defPath, m_defLine, m_defName);
+    if (name.isEmpty() || m_root.isEmpty() || !langSought(m_root, name))
         return false;
     return lookupDef(defSpot(m_root, m_defPath, m_defLine, m_defColumn, m_defName, m_defReceiver)).found();
 }
@@ -53,10 +53,11 @@ void DiffCanvas::holdJump(const QString &name, const QString &path, int line, in
 
 bool DiffCanvas::deferJump(const QString &name, const QString &path, int line, int column, const QString &receiver)
 {
-    if (rubySought(m_root, name))
+    const QString sought = langSeek(m_root, path, line, name);
+    if (sought.isEmpty() || langSought(m_root, sought))
         return false;
     holdJump(name, path, line, column, receiver);
-    seek(name);
+    seek(sought);
     return true;
 }
 

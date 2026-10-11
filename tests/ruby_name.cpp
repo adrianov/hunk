@@ -109,6 +109,25 @@ void testModel()
     CHECK(userModel(root));
 }
 
+bool nestedClass(const QString &root)
+{
+    const LangDef def = lookupName(root, "karafka.rb", "Telemetry::KarafkaMonitor");
+    return def.path == QLatin1String("lib/telemetry/karafka_monitor.rb") && def.line == 2
+        && def.signature.contains(QLatin1String("class KarafkaMonitor")) && def.body.contains(QLatin1String("1"));
+}
+
+void testNestedClass()
+{
+    QTemporaryDir dir;
+    CHECK(dir.isValid());
+    const QString root = dir.path();
+    CHECK(putFile(root, "karafka.rb", "config.monitor = Telemetry::KarafkaMonitor.new\n"));
+    CHECK(putFile(root, "lib/telemetry/karafka_monitor.rb",
+                  "module Telemetry\n  class KarafkaMonitor < Karafka::Instrumentation::Monitor\n    def instrument\n      1\n    end\n  end\nend\n"));
+    warmLang(root);
+    CHECK(nestedClass(root));
+}
+
 void testRubyClass()
 {
     QTemporaryDir dir;
@@ -134,6 +153,7 @@ int rubyNameTests()
     testConstDef();
     testConstArray();
     testModel();
+    testNestedClass();
     testRubyClass();
     return g_fails + rubyRecvTests();
 }

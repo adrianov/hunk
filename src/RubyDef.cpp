@@ -3,6 +3,7 @@
 
 #include "RubyDef.hpp"
 
+#include "LangTune.hpp"
 #include "RubyDetail.hpp"
 
 namespace {
@@ -38,7 +39,7 @@ LangDef selfCall(const QList<LangDef> &defs, const QString &path)
         if (def.signature.contains(QLatin1String("def self.")))
             selves.append(def);
     }
-    return rubyPick(selves.isEmpty() ? defs : selves, path);
+    return langPick(selves.isEmpty() ? defs : selves, path);
 }
 
 bool snakeBreak(const QString &word, int i)
@@ -150,7 +151,9 @@ LangDef rubyModel(const QList<LangDef> &defs, const QString &name)
     return ties == 1 ? best : LangDef();
 }
 
-LangDef picked(const QList<LangDef> &hits, const LangSpot &spot)
+} // namespace
+
+LangDef rubyChoose(const QList<LangDef> &hits, const LangSpot &spot)
 {
     if (classReceiver(spot.name)) {
         const LangDef model = rubyModel(hits, spot.name);
@@ -164,21 +167,25 @@ LangDef picked(const QList<LangDef> &hits, const LangSpot &spot)
         if (!loose.isEmpty())
             return selfCall(loose, spot.path);
     }
-    return rubyPick(hits, spot.path);
+    return langPick(hits, spot.path);
 }
 
-} // namespace
-
-LangDef rubyLookup(const LangSpot &spot)
+bool rubyExtra(const LangSpot &spot, LangDef *out)
 {
-    const LangDef column = schemaFind(spot.root, spot.receiver, spot.name);
-    if (column.found() && (column.path != spot.path || column.line != spot.line))
-        return column;
-    rubyEnsure(spot.root, spot.name);
-    const QList<LangDef> hits = rubyHits(spot.root, spot.name);
-    for (const LangDef &def : hits) {
-        if (def.path == spot.path && def.line == spot.line)
-            return {};
+    if (spot.name == QLatin1String("super")) {
+        *out = rubySuper(spot);
+        return true;
     }
-    return picked(hits, spot);
+    const LangDef column = schemaFind(spot.root, spot.receiver, spot.name, spot.path, spot.line);
+    if (!column.found() || (column.path == spot.path && column.line == spot.line))
+        return false;
+    *out = column;
+    return true;
+}
+
+QString rubySeek(const QString &root, const QString &path, int line, const QString &name)
+{
+    if (name == QLatin1String("super"))
+        return rubyMethodAt(root, path, line);
+    return name;
 }

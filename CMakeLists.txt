@@ -50,16 +50,24 @@ add_library(hunk_core STATIC
   src/SyntaxMd.cpp
   src/SyntaxEmph.cpp
   src/LangDef.cpp
+  src/LangTune.cpp
+  src/LangIndex.cpp
+  src/LangWalk.cpp
   src/RubyDef.cpp
   src/RubyScan.cpp
   src/RubySig.cpp
   src/RubyConst.cpp
+  src/RubyParent.cpp
   src/RubySchema.cpp
   src/RubyColumn.cpp
+  src/RubyTable.cpp
+  src/RubySuper.cpp
+  src/RubyMix.cpp
+  src/RubyHost.cpp
   src/RubyScope.cpp
   src/RubyDsl.cpp
   src/RubyBody.cpp
-  src/RubyIndex.cpp
+  src/RubyTune.cpp
   src/ReviewExport.cpp
 )
 target_include_directories(hunk_core PUBLIC ${CMAKE_SOURCE_DIR}/src)

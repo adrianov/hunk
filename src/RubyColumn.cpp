@@ -29,7 +29,9 @@ bool esEnding(const QString &name)
         || name.endsWith(QLatin1Char('z'));
 }
 
-QString plural(const QString &name)
+} // namespace
+
+QString rubyPlural(const QString &name)
 {
     QString ies;
     if (yPlural(name, &ies))
@@ -38,12 +40,41 @@ QString plural(const QString &name)
     return name + (es ? QStringLiteral("es") : QStringLiteral("s"));
 }
 
+namespace {
+
 LangDef stored(const QString &root, const QString &table, const QString &column)
 {
     const QMutexLocker lock(&g_mutex);
     if (g_root != root || table.isEmpty())
         return {};
     return g_columns.value(table + QLatin1Char('\n') + column);
+}
+
+LangDef receiverColumn(const QString &root, const QString &receiver, const QString &column)
+{
+    QString name = receiver;
+    while (name.startsWith(QLatin1Char('@')))
+        name.remove(0, 1);
+    if (name.isEmpty() || !name.at(0).isLower())
+        return {};
+    const LangDef exact = stored(root, name, column);
+    if (exact.found())
+        return exact;
+    return stored(root, rubyPlural(name), column);
+}
+
+QList<LangDef> namedColumns(const QString &root, const QString &column)
+{
+    QList<LangDef> hits;
+    const QMutexLocker lock(&g_mutex);
+    if (g_root != root || column.isEmpty())
+        return hits;
+    const QString suffix = QLatin1Char('\n') + column;
+    for (auto it = g_columns.cbegin(); it != g_columns.cend(); ++it) {
+        if (it.key().endsWith(suffix))
+            hits.append(it.value());
+    }
+    return hits;
 }
 
 } // namespace
@@ -77,16 +108,16 @@ void schemaLazy(const QString &root)
     schemaStore(ticket, root, std::move(columns));
 }
 
-LangDef schemaFind(const QString &root, const QString &receiver, const QString &column)
+LangDef schemaFind(const QString &root, const QString &receiver, const QString &column, const QString &path, int line)
 {
-    QString name = receiver;
-    while (name.startsWith(QLatin1Char('@')))
-        name.remove(0, 1);
-    if (name.isEmpty() || !name.at(0).isLower())
-        return {};
     schemaLazy(root);
-    const LangDef exact = stored(root, name, column);
-    if (exact.found())
-        return exact;
-    return stored(root, plural(name), column);
+    const LangDef known = receiverColumn(root, receiver, column);
+    if (known.found())
+        return known;
+    const QList<LangDef> hits = namedColumns(root, column);
+    if (hits.isEmpty())
+        return {};
+    if (hits.size() == 1)
+        return hits.first();
+    return bestColumn(hits, modelTable(path), lineAt(root, path, line));
 }

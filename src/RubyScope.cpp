@@ -109,7 +109,10 @@ bool noteScope(const QStringList &lines, int line, const QString &path, const QS
     if (!rubyTypeName(text, &name))
         return false;
     pushScope(text, name, stack);
-    noteOwned(lines, line, path, name, {}, out);
+    const QString full = stack->constLast().name;
+    noteOwned(lines, line, path, full, {}, out);
+    if (full != name)
+        (*out)[name].append((*out)[full].constLast());
     return true;
 }
 
@@ -129,12 +132,23 @@ bool noteValue(const QStringList &lines, int line, const QString &path, const QS
     return true;
 }
 
+void noteMixin(const QString &text, const QList<Scope> &stack)
+{
+    QString name;
+    if (inMethod(stack) || !rubyMixin(text, &name))
+        return;
+    const QString host = classOwner(stack);
+    if (!host.isEmpty())
+        rubyAddHost(name, host);
+}
+
 void scanLine(const QStringList &lines, int line, const QString &path, QList<Scope> *stack, QHash<QString, QList<LangDef>> *out)
 {
     const QString text = lines.at(line - 1);
     popScope(text, stack);
     if (!noteScope(lines, line, path, text, stack, out))
         noteValue(lines, line, path, text, *stack, out);
+    noteMixin(text, *stack);
 }
 
 } // namespace

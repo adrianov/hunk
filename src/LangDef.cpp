@@ -3,19 +3,27 @@
 
 #include "LangDef.hpp"
 
-#include "RubyDef.hpp"
-#include "SyntaxRule.hpp"
+#include "LangTune.hpp"
 
-void warmLang(const QString &root, QPointer<QObject> watch, std::function<void()> done)
+namespace {
+
+bool hereDef(const QList<LangDef> &hits, const LangSpot &spot)
 {
-    rubyWarm(root, watch, std::move(done));
+    for (const LangDef &def : hits) {
+        if (def.path == spot.path && def.line == spot.line)
+            return true;
+    }
+    return false;
 }
+
+} // namespace
 
 bool langReady(const QString &root, const QString &path)
 {
-    if (langFor(path) != Lang::Ruby)
+    const LangTune *tune = langTune(langFor(path));
+    if (!tune || !tune->note)
         return true;
-    return rubyReady(root);
+    return langCached(root);
 }
 
 LangSpot defSpot(const QString &root, const QString &path, int line, int column, const QString &name,
@@ -33,10 +41,17 @@ LangSpot defSpot(const QString &root, const QString &path, int line, int column,
 
 LangDef lookupDef(const LangSpot &spot)
 {
-    if (spot.name.isEmpty() || spot.root.isEmpty())
+    const LangTune *tune = langTune(langFor(spot.path));
+    if (!tune || spot.name.isEmpty() || spot.root.isEmpty())
         return {};
-    // Add a language here. It should return the same path, comment, signature, and body.
-    if (langFor(spot.path) == Lang::Ruby)
-        return rubyLookup(spot);
-    return {};
+    LangDef extra;
+    if (tune->extra && tune->extra(spot, &extra))
+        return extra;
+    langEnsure(spot.root, spot.name);
+    const QList<LangDef> hits = langHits(spot.root, spot.name, tune->lang);
+    if (hereDef(hits, spot))
+        return {};
+    if (tune->choose)
+        return tune->choose(hits, spot);
+    return langPick(hits, spot.path);
 }

@@ -3,19 +3,9 @@
 
 #include "DiffCanvas.hpp"
 
-#include "RubyDetail.hpp"
-#include "SyntaxRule.hpp"
+#include "LangTune.hpp"
 
 namespace {
-
-bool hoverKind(SynKind kind, const QString &path)
-{
-    if (kind == SynKind::Method)
-        return true;
-    if (langFor(path) != Lang::Ruby)
-        return false;
-    return kind == SynKind::Variable || kind == SynKind::Type;
-}
 
 bool receiverChar(QChar ch)
 {
@@ -54,21 +44,15 @@ QString dotReceiver(const QString &text, const QList<SynSpan> &spans, int column
     return {};
 }
 
-bool hashKey(const QString &text, int end)
-{
-    if (end >= text.size() || text.at(end) != QLatin1Char(':'))
-        return false;
-    return end + 1 >= text.size() || text.at(end + 1) != QLatin1Char(':');
-}
-
 QString spanName(const QString &text, const QList<SynSpan> &spans, int column, const QString &path)
 {
+    const LangTune *tune = langTune(langFor(path));
+    if (!tune)
+        return {};
     for (const SynSpan &span : spans) {
-        if (column < span.start || column >= span.end || !hoverKind(span.kind, path) || hashKey(text, span.end))
+        if (column < span.start || column >= span.end || !tuneKind(tune, span.kind))
             continue;
-        if (span.kind == SynKind::Type)
-            return rubyConst(text, span.start, span.end);
-        return text.mid(span.start, span.end - span.start);
+        return tune->name ? tune->name(text, span.start, span.end, span.kind) : text.mid(span.start, span.end - span.start);
     }
     return {};
 }

@@ -10,8 +10,8 @@
 
 class QObject;
 
-// Where a hovered name is defined. Each language fills the same fields.
-// Ruby is built in. C++, Swift, JavaScript, TypeScript, and Objective-C use this shape too.
+// Where a hovered name is defined. Every language fills these fields.
+// A language layer adds names, exclusions, and ranking. The index and the walk stay shared.
 struct LangDef {
     QString path;
     int line = 0;
@@ -33,10 +33,10 @@ struct LangSpot {
     QString receiver;
 };
 
-// Definition of the name at `spot`, or an empty result when this language has none yet.
+// Definition of the name at `spot`, or an empty result when that language has none.
 LangDef lookupDef(const LangSpot &spot);
 LangSpot defSpot(const QString &root, const QString &path, int line, int column, const QString &name,
                  const QString &receiver = {});
-// Builds the Ruby name index. When a walk is stored, `done` is queued on `watch`.
+// Remembers the project root and clears every language cache. `done` runs on `watch`.
 void warmLang(const QString &root, QPointer<QObject> watch = {}, std::function<void()> done = {});
 bool langReady(const QString &root, const QString &path);
