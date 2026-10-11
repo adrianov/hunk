@@ -265,8 +265,8 @@ Feature: Diff view
 
   Scenario: Hover a class DSL declaration
     Given a diff of a Ruby file
-    When I hover a call such as "Post.comments" or "Telemetry::Metrics::VirtualProducts.missing_items"
-    Then a popup shows that declaration, such as has_many or counter
+    When I hover a call such as "Post.comments", "http.active_requests", or "Telemetry::Metrics::VirtualProducts.missing_items"
+    Then a popup shows that declaration, such as has_many, up_down, or counter
 
   Scenario: Hover an ambiguous Ruby name
     Given a diff of a Ruby file
@@ -278,19 +278,22 @@ Feature: Diff view
     When I hover a class or module name
     Then a popup shows the file and line where it is defined
     And the popup shows the comment above it, the class or module line, and the whole body, scrolled when it is long
+    When I hover User and another file also reopens class User
+    Then the popup shows app/models/user.rb
     When I Command-click that name on macOS, or Control-click it on Linux
-    Then the diff shows that file at that line
+    Then the diff shows that file at that line, even when it has no added or removed lines
 
   Scenario: Hover a Ruby constant
     Given a diff of a Ruby file
     When I hover a constant such as "DEFAULT_PAYMENT" or ":DEFAULT_PAYMENT"
     Then a popup shows its assignment, such as "DEFAULT_PAYMENT = 'card'"
+    And an array value shows every element, through the closing bracket
     When I Command-click that constant on macOS, or Control-click it on Linux
     Then the diff shows that file at that line
 
   Scenario: Hover an Active Record column
     Given a diff of a Ruby file
-    When I hover a call such as "online_order.final_delivery_price"
+    When I hover a call such as "online_order.final_delivery_price" or "address.city"
     Then a popup shows that column from schema.rb, or from another schema file
     And the popup shows the column type and options such as precision
 
