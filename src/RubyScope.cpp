@@ -7,6 +7,7 @@ namespace {
 
 struct Scope {
     int indent = 0;
+    int line = 0;
     QString name;
 };
 
@@ -47,12 +48,24 @@ QString nestName(const QList<Scope> &stack, const QString &name)
     return stack.constLast().name + QStringLiteral("::") + name;
 }
 
-void pushScope(const QString &line, const QString &name, QList<Scope> *stack)
+void pushScope(const QString &text, int line, const QString &name, QList<Scope> *stack)
 {
     Scope scope;
-    scope.indent = leading(line);
+    scope.indent = leading(text);
+    scope.line = line;
     scope.name = nestName(*stack, name);
     stack->append(scope);
+}
+
+QStringList parentOpens(const QStringList &lines, const QList<Scope> &stack)
+{
+    QStringList opens;
+    for (int at = 0; at < stack.size() - 1; ++at) {
+        const int line = stack.at(at).line;
+        if (line >= 1 && line <= lines.size())
+            opens.append(lines.at(line - 1));
+    }
+    return opens;
 }
 
 void noteOwned(const QStringList &lines, int line, const QString &path, const QString &name, const QString &owner,
@@ -108,9 +121,10 @@ bool noteScope(const QStringList &lines, int line, const QString &path, const QS
     }
     if (!rubyTypeName(text, &name))
         return false;
-    pushScope(text, name, stack);
+    pushScope(text, line, name, stack);
     const QString full = stack->constLast().name;
     noteOwned(lines, line, path, full, {}, out);
+    rubyWrap(&(*out)[full].last(), parentOpens(lines, *stack));
     if (full != name)
         (*out)[name].append((*out)[full].constLast());
     return true;

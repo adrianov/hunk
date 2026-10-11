@@ -65,6 +65,9 @@ add_library(hunk_core STATIC
   src/RubyMix.cpp
   src/RubyHost.cpp
   src/RubyScope.cpp
+  src/RubyNest.cpp
+  src/RubyLocal.cpp
+  src/RubyAssign.cpp
   src/RubyDsl.cpp
   src/RubyBody.cpp
   src/RubyTune.cpp

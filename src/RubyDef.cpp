@@ -172,6 +172,10 @@ LangDef rubyChoose(const QList<LangDef> &hits, const LangSpot &spot)
 
 bool rubyExtra(const LangSpot &spot, LangDef *out)
 {
+    if (rubyLocal(spot)) {
+        *out = {};
+        return true;
+    }
     if (spot.name == QLatin1String("super")) {
         *out = rubySuper(spot);
         return true;

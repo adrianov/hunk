@@ -112,8 +112,10 @@ void testModel()
 bool nestedClass(const QString &root)
 {
     const LangDef def = lookupName(root, "karafka.rb", "Telemetry::KarafkaMonitor");
-    return def.path == QLatin1String("lib/telemetry/karafka_monitor.rb") && def.line == 2
-        && def.signature.contains(QLatin1String("class KarafkaMonitor")) && def.body.contains(QLatin1String("1"));
+    return def.path == QLatin1String("lib/telemetry/karafka_monitor.rb") && def.line == 3 && def.comment.isEmpty()
+        && def.signature.startsWith(QLatin1String("module Telemetry\n  # monitor\n"))
+        && def.signature.contains(QLatin1String("class KarafkaMonitor")) && def.body.contains(QLatin1String("1"))
+        && def.body.endsWith(QLatin1String("\nend"));
 }
 
 void testNestedClass()
@@ -123,9 +125,40 @@ void testNestedClass()
     const QString root = dir.path();
     CHECK(putFile(root, "karafka.rb", "config.monitor = Telemetry::KarafkaMonitor.new\n"));
     CHECK(putFile(root, "lib/telemetry/karafka_monitor.rb",
-                  "module Telemetry\n  class KarafkaMonitor < Karafka::Instrumentation::Monitor\n    def instrument\n      1\n    end\n  end\nend\n"));
+                  "module Telemetry\n  # monitor\n  class KarafkaMonitor < Karafka::Instrumentation::Monitor\n    def instrument\n      1\n    end\n  end\nend\n"));
     warmLang(root);
     CHECK(nestedClass(root));
+}
+
+LangDef lookupAt(const QString &root, const char *path, int line, int column, const char *name)
+{
+    LangSpot spot;
+    spot.root = root;
+    spot.path = QLatin1String(path);
+    spot.line = line;
+    spot.column = column;
+    spot.name = QLatin1String(name);
+    return lookupDef(spot);
+}
+
+bool localQuiet(const QString &root)
+{
+    const LangDef local = lookupAt(root, "path_normalizer.rb", 8, 4, "normalized");
+    const LangDef method = lookupAt(root, "other.rb", 1, 0, "normalized");
+    return !local.found() && method.path == QLatin1String("path_normalizer.rb") && method.line == 2;
+}
+
+void testLocal()
+{
+    QTemporaryDir dir;
+    CHECK(dir.isValid());
+    const QString root = dir.path();
+    CHECK(putFile(root, "path_normalizer.rb",
+                  "class PathNormalizer\n  def normalized(prices)\n    prices\n  end\n  def call\n"
+                  "    normalized = path.dup\n\n    normalized.gsub!(\"a\", \"b\")\n  end\nend\n"));
+    CHECK(putFile(root, "other.rb", "normalized(1)\n"));
+    warmLang(root);
+    CHECK(localQuiet(root));
 }
 
 void testRubyClass()
@@ -154,6 +187,7 @@ int rubyNameTests()
     testConstArray();
     testModel();
     testNestedClass();
+    testLocal();
     testRubyClass();
     return g_fails + rubyRecvTests();
 }
