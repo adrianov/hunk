@@ -37,6 +37,6 @@ struct LangSpot {
 LangDef lookupDef(const LangSpot &spot);
 LangSpot defSpot(const QString &root, const QString &path, int line, int column, const QString &name,
                  const QString &receiver = {});
-// Remembers the project root and clears every language cache. `done` runs on `watch`.
+// Remembers the project root. A new root clears every language cache. `done` runs on `watch`.
 void warmLang(const QString &root, QPointer<QObject> watch = {}, std::function<void()> done = {});
 bool langReady(const QString &root, const QString &path);

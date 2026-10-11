@@ -71,15 +71,15 @@ void warmLang(const QString &root, QPointer<QObject> watch, std::function<void()
 {
     {
         const QMutexLocker lock(&g_mutex);
-        if (g_cached == root)
-            return;
-        g_cached = root;
-        g_names.clear();
-        g_sought.clear();
-        g_pending.clear();
-        g_walking = false;
-        langReset(++g_ticket);
-        g_done.wakeAll();
+        if (g_cached != root) {
+            g_cached = root;
+            g_names.clear();
+            g_sought.clear();
+            g_pending.clear();
+            g_walking = false;
+            langReset(++g_ticket);
+            g_done.wakeAll();
+        }
     }
     QObject *target = watch.data();
     if (!target || !done)
