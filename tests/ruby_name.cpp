@@ -60,6 +60,25 @@ void testAssign()
     CHECK(rubyConst(QStringLiteral("private_constant :DEFAULT_PAYMENT"), 17, 33) == QLatin1String("DEFAULT_PAYMENT"));
 }
 
+bool arrayShown(const LangDef &def)
+{
+    return def.signature.contains(QLatin1String("ho]st")) && def.signature.contains(QLatin1String(":host"))
+        && def.signature.trimmed().endsWith(QLatin1String("]")) && !def.signature.contains(QLatin1String("def labels"))
+        && def.body.isEmpty();
+}
+
+void testConstArray()
+{
+    QTemporaryDir dir;
+    CHECK(dir.isValid());
+    const QString root = dir.path();
+    CHECK(putFile(root, "tags.rb",
+                  "ACTIVE_REQUEST_ATTRIBUTES = [\n  :one,\n  :two,\n  :three,\n  :four,\n  :five,\n  :six,\n"
+                  "  \"ho]st\",\n  :host,\n]\n\ndef labels\nend\n"));
+    warmLang(root);
+    CHECK(arrayShown(lookupName(root, "use.rb", "ACTIVE_REQUEST_ATTRIBUTES")));
+}
+
 void testConstDef()
 {
     QTemporaryDir dir;
@@ -70,6 +89,24 @@ void testConstDef()
     const LangDef def = lookupName(root, "use.rb", "DEFAULT_PAYMENT");
     CHECK(def.path == QLatin1String("pay.rb") && def.line == 2 && def.signature.contains(QLatin1String("'card'"))
           && def.comment.contains(QLatin1String("Card")));
+}
+
+bool userModel(const QString &root)
+{
+    const LangDef model = lookupName(root, "app/services/user/save_promocode_usage_history.rb", "User");
+    return model.path == QLatin1String("app/models/user.rb") && model.line == 2 && model.comment.contains(QLatin1String("Account"));
+}
+
+void testModel()
+{
+    QTemporaryDir dir;
+    CHECK(dir.isValid());
+    const QString root = dir.path();
+    CHECK(putFile(root, "app/models/user.rb", "# Account\nclass User < ApplicationRecord\n  MIN_AGE = 18\nend\n"));
+    CHECK(putFile(root, "app/services/user/save_promocode_usage_history.rb",
+                  "class User\n  class SavePromocodeUsageHistory\n    def self.call\n    end\n  end\nend\n"));
+    warmLang(root);
+    CHECK(userModel(root));
 }
 
 void testRubyClass()
@@ -95,6 +132,8 @@ int rubyNameTests()
     testRubyType();
     testAssign();
     testConstDef();
+    testConstArray();
+    testModel();
     testRubyClass();
     return g_fails + rubyRecvTests();
 }

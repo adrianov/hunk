@@ -5,6 +5,7 @@
 
 #include "DiffPopup.hpp"
 #include "LangDef.hpp"
+#include "RubyDetail.hpp"
 #include "SyntaxRule.hpp"
 
 #include <QCursor>
@@ -25,24 +26,58 @@ void DiffCanvas::onScroll()
     stopDef();
 }
 
+bool DiffCanvas::seekBusy(const QString &name) const
+{
+    return name.isEmpty() || m_root.isEmpty() || rubySought(m_root, name) || m_seeking.contains(name);
+}
+
+void DiffCanvas::afterSeek(const QString &name)
+{
+    m_seeking.remove(name);
+    if (m_defWait && m_defName == name && !m_defTimer.isActive())
+        showDef();
+    finishJump();
+}
+
+void DiffCanvas::seek(const QString &name)
+{
+    if (seekBusy(name))
+        return;
+    m_seeking.insert(name);
+    const QString root = m_root;
+    QPointer<DiffCanvas> alive(this);
+    QThreadPool::globalInstance()->start([alive, root, name] {
+        rubyEnsure(root, name);
+        if (alive)
+            QMetaObject::invokeMethod(alive.data(), [alive, name] { if (alive) alive->afterSeek(name); }, Qt::QueuedConnection);
+    });
+}
+
+bool DiffCanvas::awaitSeek()
+{
+    if (rubySought(m_root, m_defName))
+        return false;
+    m_defWait = true;
+    seek(m_defName);
+    return true;
+}
+
 void DiffCanvas::setRoot(const QString &root)
 {
     if (root == m_root)
         return;
     m_root = root;
+    m_seeking.clear();
     stopDef();
     if (root.isEmpty())
         return;
-    QPointer<QObject> watch(this);
     QPointer<DiffCanvas> alive(this);
-    QThreadPool::globalInstance()->start([watch, alive, root] {
-        warmLang(root, watch, [alive] {
-            if (!alive)
-                return;
-            if (alive->m_defWait && !alive->m_defTimer.isActive())
-                alive->showDef();
-            alive->finishJump();
-        });
+    warmLang(root, this, [alive] {
+        if (!alive)
+            return;
+        if (alive->m_defWait && !alive->m_defTimer.isActive())
+            alive->showDef();
+        alive->finishJump();
     });
 }
 
@@ -130,18 +165,15 @@ void DiffCanvas::showDef()
             m_defPopup->hide();
         return;
     }
+    if (awaitSeek())
+        return;
     const LangDef def = lookupDef(defSpot(m_root, m_defPath, m_defLine, m_defColumn, m_defName, m_defReceiver));
+    m_defWait = false;
     if (def.found()) {
-        m_defWait = false;
         ensurePopup()->present(def, m_mono, QCursor::pos(), m_defPath);
         followHand();
         return;
     }
-    if (!langReady(m_root, m_defPath)) {
-        m_defWait = true;
-        return;
-    }
-    m_defWait = false;
     if (m_defPopup)
         m_defPopup->hide();
 }

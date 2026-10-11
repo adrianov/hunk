@@ -11,6 +11,7 @@
 #include <QHash>
 #include <QMetaObject>
 #include <QMutex>
+#include <QSet>
 
 namespace {
 
@@ -33,12 +34,41 @@ bool skipDir(const QString &name)
     return false;
 }
 
-void noteDefs(const QString &root, const QString &full, QHash<QString, QList<LangDef>> *out)
+bool wordChar(QChar ch)
 {
-    noteRuby(rubyLines(rubyRead(full)), QDir(root).relativeFilePath(full), out);
+    return ch.isLetterOrNumber() || ch == QLatin1Char('_');
 }
 
-void walkRuby(const QString &root, const QString &dir, QHash<QString, QList<LangDef>> *out, int depth)
+bool wordIn(const QString &text, const QString &name)
+{
+    int from = 0;
+    while (from < text.size()) {
+        const int at = text.indexOf(name, from);
+        if (at < 0)
+            return false;
+        const bool left = at == 0 || !wordChar(text.at(at - 1));
+        const int end = at + name.size();
+        const bool right = end >= text.size() || !wordChar(text.at(end));
+        if (left && right)
+            return true;
+        from = end;
+    }
+    return false;
+}
+
+void noteDefs(const QString &root, const QString &full, const QString &name, QHash<QString, QList<LangDef>> *out)
+{
+    const QString text = rubyRead(full);
+    if (!wordIn(text, name))
+        return;
+    QHash<QString, QList<LangDef>> local;
+    noteRuby(rubyLines(text), QDir(root).relativeFilePath(full), &local);
+    const QList<LangDef> found = local.value(name);
+    if (!found.isEmpty())
+        (*out)[name].append(found);
+}
+
+void walkRuby(const QString &root, const QString &dir, const QString &name, QHash<QString, QList<LangDef>> *out, int depth)
 {
     if (depth > 24)
         return;
@@ -46,20 +76,12 @@ void walkRuby(const QString &root, const QString &dir, QHash<QString, QList<Lang
     for (const QFileInfo &info : folder.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot)) {
         if (info.isDir()) {
             if (!skipDir(info.fileName()))
-                walkRuby(root, info.filePath(), out, depth + 1);
+                walkRuby(root, info.filePath(), name, out, depth + 1);
             continue;
         }
         if (langFor(info.fileName()) == Lang::Ruby)
-            noteDefs(root, info.filePath(), out);
+            noteDefs(root, info.filePath(), name, out);
     }
-}
-
-void collectLang(const QString &root, QHash<QString, QList<LangDef>> *names, QHash<QString, LangDef> *columns)
-{
-    if (root.isEmpty())
-        return;
-    walkRuby(root, root, names, 0);
-    readSchemas(root, columns);
 }
 
 } // namespace
@@ -70,29 +92,20 @@ QMutex g_mutex;
 QString g_cached;
 int g_ticket = 0;
 QHash<QString, QList<LangDef>> g_names;
+QSet<QString> g_sought;
 
 } // namespace
 
 void rubyWarm(const QString &root, QPointer<QObject> watch, std::function<void()> done)
 {
-    int ticket = 0;
     {
         const QMutexLocker lock(&g_mutex);
         if (g_cached == root)
             return;
-        ticket = ++g_ticket;
-        schemaBump(ticket);
-    }
-    QHash<QString, QList<LangDef>> names;
-    QHash<QString, LangDef> columns;
-    collectLang(root, &names, &columns);
-    schemaStore(ticket, root, std::move(columns));
-    {
-        const QMutexLocker lock(&g_mutex);
-        if (ticket != g_ticket)
-            return;
         g_cached = root;
-        g_names = std::move(names);
+        g_names.clear();
+        g_sought.clear();
+        schemaBump(++g_ticket);
     }
     QObject *target = watch.data();
     if (!target || !done)
@@ -112,6 +125,30 @@ QList<LangDef> rubyHits(const QString &root, const QString &name)
     if (g_cached != root)
         return {};
     return g_names.value(name);
+}
+
+bool rubySought(const QString &root, const QString &name)
+{
+    const QMutexLocker lock(&g_mutex);
+    return g_cached == root && g_sought.contains(name);
+}
+
+void rubyEnsure(const QString &root, const QString &name)
+{
+    if (root.isEmpty() || name.isEmpty())
+        return;
+    {
+        const QMutexLocker lock(&g_mutex);
+        if (g_cached != root || g_sought.contains(name))
+            return;
+    }
+    QHash<QString, QList<LangDef>> found;
+    walkRuby(root, root, name, &found, 0);
+    const QMutexLocker lock(&g_mutex);
+    if (g_cached != root)
+        return;
+    g_names.insert(name, found.value(name));
+    g_sought.insert(name);
 }
 
 LangDef rubyPick(const QList<LangDef> &defs, const QString &path)

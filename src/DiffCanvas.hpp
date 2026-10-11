@@ -54,7 +54,7 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
     bool viewportEvent(QEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
-    void keyReleaseEvent(QKeyEvent *event) override;
+    bool eventFilter(QObject *watched, QEvent *event) override;
     void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
@@ -147,6 +147,11 @@ private:
     void placeCursor();
     bool canFollow() const;
     void followHand();
+    void seek(const QString &name);
+    void afterSeek(const QString &name);
+    bool seekBusy(const QString &name) const;
+    bool awaitSeek();
+    bool deferJump(const QString &name, const QString &path, int line, int column, const QString &receiver);
     void armHover();
     void onScroll();
     QString methodName(int file, int row, bool old, int column, int *line, QString *receiver) const;
@@ -220,6 +225,7 @@ private:
     int m_hoverRow = -1;
     QTimer m_defTimer;
     QString m_defName;
+    QSet<QString> m_seeking;
     QString m_defPath;
     int m_defLine = 0;
     int m_defColumn = 0;

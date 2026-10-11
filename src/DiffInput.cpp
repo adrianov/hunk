@@ -128,8 +128,7 @@ void DiffCanvas::trackHover(QMouseEvent *mouse, int x, int y)
     hoverRow(band);
     hoverCursor(band, x);
     hoverDef(x, y);
-    if (!m_defName.isEmpty() && jumpMod(mouse->modifiers()))
-        viewport()->setCursor(Qt::PointingHandCursor);
+    followHand();
 }
 
 void DiffCanvas::onMove(QMouseEvent *mouse)

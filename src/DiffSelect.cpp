@@ -11,6 +11,7 @@
 #include <QKeyEvent>
 #include <QMenu>
 #include <QMouseEvent>
+#include <QTimer>
 
 namespace {
 
@@ -161,4 +162,15 @@ void DiffCanvas::keyPressEvent(QKeyEvent *event)
         return;
     }
     QAbstractScrollArea::keyPressEvent(event);
+}
+
+bool DiffCanvas::eventFilter(QObject *watched, QEvent *event)
+{
+    const bool key = event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease;
+    if (key && !static_cast<const QKeyEvent *>(event)->isAutoRepeat()) {
+        const int code = static_cast<const QKeyEvent *>(event)->key();
+        if (code == Qt::Key_Control || code == Qt::Key_Meta)
+            QTimer::singleShot(0, this, &DiffCanvas::placeCursor);
+    }
+    return QAbstractScrollArea::eventFilter(watched, event);
 }

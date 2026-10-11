@@ -46,6 +46,7 @@ DiffCanvas::DiffCanvas(QWidget *parent)
     connect(&m_wrapTimer, &QTimer::timeout, this, &DiffCanvas::rebuild);
     armHover();
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &DiffCanvas::onScroll);
+    qApp->installEventFilter(this);
 }
 
 void DiffCanvas::ensureFont()

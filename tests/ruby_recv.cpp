@@ -36,7 +36,9 @@ bool putFile(const QString &root, const char *rel, const char *text)
 void schemaFiles(const QString &root)
 {
     CHECK(putFile(root, "db/schema.rb",
-                  "create_table \"online_orders\" do |t|\n  t.float \"final_delivery_price\", precision: 8, scale: 2\nend\n"));
+                  "create_table \"online_orders\" do |t|\n  t.float \"final_delivery_price\", precision: 8, scale: 2\nend\n"
+                  "create_table \"addresses\" do |t|\n  t.string \"city\"\nend\n"
+                  "create_table \"statuses\" do |t|\n  t.string \"name\"\nend\n"));
     CHECK(putFile(root, "db/clickhouse_schema.rb", "create_table \"prices\" do |t|\n  t.float \"current\"\nend\n"));
 }
 
@@ -59,7 +61,14 @@ bool orderColumn(const QString &root)
 
 bool priceColumn(const QString &root)
 {
-    return columnDef(root, QStringLiteral("current"), QStringLiteral("price")).path == QLatin1String("db/clickhouse_schema.rb");
+    return columnDef(root, QStringLiteral("current"), QStringLiteral("price")).path.endsWith(QLatin1String("clickhouse_schema.rb"))
+        && columnDef(root, QStringLiteral("current"), QStringLiteral("prices")).path.endsWith(QLatin1String("clickhouse_schema.rb"));
+}
+
+bool sColumn(const QString &root)
+{
+    return columnDef(root, QStringLiteral("city"), QStringLiteral("address")).comment.contains(QLatin1String("addresses"))
+        && columnDef(root, QStringLiteral("name"), QStringLiteral("status")).comment.contains(QLatin1String("statuses"));
 }
 
 void testSchemaColumn()
@@ -69,7 +78,7 @@ void testSchemaColumn()
     const QString root = dir.path();
     schemaFiles(root);
     warmLang(root);
-    CHECK(orderColumn(root) && priceColumn(root));
+    CHECK(orderColumn(root) && priceColumn(root) && sColumn(root));
 }
 
 void callFiles(const QString &root)
@@ -134,6 +143,30 @@ void testDsl()
     CHECK(!dslHit(root, "nope", "has_many"));
 }
 
+bool looseMetric(const QString &root)
+{
+    LangSpot spot;
+    spot.root = root;
+    spot.path = QStringLiteral("spec/http_spec.rb");
+    spot.name = QStringLiteral("active_requests");
+    spot.receiver = QStringLiteral("http");
+    const LangDef def = lookupDef(spot);
+    return def.path.endsWith(QLatin1String("metrics/http.rb")) && def.signature.contains(QLatin1String("up_down(:active_requests"));
+}
+
+void testLooseMetric()
+{
+    QTemporaryDir dir;
+    CHECK(dir.isValid());
+    const QString root = dir.path();
+    CHECK(putFile(root, "lib/telemetry/metrics/http.rb",
+                  "class Telemetry::Metrics::Http < Base\n  up_down(:active_requests, 'client')\nend\n"));
+    CHECK(putFile(root, "lib/telemetry/metrics/server.rb",
+                  "class Telemetry::Metrics::Server < Base\n  up_down(:active_requests, 'server')\nend\n"));
+    warmLang(root);
+    CHECK(looseMetric(root));
+}
+
 void testMetric()
 {
     QTemporaryDir dir;
@@ -155,5 +188,6 @@ int rubyRecvTests()
     testClassCall();
     testDsl();
     testMetric();
+    testLooseMetric();
     return g_fails;
 }

@@ -4,6 +4,7 @@
 #include "DiffCanvas.hpp"
 
 #include "LangDef.hpp"
+#include "RubyDetail.hpp"
 #include "SyntaxRule.hpp"
 
 #include <QCursor>
@@ -18,7 +19,7 @@ bool DiffCanvas::jumpMod(Qt::KeyboardModifiers mods) const
 
 bool DiffCanvas::canFollow() const
 {
-    if (m_defName.isEmpty() || m_root.isEmpty())
+    if (m_defName.isEmpty() || m_root.isEmpty() || !rubySought(m_root, m_defName))
         return false;
     return lookupDef(defSpot(m_root, m_defPath, m_defLine, m_defColumn, m_defName, m_defReceiver)).found();
 }
@@ -31,6 +32,8 @@ void DiffCanvas::followHand()
 
 void DiffCanvas::placeCursor()
 {
+    if (m_dragText || m_dragSplit)
+        return;
     const QPoint local = viewport()->mapFromGlobal(QCursor::pos());
     if (!viewport()->rect().contains(local))
         return;
@@ -48,6 +51,15 @@ void DiffCanvas::holdJump(const QString &name, const QString &path, int line, in
     m_jumpReceiver = receiver;
 }
 
+bool DiffCanvas::deferJump(const QString &name, const QString &path, int line, int column, const QString &receiver)
+{
+    if (rubySought(m_root, name))
+        return false;
+    holdJump(name, path, line, column, receiver);
+    seek(name);
+    return true;
+}
+
 void DiffCanvas::chooseDef(int x, int y)
 {
     const TextMark hit = textAt(x, y);
@@ -58,11 +70,11 @@ void DiffCanvas::chooseDef(int x, int y)
     if (name.isEmpty() || line <= 0 || m_root.isEmpty())
         return;
     const QString path = sidePath(m_doc.files.at(hit.file), hit.old);
+    if (deferJump(name, path, line, hit.pos, receiver))
+        return;
     const LangDef def = lookupDef(defSpot(m_root, path, line, hit.pos, name, receiver));
     if (def.found())
         emit openDefinition(def.path, def.line);
-    else if (!langReady(m_root, path))
-        holdJump(name, path, line, hit.pos, receiver);
 }
 
 void DiffCanvas::finishJump()

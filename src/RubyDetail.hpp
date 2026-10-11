@@ -23,6 +23,8 @@ LangDef rubyAt(const QStringList &lines, int line, const QString &path);
 bool rubyClosed(const QString &line);
 bool rubyDsl(const QString &line, QString *name);
 QList<LangDef> rubyHits(const QString &root, const QString &name);
+void rubyEnsure(const QString &root, const QString &name);
+bool rubySought(const QString &root, const QString &name);
 LangDef rubyPick(const QList<LangDef> &defs, const QString &path);
 void noteRuby(const QStringList &lines, const QString &path, QHash<QString, QList<LangDef>> *out);
 void readSchemas(const QString &root, QHash<QString, LangDef> *out);

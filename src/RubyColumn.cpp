@@ -31,12 +31,11 @@ bool esEnding(const QString &name)
 
 QString plural(const QString &name)
 {
-    if (name.endsWith(QLatin1Char('s')))
-        return name;
     QString ies;
     if (yPlural(name, &ies))
         return ies;
-    return name + (esEnding(name) ? QStringLiteral("es") : QStringLiteral("s"));
+    const bool es = name.endsWith(QLatin1Char('s')) || esEnding(name);
+    return name + (es ? QStringLiteral("es") : QStringLiteral("s"));
 }
 
 LangDef stored(const QString &root, const QString &table, const QString &column)
@@ -64,6 +63,20 @@ void schemaStore(int ticket, const QString &root, QHash<QString, LangDef> column
     g_columns = std::move(columns);
 }
 
+void schemaLazy(const QString &root)
+{
+    int ticket = 0;
+    {
+        const QMutexLocker lock(&g_mutex);
+        if (g_root == root)
+            return;
+        ticket = g_ticket;
+    }
+    QHash<QString, LangDef> columns;
+    readSchemas(root, &columns);
+    schemaStore(ticket, root, std::move(columns));
+}
+
 LangDef schemaFind(const QString &root, const QString &receiver, const QString &column)
 {
     QString name = receiver;
@@ -71,6 +84,7 @@ LangDef schemaFind(const QString &root, const QString &receiver, const QString &
         name.remove(0, 1);
     if (name.isEmpty() || !name.at(0).isLower())
         return {};
+    schemaLazy(root);
     const LangDef exact = stored(root, name, column);
     if (exact.found())
         return exact;
