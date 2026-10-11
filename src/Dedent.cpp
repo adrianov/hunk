@@ -9,8 +9,7 @@ namespace {
 
 int lineMargin(const QString &line)
 {
-    const QString trimmed = line.trimmed();
-    if (trimmed.isEmpty() || trimmed == QStringLiteral("…"))
+    if (line.trimmed().isEmpty())
         return -1;
     int spaces = 0;
     while (spaces < line.size() && line.at(spaces) == QLatin1Char(' '))

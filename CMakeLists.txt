@@ -52,6 +52,7 @@ add_library(hunk_core STATIC
   src/LangDef.cpp
   src/RubyDef.cpp
   src/RubyScan.cpp
+  src/RubySig.cpp
   src/RubyConst.cpp
   src/RubySchema.cpp
   src/RubyColumn.cpp

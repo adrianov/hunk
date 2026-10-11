@@ -119,6 +119,7 @@ bool noteValue(const QStringList &lines, int line, const QString &path, const QS
     QString name;
     if (rubyAssign(text, &name)) {
         noteOwned(lines, line, path, name, {}, out);
+        (*out)[name].last().body.clear();
         return true;
     }
     const QString owner = classOwner(stack);

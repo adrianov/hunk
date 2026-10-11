@@ -18,24 +18,6 @@ bool afterDot(const QString &line, int at, QString *name)
     return rubyWord(line, rubySkip(line, at + 1), name, &at);
 }
 
-int parenDelta(const QString &line)
-{
-    int depth = 0;
-    for (const QChar ch : line) {
-        if (ch == QLatin1Char('('))
-            ++depth;
-        else if (ch == QLatin1Char(')'))
-            --depth;
-    }
-    return depth;
-}
-
-bool sigDone(const QString &line, int depth)
-{
-    const QString trimmed = line.trimmed();
-    return depth <= 0 && !trimmed.endsWith(QLatin1Char(',')) && !trimmed.endsWith(QLatin1Char('\\'));
-}
-
 } // namespace
 
 int rubySkip(const QString &line, int at)
@@ -96,22 +78,4 @@ QString rubyComment(const QStringList &lines, int line)
         notes.prepend(lines.at(at - 1));
     }
     return notes.join(QLatin1Char('\n'));
-}
-
-int rubySigEnd(const QStringList &lines, int line)
-{
-    int depth = 0;
-    int at = line;
-    while (at <= lines.size() && at <= line + 6) {
-        depth += parenDelta(lines.at(at - 1));
-        if (sigDone(lines.at(at - 1), depth))
-            return at;
-        ++at;
-    }
-    return qMin(at, lines.size());
-}
-
-QString rubyJoin(const QStringList &lines, int first, int last)
-{
-    return lines.mid(first - 1, last - first + 1).join(QLatin1Char('\n'));
 }

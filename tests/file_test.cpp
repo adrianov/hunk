@@ -121,7 +121,6 @@ void testDedent()
 {
     CHECK(dedent(QStringLiteral("  # note\n  def hi\n\n    go\n  end")) == QStringLiteral("# note\ndef hi\n\n  go\nend"));
     CHECK(dedent(QStringLiteral("\tdef hi\n\t  go")) == QStringLiteral("def hi\n  go"));
-    CHECK(dedent(QStringLiteral("  def hi\n    go\n…")) == QStringLiteral("def hi\n  go\n…"));
 }
 
 void testBinary(const FileDiff &file)
