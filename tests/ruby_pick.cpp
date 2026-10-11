@@ -81,6 +81,17 @@ void testRubyOrder()
     CHECK(bodyAt(text, 4).body.contains(QLatin1String("0")));
 }
 
+void testRubyKept()
+{
+    QTemporaryDir dir;
+    CHECK(dir.isValid());
+    const QString root = dir.path();
+    CHECK(putFile(root, "a.rb", "def kept\n  1\nend\n") && putFile(root, "b.rb", "kept\n"));
+    warmLang(root);
+    QFile::remove(QDir(root).filePath(QLatin1String("a.rb")));
+    CHECK(lookupName(root, "b.rb", "kept").body.contains(QLatin1String("1")));
+}
+
 void testRubyAmbiguous()
 {
     QTemporaryDir dir;
@@ -97,6 +108,7 @@ void testRubyAmbiguous()
 int rubyPickTests()
 {
     testRubyNear();
+    testRubyKept();
     testRubyAmbiguous();
     testRubySetter();
     testRubyEndless();

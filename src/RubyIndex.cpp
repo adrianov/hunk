@@ -14,6 +14,14 @@
 
 namespace {
 
+QString rubyRead(const QString &path)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly))
+        return {};
+    return QString::fromUtf8(file.readAll());
+}
+
 bool skipDir(const QString &name)
 {
     static const char *names[] = {"vendor", "tmp",        "node_modules", ".git",  "log",
@@ -25,7 +33,7 @@ bool skipDir(const QString &name)
     return false;
 }
 
-void noteDefs(const QString &root, const QString &full, QHash<QString, QList<RubyPlace>> *out)
+void noteDefs(const QString &root, const QString &full, QHash<QString, QList<LangDef>> *out)
 {
     const QStringList lines = rubyLines(rubyRead(full));
     const QString path = QDir(root).relativeFilePath(full);
@@ -33,11 +41,11 @@ void noteDefs(const QString &root, const QString &full, QHash<QString, QList<Rub
         QString name;
         if (!rubyDefName(lines.at(line - 1), &name))
             continue;
-        (*out)[name].push_back(RubyPlace{path, line});
+        (*out)[name].push_back(rubyAt(lines, line, path));
     }
 }
 
-void walkRuby(const QString &root, const QString &dir, QHash<QString, QList<RubyPlace>> *out, int depth)
+void walkRuby(const QString &root, const QString &dir, QHash<QString, QList<LangDef>> *out, int depth)
 {
     if (depth > 24)
         return;
@@ -55,20 +63,12 @@ void walkRuby(const QString &root, const QString &dir, QHash<QString, QList<Ruby
 
 } // namespace
 
-QString rubyRead(const QString &path)
-{
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly))
-        return {};
-    return QString::fromUtf8(file.readAll());
-}
-
 namespace {
 
 QMutex g_mutex;
 QString g_cached;
 int g_ticket = 0;
-QHash<QString, QList<RubyPlace>> g_names;
+QHash<QString, QList<LangDef>> g_names;
 
 } // namespace
 
@@ -81,7 +81,7 @@ void rubyWarm(const QString &root, QPointer<QObject> watch, std::function<void()
             return;
         ticket = ++g_ticket;
     }
-    QHash<QString, QList<RubyPlace>> names;
+    QHash<QString, QList<LangDef>> names;
     if (!root.isEmpty())
         walkRuby(root, root, &names, 0);
     {
@@ -103,7 +103,7 @@ bool rubyReady(const QString &root)
     return g_cached == root;
 }
 
-QList<RubyPlace> rubyHits(const QString &root, const QString &name)
+QList<LangDef> rubyHits(const QString &root, const QString &name)
 {
     const QMutexLocker lock(&g_mutex);
     if (g_cached != root)
@@ -111,22 +111,22 @@ QList<RubyPlace> rubyHits(const QString &root, const QString &name)
     return g_names.value(name);
 }
 
-RubyPlace rubyPick(const QList<RubyPlace> &places, const QString &path)
+LangDef rubyPick(const QList<LangDef> &defs, const QString &path)
 {
     const QString folder = QFileInfo(path).path();
-    RubyPlace near;
+    LangDef near;
     int count = 0;
-    for (const RubyPlace &place : places) {
-        if (place.path == path)
-            return place;
-        if (QFileInfo(place.path).path() != folder)
+    for (const LangDef &def : defs) {
+        if (def.path == path)
+            return def;
+        if (QFileInfo(def.path).path() != folder)
             continue;
-        near = place;
+        near = def;
         ++count;
     }
     if (count == 1)
         return near;
-    if (places.size() == 1)
-        return places.constFirst();
+    if (defs.size() == 1)
+        return defs.constFirst();
     return {};
 }
