@@ -202,6 +202,8 @@ Feature: Diff view
 
   Scenario: Copy text from a diff pane
     Given a diff is on screen
+    When I double-click a word in the left or the right pane
+    Then that word is selected
     When I select text in the left or the right pane
     And I open the pane menu
     Then Copy is there, with the shortcut Ctrl+C
@@ -238,7 +240,8 @@ Feature: Diff view
     Given a diff of a Ruby file
     When I hover a call to a method
     Then a popup shows the file and line where that method is defined
-    And the popup shows the comment above it, its signature, and its body
+    And a definition in this file is labeled "Same file" and the line
+    And the popup shows the comment above it, its signature, and its whole body, scrolled when it is long
     And that code is colored like the diff, and long lines wrap
     And shared leading spaces are removed
     When I hover that method's definition
@@ -246,13 +249,54 @@ Feature: Diff view
 
   Scenario: Jump to a Ruby definition
     Given a diff of a Ruby file
+    When I hold Command on macOS, or Control on Linux, over a name that opens
+    Then the pointer is a hand
+    When I hold it over a name that does not open
+    Then the pointer stays a text cursor
     When I Command-click a call to a method on macOS, or Control-click it on Linux
     Then the diff shows the file where that method is defined, at that line
     And that file stays listed even when it has no added or removed lines
 
+  Scenario: Hover a call on a class
+    Given a diff of a Ruby file that defines its own call method
+    When I hover a call such as "Products::AdditionalFieldsFromPostgres.call"
+    Then a popup shows that class's call method
+    And it does not show the call method in the file I am reading
+
+  Scenario: Hover a class DSL declaration
+    Given a diff of a Ruby file
+    When I hover a call such as "Post.comments" or "Telemetry::Metrics::VirtualProducts.missing_items"
+    Then a popup shows that declaration, such as has_many or counter
+
   Scenario: Hover an ambiguous Ruby name
     Given a diff of a Ruby file
     When I hover a name that is defined in more than one file
+    Then no definition popup appears
+
+  Scenario: Hover a Ruby class
+    Given a diff of a Ruby file
+    When I hover a class or module name
+    Then a popup shows the file and line where it is defined
+    And the popup shows the comment above it, the class or module line, and the whole body, scrolled when it is long
+    When I Command-click that name on macOS, or Control-click it on Linux
+    Then the diff shows that file at that line
+
+  Scenario: Hover a Ruby constant
+    Given a diff of a Ruby file
+    When I hover a constant such as "DEFAULT_PAYMENT" or ":DEFAULT_PAYMENT"
+    Then a popup shows its assignment, such as "DEFAULT_PAYMENT = 'card'"
+    When I Command-click that constant on macOS, or Control-click it on Linux
+    Then the diff shows that file at that line
+
+  Scenario: Hover an Active Record column
+    Given a diff of a Ruby file
+    When I hover a call such as "online_order.final_delivery_price"
+    Then a popup shows that column from schema.rb, or from another schema file
+    And the popup shows the column type and options such as precision
+
+  Scenario: Hover a Ruby hash key
+    Given a diff of a Ruby file
+    When I hover a hash key or a keyword argument
     Then no definition popup appears
 
   Scenario: Markdown on an added line
