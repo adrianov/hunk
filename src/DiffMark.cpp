@@ -106,6 +106,7 @@ void DiffCanvas::takeWord(const TextMark &hit)
     m_selFile = hit.file;
     m_selRow = hit.row;
     m_selOld = hit.old;
+    viewport()->update();
 }
 
 void DiffCanvas::pickWord(QMouseEvent *mouse)
