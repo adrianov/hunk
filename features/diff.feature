@@ -275,7 +275,7 @@ Feature: Diff view
 
   Scenario: Hover a Ruby class
     Given a diff of a Ruby file
-    When I hover a class or module name
+    When I hover a class or module name, including one nested in a module such as "Telemetry::KarafkaMonitor"
     Then a popup shows the file and line where it is defined
     And the popup shows the comment above it, the class or module line, and the whole body, scrolled when it is long
     When I hover User and another file also reopens class User
@@ -294,8 +294,16 @@ Feature: Diff view
   Scenario: Hover an Active Record column
     Given a diff of a Ruby file
     When I hover a call such as "online_order.final_delivery_price" or "address.city"
+    And I hover a column such as ":product_gold_erp_id" or "manzana_session_id"
     Then a popup shows that column from schema.rb, or from another schema file
     And the popup shows the column type and options such as precision
+    And when several tables have that column, the popup shows the table named on the line, or the model file's table
+
+  Scenario: Hover super
+    Given a diff of a Ruby file
+    When I hover super inside a method
+    Then a popup shows that method on the parent class
+    And when several classes prepend the module, the popup lists each of those methods
 
   Scenario: Hover a Ruby hash key
     Given a diff of a Ruby file
