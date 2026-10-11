@@ -234,6 +234,27 @@ Feature: Diff view
     Then "zero?" is colored as a method
     And "amount" and "ask_rate" are colored as variables
 
+  Scenario: Hover a Ruby method
+    Given a diff of a Ruby file
+    When I hover a call to a method
+    Then a popup shows the file and line where that method is defined
+    And the popup shows the comment above it, its signature, and its body
+    And that code is colored like the diff, and long lines wrap
+    And shared leading spaces are removed
+    When I hover that method's definition
+    Then no definition popup appears
+
+  Scenario: Jump to a Ruby definition
+    Given a diff of a Ruby file
+    When I Command-click a call to a method on macOS, or Control-click it on Linux
+    Then the diff shows the file where that method is defined, at that line
+    And that file stays listed even when it has no added or removed lines
+
+  Scenario: Hover an ambiguous Ruby name
+    Given a diff of a Ruby file
+    When I hover a name that is defined in more than one file
+    Then no definition popup appears
+
   Scenario: Markdown on an added line
     Given a diff of "README.md"
     When a line adds "# Hello"
