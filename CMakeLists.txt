@@ -52,6 +52,11 @@ add_library(hunk_core STATIC
   src/LangDef.cpp
   src/RubyDef.cpp
   src/RubyScan.cpp
+  src/RubyConst.cpp
+  src/RubySchema.cpp
+  src/RubyColumn.cpp
+  src/RubyScope.cpp
+  src/RubyDsl.cpp
   src/RubyBody.cpp
   src/RubyIndex.cpp
   src/ReviewExport.cpp
@@ -96,6 +101,8 @@ add_executable(hunk
   src/DiffScroll.cpp
   src/DiffInput.cpp
   src/DiffHover.cpp
+  src/DiffName.cpp
+  src/DiffJump.cpp
   src/DiffPopup.cpp
   src/DefCode.cpp
   src/DiffTitle.cpp
@@ -187,6 +194,8 @@ add_executable(hunk_test
   tests/shift_test.cpp
   tests/ruby_test.cpp
   tests/ruby_pick.cpp
+  tests/ruby_name.cpp
+  tests/ruby_recv.cpp
   src/ReviewStore.cpp
   src/ReviewSync.cpp
   src/ReviewShift.cpp

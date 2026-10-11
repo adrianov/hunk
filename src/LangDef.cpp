@@ -18,6 +18,19 @@ bool langReady(const QString &root, const QString &path)
     return rubyReady(root);
 }
 
+LangSpot defSpot(const QString &root, const QString &path, int line, int column, const QString &name,
+                 const QString &receiver)
+{
+    LangSpot spot;
+    spot.root = root;
+    spot.path = path;
+    spot.line = line;
+    spot.column = column;
+    spot.name = name;
+    spot.receiver = receiver;
+    return spot;
+}
+
 LangDef lookupDef(const LangSpot &spot)
 {
     if (spot.name.isEmpty() || spot.root.isEmpty())

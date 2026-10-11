@@ -105,6 +105,8 @@ void testRubyAmbiguous()
 
 } // namespace
 
+int rubyNameTests();
+
 int rubyPickTests()
 {
     testRubyNear();
@@ -113,5 +115,5 @@ int rubyPickTests()
     testRubySetter();
     testRubyEndless();
     testRubyOrder();
-    return g_fails;
+    return g_fails + rubyNameTests();
 }

@@ -15,11 +15,12 @@ class DefCode;
 
 // Floating definition: file and line, then the comment, signature, and body.
 // The code uses the diff colors, and long lines wrap the same way.
+// A definition in the hovered file is labeled Same file.
 class DefPopup : public QFrame {
 public:
     explicit DefPopup(QWidget *parent);
     std::function<void()> onLeave;
-    void present(const LangDef &def, const QFont &font, const QPoint &global);
+    void present(const LangDef &def, const QFont &font, const QPoint &global, const QString &from);
 
 protected:
     void leaveEvent(QEvent *event) override;

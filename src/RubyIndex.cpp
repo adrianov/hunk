@@ -35,14 +35,7 @@ bool skipDir(const QString &name)
 
 void noteDefs(const QString &root, const QString &full, QHash<QString, QList<LangDef>> *out)
 {
-    const QStringList lines = rubyLines(rubyRead(full));
-    const QString path = QDir(root).relativeFilePath(full);
-    for (int line = 1; line <= lines.size(); ++line) {
-        QString name;
-        if (!rubyDefName(lines.at(line - 1), &name))
-            continue;
-        (*out)[name].push_back(rubyAt(lines, line, path));
-    }
+    noteRuby(rubyLines(rubyRead(full)), QDir(root).relativeFilePath(full), out);
 }
 
 void walkRuby(const QString &root, const QString &dir, QHash<QString, QList<LangDef>> *out, int depth)
@@ -59,6 +52,14 @@ void walkRuby(const QString &root, const QString &dir, QHash<QString, QList<Lang
         if (langFor(info.fileName()) == Lang::Ruby)
             noteDefs(root, info.filePath(), out);
     }
+}
+
+void collectLang(const QString &root, QHash<QString, QList<LangDef>> *names, QHash<QString, LangDef> *columns)
+{
+    if (root.isEmpty())
+        return;
+    walkRuby(root, root, names, 0);
+    readSchemas(root, columns);
 }
 
 } // namespace
@@ -80,10 +81,12 @@ void rubyWarm(const QString &root, QPointer<QObject> watch, std::function<void()
         if (g_cached == root)
             return;
         ticket = ++g_ticket;
+        schemaBump(ticket);
     }
     QHash<QString, QList<LangDef>> names;
-    if (!root.isEmpty())
-        walkRuby(root, root, &names, 0);
+    QHash<QString, LangDef> columns;
+    collectLang(root, &names, &columns);
+    schemaStore(ticket, root, std::move(columns));
     {
         const QMutexLocker lock(&g_mutex);
         if (ticket != g_ticket)

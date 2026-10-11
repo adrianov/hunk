@@ -29,9 +29,7 @@ QString defText(const LangDef &def)
 
 void tipStyle(QFrame *frame)
 {
-    frame->setStyleSheet(QStringLiteral("DefPopup { background: %1; border: 1px solid %2; }"
-                                        "QLabel { color: %3; background: transparent; }")
-                             .arg(kBg.name(), kLine.name(), kMuted.name()));
+    frame->setStyleSheet(QStringLiteral("DefPopup { background: %1; border: 1px solid %2; }").arg(kBg.name(), kLine.name()));
 }
 
 int fitAxis(int cursor, int size, int low, int high, int gap)
@@ -83,10 +81,13 @@ DefPopup::DefPopup(QWidget *parent)
     layout->addWidget(m_scroll);
 }
 
-void DefPopup::present(const LangDef &def, const QFont &font, const QPoint &global)
+void DefPopup::present(const LangDef &def, const QFont &font, const QPoint &global, const QString &from)
 {
     tipStyle(this);
-    m_path->setText(def.path + QLatin1Char(':') + QString::number(def.line));
+    const bool here = def.path == from;
+    const QString line = QString::number(def.line);
+    m_path->setText(here ? QStringLiteral("Same file:") + line : def.path + QLatin1Char(':') + line);
+    m_path->setStyleSheet(QStringLiteral("color: %1; background: transparent;").arg((here ? kText : kMuted).name()));
     fitCode(font, defText(def), def.path);
     place(global);
     show();

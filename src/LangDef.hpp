@@ -18,6 +18,7 @@ struct LangDef {
     QString comment;
     QString signature;
     QString body;
+    QString owner;
 
     bool found() const { return line > 0 && !path.isEmpty(); }
 };
@@ -29,10 +30,13 @@ struct LangSpot {
     int line = 0;
     int column = 0;
     QString name;
+    QString receiver;
 };
 
 // Definition of the name at `spot`, or an empty result when this language has none yet.
 LangDef lookupDef(const LangSpot &spot);
+LangSpot defSpot(const QString &root, const QString &path, int line, int column, const QString &name,
+                 const QString &receiver = {});
 // Builds the Ruby name index. When a walk is stored, `done` is queued on `watch`.
 void warmLang(const QString &root, QPointer<QObject> watch = {}, std::function<void()> done = {});
 bool langReady(const QString &root, const QString &path);

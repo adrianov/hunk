@@ -102,25 +102,23 @@ bool stopBody(const QString &text, int indent)
     return indentOf(text) <= indent && isEnd(text);
 }
 
-QString capped(QStringList body)
-{
-    if (body.size() == 40)
-        body.append(QStringLiteral("…"));
-    return body.join(QLatin1Char('\n'));
-}
-
 QString takeBody(const QStringList &lines, int indent, int sigEnd)
 {
     QStringList body;
-    for (int at = sigEnd + 1; at <= lines.size() && body.size() < 40; ++at) {
+    for (int at = sigEnd + 1; at <= lines.size(); ++at) {
         body.append(lines.at(at - 1));
         if (stopBody(lines.at(at - 1), indent))
-            return body.join(QLatin1Char('\n'));
+            break;
     }
-    return capped(body);
+    return body.join(QLatin1Char('\n'));
 }
 
 } // namespace
+
+bool rubyClosed(const QString &line)
+{
+    return endlessDef(line) || closedLine(line);
+}
 
 LangDef rubyAt(const QStringList &lines, int line, const QString &path)
 {

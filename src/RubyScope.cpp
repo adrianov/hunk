@@ -1,0 +1,146 @@
+// Copyright © 2026 Peter Adrianov
+// SPDX-License-Identifier: MIT
+
+#include "RubyDetail.hpp"
+
+namespace {
+
+struct Scope {
+    int indent = 0;
+    QString name;
+};
+
+int leading(const QString &line)
+{
+    int col = 0;
+    for (const QChar ch : line) {
+        if (ch == QLatin1Char(' '))
+            ++col;
+        else if (ch == QLatin1Char('\t'))
+            col += 4;
+        else
+            break;
+    }
+    return col;
+}
+
+bool endWord(const QString &line)
+{
+    const int at = rubySkip(line, 0);
+    if (!line.mid(at).startsWith(QLatin1String("end")))
+        return false;
+    return at + 3 >= line.size() || (!line.at(at + 3).isLetterOrNumber() && line.at(at + 3) != QLatin1Char('_'));
+}
+
+void popScope(const QString &line, QList<Scope> *stack)
+{
+    if (!endWord(line))
+        return;
+    while (!stack->isEmpty() && leading(line) <= stack->constLast().indent)
+        stack->removeLast();
+}
+
+QString nestName(const QList<Scope> &stack, const QString &name)
+{
+    if (name.contains(QLatin1String("::")) || stack.isEmpty())
+        return name;
+    return stack.constLast().name + QStringLiteral("::") + name;
+}
+
+void pushScope(const QString &line, const QString &name, QList<Scope> *stack)
+{
+    Scope scope;
+    scope.indent = leading(line);
+    scope.name = nestName(*stack, name);
+    stack->append(scope);
+}
+
+void noteOwned(const QStringList &lines, int line, const QString &path, const QString &name, const QString &owner,
+               QHash<QString, QList<LangDef>> *out)
+{
+    LangDef def = rubyAt(lines, line, path);
+    def.owner = owner;
+    (*out)[name].push_back(def);
+}
+
+QString classOwner(const QList<Scope> &stack)
+{
+    for (int at = stack.size() - 1; at >= 0; --at) {
+        if (!stack.at(at).name.isEmpty())
+            return stack.at(at).name;
+    }
+    return {};
+}
+
+bool inMethod(const QList<Scope> &stack)
+{
+    return !stack.isEmpty() && stack.constLast().name.isEmpty();
+}
+
+void pushMethod(const QString &line, QList<Scope> *stack)
+{
+    if (rubyClosed(line))
+        return;
+    Scope method;
+    method.indent = leading(line);
+    stack->append(method);
+}
+
+void noteMetric(const QStringList &lines, int line, const QString &path, const QString &name, const QString &owner,
+                QHash<QString, QList<LangDef>> *out)
+{
+    LangDef def;
+    def.path = path;
+    def.line = line;
+    def.signature = rubyJoin(lines, line, rubySigEnd(lines, line));
+    def.owner = owner;
+    (*out)[name].push_back(def);
+}
+
+bool noteScope(const QStringList &lines, int line, const QString &path, const QString &text, QList<Scope> *stack,
+               QHash<QString, QList<LangDef>> *out)
+{
+    QString name;
+    if (rubyDefName(text, &name)) {
+        noteOwned(lines, line, path, name, classOwner(*stack), out);
+        pushMethod(text, stack);
+        return true;
+    }
+    if (!rubyTypeName(text, &name))
+        return false;
+    pushScope(text, name, stack);
+    noteOwned(lines, line, path, name, {}, out);
+    return true;
+}
+
+bool noteValue(const QStringList &lines, int line, const QString &path, const QString &text, const QList<Scope> &stack,
+               QHash<QString, QList<LangDef>> *out)
+{
+    QString name;
+    if (rubyAssign(text, &name)) {
+        noteOwned(lines, line, path, name, {}, out);
+        return true;
+    }
+    const QString owner = classOwner(stack);
+    if (owner.isEmpty() || inMethod(stack) || !rubyDsl(text, &name))
+        return false;
+    noteMetric(lines, line, path, name, owner, out);
+    return true;
+}
+
+void scanLine(const QStringList &lines, int line, const QString &path, QList<Scope> *stack, QHash<QString, QList<LangDef>> *out)
+{
+    const QString text = lines.at(line - 1);
+    popScope(text, stack);
+    if (!noteScope(lines, line, path, text, stack, out))
+        noteValue(lines, line, path, text, *stack, out);
+}
+
+} // namespace
+
+void noteRuby(const QStringList &lines, const QString &path, QHash<QString, QList<LangDef>> *out)
+{
+    QList<Scope> stack;
+    for (int line = 1; line <= lines.size(); ++line)
+        scanLine(lines, line, path, &stack, out);
+}

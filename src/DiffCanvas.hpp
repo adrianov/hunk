@@ -54,6 +54,7 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
     bool viewportEvent(QEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
     void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
@@ -143,14 +144,18 @@ private:
     void chooseRow(const Band &band, int x);
     void hoverRow(const Band *band);
     void hoverCursor(const Band *band, int x);
+    void placeCursor();
+    bool canFollow() const;
+    void followHand();
     void armHover();
     void onScroll();
-    QString methodName(int file, int row, bool old, int column, int *line) const;
+    QString methodName(int file, int row, bool old, int column, int *line, QString *receiver) const;
     void hoverDef(int x, int y);
+    void keepDef(const QString &name, const QString &path, int line, int column, const QString &receiver);
     void showDef();
     bool jumpMod(Qt::KeyboardModifiers mods) const;
     void chooseDef(int x, int y);
-    void holdJump(const QString &name, const QString &path, int line, int column);
+    void holdJump(const QString &name, const QString &path, int line, int column, const QString &receiver);
     void finishJump();
     bool mouseEvent(QEvent *event);
     void dropDef();
@@ -218,11 +223,13 @@ private:
     QString m_defPath;
     int m_defLine = 0;
     int m_defColumn = 0;
+    QString m_defReceiver;
     bool m_defWait = false;
     QString m_jumpName;
     QString m_jumpPath;
     int m_jumpLine = 0;
     int m_jumpColumn = 0;
+    QString m_jumpReceiver;
     QWidget *m_defPopup = nullptr;
     int m_checkFile = -1;
     int m_lastFile = -1;
