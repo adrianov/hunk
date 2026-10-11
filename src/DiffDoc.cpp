@@ -3,6 +3,8 @@
 
 #include "DiffDoc.hpp"
 
+#include "DiffDetail.hpp"
+
 #include <QHash>
 
 #include <algorithm>
@@ -72,6 +74,48 @@ QString FileDiff::title() const
     if (slash >= 0 && newPath.startsWith(oldPath.left(slash + 1)))
         return oldPath + QStringLiteral(" → ") + newPath.mid(slash + 1);
     return oldPath + QStringLiteral(" → ") + newPath;
+}
+
+FileDiff unchangedFile(const QString &path, const QStringList &lines)
+{
+    FileDiff file;
+    file.oldPath = path;
+    file.newPath = path;
+    for (int index = 0; index < lines.size(); ++index) {
+        DiffRow row;
+        row.kind = RowKind::Context;
+        row.leftNum = index + 1;
+        row.rightNum = index + 1;
+        row.leftText = expandTabs(lines.at(index));
+        row.rightText = row.leftText;
+        file.rows.append(row);
+    }
+    return file;
+}
+
+int fileNamed(const DiffDoc &doc, const QString &path)
+{
+    for (int index = 0; index < doc.files.size(); ++index) {
+        if (doc.files.at(index).path() == path)
+            return index;
+    }
+    return -1;
+}
+
+int rowForLine(const FileDiff &file, int line, bool *oldSide)
+{
+    int left = -1;
+    for (int index = 0; index < file.rows.size(); ++index) {
+        const DiffRow &row = file.rows.at(index);
+        if (row.rightNum == line) {
+            *oldSide = false;
+            return index;
+        }
+        if (left < 0 && row.leftNum == line)
+            left = index;
+    }
+    *oldSide = left >= 0;
+    return left;
 }
 
 QString FileDiff::shortName() const

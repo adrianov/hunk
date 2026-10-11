@@ -5,6 +5,7 @@
 
 #include <QList>
 #include <QString>
+#include <QStringList>
 
 // One word-level highlight range inside a diff line.
 struct WordSpan {
@@ -107,6 +108,10 @@ struct DiffDoc {
 
 // File indexes in the same order as the file list: root first, then folders.
 QList<int> listedOrder(const DiffDoc &doc);
+// Both sides of `path`, unchanged. Line numbers match the file.
+FileDiff unchangedFile(const QString &path, const QStringList &lines);
+int fileNamed(const DiffDoc &doc, const QString &path);
+int rowForLine(const FileDiff &file, int line, bool *oldSide);
 
 struct LineHit {
     int file = -1;

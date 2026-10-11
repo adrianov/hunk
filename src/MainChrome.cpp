@@ -120,6 +120,7 @@ void MainWindow::wireTree()
     connect(m_diff, &DiffCanvas::fileScrolled, this, &MainWindow::selectTreeFile);
     connect(m_diff, &DiffCanvas::commentRequested, this, &MainWindow::commentAt);
     connect(m_diff, &DiffCanvas::reviewRequested, this, &MainWindow::hideReviewed);
+    connect(m_diff, &DiffCanvas::openDefinition, this, &MainWindow::openDefinition);
 }
 
 void MainWindow::wireNotes()

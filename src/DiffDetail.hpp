@@ -25,6 +25,8 @@ struct ParseCursor {
 };
 
 QString expandTabs(const QString &text);
+// Drop the indent shared by every non-blank line. Tabs count as spaces.
+QString dedent(const QString &text);
 int readPath(const QString &text, int index, QString *path);
 QString pathAfter(const QString &line);
 void wordDiff(const QString &left, const QString &right, QList<WordSpan> *leftSpans, QList<WordSpan> *rightSpans);

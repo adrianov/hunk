@@ -5,6 +5,7 @@
 
 #include "DiffDoc.hpp"
 #include "DiffFold.hpp"
+#include "DiffPopup.hpp"
 
 #include <QAbstractScrollArea>
 #include <QSet>
@@ -26,6 +27,7 @@ public:
     explicit DiffCanvas(QWidget *parent = nullptr);
 
     void setMessage(const QString &text);
+    void setRoot(const QString &root);
     void setDoc(const DiffDoc &doc, const QString &leftLabel, const QString &rightLabel, const QSet<int> &skip);
     void setSkipped(const QSet<int> &files);
     void setNoteKeys(const QSet<QString> &keys);
@@ -46,6 +48,7 @@ signals:
     void commentRequested(int file, int row, bool oldSide);
     void reviewRequested(int file);
     void fileScrolled(int file);
+    void openDefinition(const QString &path, int line);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -140,6 +143,20 @@ private:
     void chooseRow(const Band &band, int x);
     void hoverRow(const Band *band);
     void hoverCursor(const Band *band, int x);
+    void armHover();
+    void onScroll();
+    QString methodName(int file, int row, bool old, int column, int *line) const;
+    void hoverDef(int x, int y);
+    void showDef();
+    bool jumpMod(Qt::KeyboardModifiers mods) const;
+    void chooseDef(int x, int y);
+    void holdJump(const QString &name, const QString &path, int line, int column);
+    void finishJump();
+    bool mouseEvent(QEvent *event);
+    void dropDef();
+    void stopDef();
+    bool overDef() const;
+    DefPopup *ensurePopup();
     bool openFold(const Band *band, int x);
     void setHover(int file, int row);
     void onPress(QMouseEvent *mouse);
@@ -166,6 +183,7 @@ private:
     bool headerStuck(int scrollY) const;
 
     DiffDoc m_doc;
+    QString m_root;
     QString m_leftLabel;
     QString m_rightLabel;
     QString m_message;
@@ -195,6 +213,17 @@ private:
     bool m_dragText = false;
     int m_hoverFile = -1;
     int m_hoverRow = -1;
+    QTimer m_defTimer;
+    QString m_defName;
+    QString m_defPath;
+    int m_defLine = 0;
+    int m_defColumn = 0;
+    bool m_defWait = false;
+    QString m_jumpName;
+    QString m_jumpPath;
+    int m_jumpLine = 0;
+    int m_jumpColumn = 0;
+    QWidget *m_defPopup = nullptr;
     int m_checkFile = -1;
     int m_lastFile = -1;
 };

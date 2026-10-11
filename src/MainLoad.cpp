@@ -28,12 +28,15 @@ void MainWindow::rememberRoot(const QString &root)
 {
     const bool switched = root != m_root;
     m_root = root;
+    m_diff->setRoot(m_root);
     if (!m_smoke)
         QSettings().setValue(QStringLiteral("lastRepo"), m_root);
     rememberRecent(m_root);
     m_store->setRepo(m_root);
-    if (switched)
+    if (switched) {
+        m_opened.clear();
         loadSeen();
+    }
 }
 
 void fitRefBox(QComboBox *box);
@@ -114,7 +117,10 @@ void MainWindow::showLoadedDiff(const GitResult &result)
     m_title = result.title;
     m_conflict = result.conflict;
     m_drift = result.drift;
+    m_leftLabel = result.leftLabel;
+    m_rightLabel = result.rightLabel;
     m_doc = result.doc;
+    keepOpened();
     m_bodies.clear();
     applySeen(&m_doc, m_seen);
     m_store->sync(m_doc, m_cleanup->isChecked());

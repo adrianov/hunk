@@ -9,6 +9,7 @@
 #include <QFileSystemWatcher>
 #include <QHash>
 #include <QMainWindow>
+#include <QStringList>
 #include <QSet>
 #include <QTimer>
 
@@ -123,6 +124,11 @@ private:
     void showLoadedDiff(const GitResult &result);
     void showDiff(const GitResult &result, int scroll);
     void showLoadedTitle();
+    void keepOpened();
+    void openDefinition(const QString &path, int line);
+    int plainIndex(const QString &path);
+    void showPlain();
+    void showAt(int file, int line);
     void prepareRepoLabel();
     void showRepoPath();
     void tintRepoLabel();
@@ -181,6 +187,9 @@ private:
     QHash<QString, QString> m_seen;
     QHash<QString, QString> m_hidden;
     QString m_root;
+    QString m_leftLabel;
+    QString m_rightLabel;
+    QStringList m_opened;
     QString m_startPath;
     QString m_title;
     QString m_conflict;

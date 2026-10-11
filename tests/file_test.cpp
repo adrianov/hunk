@@ -1,6 +1,7 @@
 // Copyright © 2026 Peter Adrianov
 // SPDX-License-Identifier: MIT
 
+#include "DiffDetail.hpp"
 #include "DiffParse.hpp"
 
 #include <QDebug>
@@ -88,6 +89,41 @@ void testJoinRename()
     CHECK(!file.added && !file.removed && file.rows.size() == 1);
 }
 
+FileDiff samplePlain()
+{
+    return unchangedFile(QStringLiteral("lib/app.rb"), {QStringLiteral("def hi"), QStringLiteral("end")});
+}
+
+void testUnchangedFile()
+{
+    const FileDiff file = samplePlain();
+    CHECK(file.adds == 0);
+    CHECK(file.dels == 0);
+    CHECK(file.rows.size() == 2);
+    CHECK(file.rows.at(0).kind == RowKind::Context);
+    CHECK(file.rows.at(0).rightNum == 1);
+    CHECK(file.rows.at(0).leftText == file.rows.at(0).rightText);
+}
+
+void testUnchangedRow()
+{
+    const FileDiff file = samplePlain();
+    bool oldSide = true;
+    CHECK(rowForLine(file, 2, &oldSide) == 1);
+    CHECK(!oldSide);
+    DiffDoc doc;
+    doc.files.append(file);
+    CHECK(fileNamed(doc, QStringLiteral("lib/app.rb")) == 0);
+    CHECK(fileNamed(doc, QStringLiteral("missing.rb")) < 0);
+}
+
+void testDedent()
+{
+    CHECK(dedent(QStringLiteral("  # note\n  def hi\n\n    go\n  end")) == QStringLiteral("# note\ndef hi\n\n  go\nend"));
+    CHECK(dedent(QStringLiteral("\tdef hi\n\t  go")) == QStringLiteral("def hi\n  go"));
+    CHECK(dedent(QStringLiteral("  def hi\n    go\n…")) == QStringLiteral("def hi\n  go\n…"));
+}
+
 void testBinary(const FileDiff &file)
 {
     CHECK(file.binary);
@@ -107,5 +143,8 @@ int fileTests()
     testBinary(doc.files.at(4));
     testRenameTitle();
     testJoinRename();
+    testUnchangedFile();
+    testUnchangedRow();
+    testDedent();
     return g_fails;
 }

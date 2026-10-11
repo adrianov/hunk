@@ -39,6 +39,7 @@ add_library(hunk_core STATIC
   src/DiffParse.cpp
   src/DiffGap.cpp
   src/DiffPath.cpp
+  src/Dedent.cpp
   src/WordDiff.cpp
   src/DiffZip.cpp
   src/DiffFold.cpp
@@ -48,6 +49,11 @@ add_library(hunk_core STATIC
   src/SyntaxWord.cpp
   src/SyntaxMd.cpp
   src/SyntaxEmph.cpp
+  src/LangDef.cpp
+  src/RubyDef.cpp
+  src/RubyScan.cpp
+  src/RubyBody.cpp
+  src/RubyIndex.cpp
   src/ReviewExport.cpp
 )
 target_include_directories(hunk_core PUBLIC ${CMAKE_SOURCE_DIR}/src)
@@ -73,6 +79,7 @@ add_executable(hunk
   src/MainNoteKeep.cpp
   src/MainReview.cpp
   src/MainLoad.cpp
+  src/MainJump.cpp
   src/MainPath.cpp
   src/MainRef.cpp
   src/MainRefFilter.cpp
@@ -88,6 +95,9 @@ add_executable(hunk
   src/MdHtml.cpp
   src/DiffScroll.cpp
   src/DiffInput.cpp
+  src/DiffHover.cpp
+  src/DiffPopup.cpp
+  src/DefCode.cpp
   src/DiffTitle.cpp
   src/DiffSplit.cpp
   src/DiffSelect.cpp
@@ -175,6 +185,8 @@ add_executable(hunk_test
   tests/gap_test.cpp
   tests/review_test.cpp
   tests/shift_test.cpp
+  tests/ruby_test.cpp
+  tests/ruby_pick.cpp
   src/ReviewStore.cpp
   src/ReviewSync.cpp
   src/ReviewShift.cpp

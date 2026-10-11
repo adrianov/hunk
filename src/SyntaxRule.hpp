@@ -38,6 +38,7 @@ struct Scan {
 
 Rule ruleFor(Lang lang);
 Lang langFor(const QString &path);
+QString sidePath(const FileDiff &file, bool left);
 void colorSide(FileDiff *file, bool left, const Rule &rule);
 
 void addSpan(QList<SynSpan> *out, int start, int end, SynKind kind);

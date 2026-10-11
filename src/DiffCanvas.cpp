@@ -44,10 +44,8 @@ DiffCanvas::DiffCanvas(QWidget *parent)
     m_wrapTimer.setSingleShot(true);
     m_wrapTimer.setInterval(100);
     connect(&m_wrapTimer, &QTimer::timeout, this, &DiffCanvas::rebuild);
-    connect(verticalScrollBar(), &QScrollBar::valueChanged, this, [this]() {
-        viewport()->update();
-        emitVisibleFile();
-    });
+    armHover();
+    connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &DiffCanvas::onScroll);
 }
 
 void DiffCanvas::ensureFont()
@@ -76,6 +74,7 @@ void DiffCanvas::setMessage(const QString &text)
     m_docH = 0;
     m_selFile = m_selRow = m_hoverFile = m_hoverRow = m_checkFile = m_lastFile = -1;
     clearMark();
+    stopDef();
     updateScroll();
     viewport()->update();
 }
@@ -94,6 +93,7 @@ void DiffCanvas::setDoc(const DiffDoc &doc, const QString &leftLabel, const QStr
     m_rightLabel = rightLabel;
     m_selFile = m_selRow = m_hoverFile = m_hoverRow = m_checkFile = m_lastFile = -1;
     clearMark();
+    stopDef();
     rebuild();
 }
 

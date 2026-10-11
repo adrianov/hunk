@@ -58,6 +58,10 @@ void DiffCanvas::pressRow(const Band &band, int x, int y, QMouseEvent *mouse)
 
 void DiffCanvas::pressAt(QMouseEvent *mouse, int x, int y)
 {
+    if (jumpMod(mouse->modifiers())) {
+        chooseDef(x, y);
+        return;
+    }
     const Band *band = bandAt(y);
     if (!band || openFold(band, x) || grabSplit(band, x) || band->kind != Band::Row)
         return;
@@ -80,6 +84,7 @@ void DiffCanvas::clearHover()
     if (!m_dragSplit)
         viewport()->unsetCursor();
     viewport()->update();
+    dropDef();
 }
 
 void DiffCanvas::setHover(int file, int row)
@@ -115,11 +120,16 @@ void DiffCanvas::hoverCursor(const Band *band, int x)
 
 void DiffCanvas::trackHover(QMouseEvent *mouse, int x, int y)
 {
-    if (hoverTitle(x, int(mouse->position().y())))
+    if (hoverTitle(x, int(mouse->position().y()))) {
+        stopDef();
         return;
+    }
     const Band *band = bandAt(y);
     hoverRow(band);
     hoverCursor(band, x);
+    hoverDef(x, y);
+    if (!m_defName.isEmpty() && jumpMod(mouse->modifiers()))
+        viewport()->setCursor(Qt::PointingHandCursor);
 }
 
 void DiffCanvas::onMove(QMouseEvent *mouse)
@@ -135,29 +145,38 @@ void DiffCanvas::onMove(QMouseEvent *mouse)
     trackHover(mouse, x, y);
 }
 
-bool DiffCanvas::viewportEvent(QEvent *event)
+bool DiffCanvas::mouseEvent(QEvent *event)
 {
+    auto *mouse = static_cast<QMouseEvent *>(event);
     switch (event->type()) {
-    case QEvent::Paint:
-        paintContents();
-        return true;
     case QEvent::MouseButtonPress:
-        onPress(static_cast<QMouseEvent *>(event));
+        onPress(mouse);
         return true;
     case QEvent::MouseButtonRelease:
-        if (!releaseSplit(static_cast<QMouseEvent *>(event)))
-            endText(static_cast<QMouseEvent *>(event));
+        if (!releaseSplit(mouse))
+            endText(mouse);
         return true;
     case QEvent::MouseButtonDblClick:
-        pickWord(static_cast<QMouseEvent *>(event));
+        if (!jumpMod(mouse->modifiers()))
+            pickWord(mouse);
         return true;
     case QEvent::MouseMove:
-        onMove(static_cast<QMouseEvent *>(event));
-        return true;
-    case QEvent::Leave:
-        clearHover();
+        onMove(mouse);
         return true;
     default:
-        return QAbstractScrollArea::viewportEvent(event);
+        return false;
     }
+}
+
+bool DiffCanvas::viewportEvent(QEvent *event)
+{
+    if (event->type() == QEvent::Paint) {
+        paintContents();
+        return true;
+    }
+    if (event->type() == QEvent::Leave) {
+        clearHover();
+        return true;
+    }
+    return mouseEvent(event) || QAbstractScrollArea::viewportEvent(event);
 }

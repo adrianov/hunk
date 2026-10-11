@@ -152,9 +152,12 @@ void DiffCanvas::keyPressEvent(QKeyEvent *event)
         copyMarked();
         return;
     }
-    if (event->key() == Qt::Key_Escape && m_anchor.file >= 0) {
-        clearMark();
-        viewport()->update();
+    if (event->key() == Qt::Key_Escape) {
+        stopDef();
+        if (m_anchor.file >= 0) {
+            clearMark();
+            viewport()->update();
+        }
         return;
     }
     QAbstractScrollArea::keyPressEvent(event);
