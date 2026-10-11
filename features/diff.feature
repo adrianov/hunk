@@ -262,6 +262,8 @@ Feature: Diff view
     When I hover a call such as "Products::AdditionalFieldsFromPostgres.call"
     Then a popup shows that class's call method
     And it does not show the call method in the file I am reading
+    When I hover a call on a local such as "io.write"
+    Then no definition popup appears
 
   Scenario: Hover a class DSL declaration
     Given a diff of a Ruby file
