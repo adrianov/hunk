@@ -158,6 +158,28 @@ void testClassCall()
     CHECK(classCall(root));
 }
 
+bool writeCall(const QString &root, const char *path, const char *receiver)
+{
+    LangSpot spot;
+    spot.root = root;
+    spot.path = QLatin1String(path);
+    spot.name = QStringLiteral("write");
+    spot.receiver = QLatin1String(receiver);
+    return lookupDef(spot).path.endsWith(QLatin1String("sentry_event.rb"));
+}
+
+void testLocalCall()
+{
+    QTemporaryDir dir;
+    CHECK(dir.isValid());
+    const QString root = dir.path();
+    CHECK(putFile(root, "sentry_event.rb", "class SentryEvent\n  def write(obj, key, value)\n    1\n  end\nend\n"));
+    CHECK(putFile(root, "stocks.rb", "def proceed_file\n  open_writer do |io|\n    io.write(\"a\")\n  end\nend\n"));
+    CHECK(putFile(root, "other.rb", "write(1)\n"));
+    warmLang(root);
+    CHECK(!writeCall(root, "stocks.rb", "io") && writeCall(root, "other.rb", "") && writeCall(root, "use.rb", "SentryEvent"));
+}
+
 bool metricHit(const QString &root, const char *name, const char *bit)
 {
     LangSpot spot;
@@ -331,6 +353,7 @@ int rubyRecvTests()
     testSeekBatch();
     testBareColumn();
     testClassCall();
+    testLocalCall();
     testDsl();
     testMetric();
     testLooseMetric();

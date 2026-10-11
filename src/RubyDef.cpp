@@ -162,12 +162,9 @@ LangDef rubyChoose(const QList<LangDef> &hits, const LangSpot &spot)
     }
     if (classReceiver(spot.receiver))
         return selfCall(ownedHits(hits, spot.receiver), spot.path);
-    if (!spot.receiver.isEmpty()) {
-        const QList<LangDef> loose = looseHits(hits, spot.receiver);
-        if (!loose.isEmpty())
-            return selfCall(loose, spot.path);
-    }
-    return langPick(hits, spot.path);
+    if (spot.receiver.isEmpty())
+        return langPick(hits, spot.path);
+    return selfCall(looseHits(hits, spot.receiver), spot.path);
 }
 
 bool rubyExtra(const LangSpot &spot, LangDef *out)
