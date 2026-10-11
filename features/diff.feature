@@ -308,8 +308,9 @@ Feature: Diff view
 
   Scenario: Hover a Ruby hash key
     Given a diff of a Ruby file
-    When I hover a hash key, a keyword argument, or a local variable such as "normalized = path.dup"
+    When I hover a hash key, a keyword argument, or a local variable such as "normalized = path.dup" or "|(key, value), normalized|"
     Then no definition popup appears
+    And hovering that name after the block opens the method
 
   Scenario: Markdown on an added line
     Given a diff of "README.md"
