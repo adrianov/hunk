@@ -278,6 +278,7 @@ Feature: Diff view
     When I hover a class or module name, including one nested in a module such as "Telemetry::KarafkaMonitor"
     Then a popup shows the file and line where it is defined
     And the popup shows the comment above it, the class or module line, and the whole body, scrolled when it is long
+    And a nested class also shows the module around it
     When I hover User and another file also reopens class User
     Then the popup shows app/models/user.rb
     When I Command-click that name on macOS, or Control-click it on Linux
@@ -307,7 +308,7 @@ Feature: Diff view
 
   Scenario: Hover a Ruby hash key
     Given a diff of a Ruby file
-    When I hover a hash key or a keyword argument
+    When I hover a hash key, a keyword argument, or a local variable such as "normalized = path.dup"
     Then no definition popup appears
 
   Scenario: Markdown on an added line
