@@ -41,6 +41,11 @@ bool rubyWordHit(const QString &line, int at, const QString &name)
     return left && (end >= line.size() || !rubyWordChar(line.at(end)));
 }
 
+bool rubyEndLine(const QString &line)
+{
+    return rubyWordHit(line, rubySkip(line, 0), QStringLiteral("end"));
+}
+
 int rubyIndent(const QString &line)
 {
     int col = 0;

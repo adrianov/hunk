@@ -13,15 +13,6 @@ QMutex g_mutex;
 QString g_key;
 QStringList g_lines;
 
-bool endLine(const QString &line)
-{
-    const int at = rubySkip(line, 0);
-    if (!line.mid(at).startsWith(QLatin1String("end")))
-        return false;
-    const int after = at + 3;
-    return after >= line.size() || !rubyWordChar(line.at(after));
-}
-
 int defAt(const QStringList &lines, int line)
 {
     int limit = rubyIndent(lines.at(line - 1));
@@ -45,7 +36,7 @@ int methodEnd(const QStringList &lines, int defLine)
         return defLine;
     const int indent = rubyIndent(lines.at(defLine - 1));
     for (int at = defLine + 1; at <= lines.size(); ++at) {
-        if (rubyIndent(lines.at(at - 1)) <= indent && endLine(lines.at(at - 1)))
+        if (rubyIndent(lines.at(at - 1)) <= indent && rubyEndLine(lines.at(at - 1)))
             return at;
     }
     return lines.size();

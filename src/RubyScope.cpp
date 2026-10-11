@@ -11,17 +11,9 @@ struct Scope {
     QString name;
 };
 
-bool endWord(const QString &line)
-{
-    const int at = rubySkip(line, 0);
-    if (!line.mid(at).startsWith(QLatin1String("end")))
-        return false;
-    return at + 3 >= line.size() || (!line.at(at + 3).isLetterOrNumber() && line.at(at + 3) != QLatin1Char('_'));
-}
-
 void popScope(const QString &line, QList<Scope> *stack)
 {
-    if (!endWord(line))
+    if (!rubyEndLine(line))
         return;
     while (!stack->isEmpty() && rubyIndent(line) <= stack->constLast().indent)
         stack->removeLast();
