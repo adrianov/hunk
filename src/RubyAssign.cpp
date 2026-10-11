@@ -5,20 +5,6 @@
 
 namespace {
 
-bool wordChar(QChar ch)
-{
-    return ch.isLetterOrNumber() || ch == QLatin1Char('_');
-}
-
-bool wordHit(const QString &line, int at, const QString &name)
-{
-    if (at < 0 || !line.mid(at).startsWith(name))
-        return false;
-    const int end = at + name.size();
-    const bool left = at == 0 || !wordChar(line.at(at - 1));
-    return left && (end >= line.size() || !wordChar(line.at(end)));
-}
-
 bool plainAssign(const QString &line, int at)
 {
     at = rubySkip(line, at);
@@ -38,7 +24,7 @@ bool rubyAssigned(const QString &line, const QString &name)
         if (at < 0)
             return false;
         const int end = at + name.size();
-        if (wordHit(line, at, name) && (hash < 0 || at < hash) && plainAssign(line, end))
+        if (rubyWordHit(line, at, name) && (hash < 0 || at < hash) && plainAssign(line, end))
             return true;
         from = qMax(end, at + 1);
     }

@@ -11,20 +11,6 @@ struct Scope {
     QString name;
 };
 
-int leading(const QString &line)
-{
-    int col = 0;
-    for (const QChar ch : line) {
-        if (ch == QLatin1Char(' '))
-            ++col;
-        else if (ch == QLatin1Char('\t'))
-            col += 4;
-        else
-            break;
-    }
-    return col;
-}
-
 bool endWord(const QString &line)
 {
     const int at = rubySkip(line, 0);
@@ -37,7 +23,7 @@ void popScope(const QString &line, QList<Scope> *stack)
 {
     if (!endWord(line))
         return;
-    while (!stack->isEmpty() && leading(line) <= stack->constLast().indent)
+    while (!stack->isEmpty() && rubyIndent(line) <= stack->constLast().indent)
         stack->removeLast();
 }
 
@@ -51,7 +37,7 @@ QString nestName(const QList<Scope> &stack, const QString &name)
 void pushScope(const QString &text, int line, const QString &name, QList<Scope> *stack)
 {
     Scope scope;
-    scope.indent = leading(text);
+    scope.indent = rubyIndent(text);
     scope.line = line;
     scope.name = nestName(*stack, name);
     stack->append(scope);
@@ -95,7 +81,7 @@ void pushMethod(const QString &line, QList<Scope> *stack)
     if (rubyClosed(line))
         return;
     Scope method;
-    method.indent = leading(line);
+    method.indent = rubyIndent(line);
     stack->append(method);
 }
 

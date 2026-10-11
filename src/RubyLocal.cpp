@@ -13,51 +13,23 @@ QMutex g_mutex;
 QString g_key;
 QStringList g_lines;
 
-bool wordChar(QChar ch)
-{
-    return ch.isLetterOrNumber() || ch == QLatin1Char('_');
-}
-
-bool wordHit(const QString &line, int at, const QString &name)
-{
-    if (at < 0 || !line.mid(at).startsWith(name))
-        return false;
-    const int end = at + name.size();
-    const bool left = at == 0 || !wordChar(line.at(at - 1));
-    return left && (end >= line.size() || !wordChar(line.at(end)));
-}
-
-int indentOf(const QString &line)
-{
-    int col = 0;
-    for (const QChar ch : line) {
-        if (ch == QLatin1Char(' '))
-            ++col;
-        else if (ch == QLatin1Char('\t'))
-            col += 4;
-        else
-            break;
-    }
-    return col;
-}
-
 bool endLine(const QString &line)
 {
     const int at = rubySkip(line, 0);
     if (!line.mid(at).startsWith(QLatin1String("end")))
         return false;
     const int after = at + 3;
-    return after >= line.size() || !wordChar(line.at(after));
+    return after >= line.size() || !rubyWordChar(line.at(after));
 }
 
 int defAt(const QStringList &lines, int line)
 {
-    int limit = indentOf(lines.at(line - 1));
+    int limit = rubyIndent(lines.at(line - 1));
     for (int at = line; at >= 1; --at) {
         const QString text = lines.at(at - 1);
-        if (text.isEmpty() || indentOf(text) > limit)
+        if (text.isEmpty() || rubyIndent(text) > limit)
             continue;
-        limit = indentOf(text);
+        limit = rubyIndent(text);
         QString name;
         if (rubyDefName(text, &name))
             return at;
@@ -71,9 +43,9 @@ int methodEnd(const QStringList &lines, int defLine)
 {
     if (rubyClosed(lines.at(defLine - 1)))
         return defLine;
-    const int indent = indentOf(lines.at(defLine - 1));
+    const int indent = rubyIndent(lines.at(defLine - 1));
     for (int at = defLine + 1; at <= lines.size(); ++at) {
-        if (indentOf(lines.at(at - 1)) <= indent && endLine(lines.at(at - 1)))
+        if (rubyIndent(lines.at(at - 1)) <= indent && endLine(lines.at(at - 1)))
             return at;
     }
     return lines.size();
@@ -106,7 +78,7 @@ Token tokenAt(const QString &line, int column, const QString &name)
         if (at < 0)
             return Token::Miss;
         const int end = at + name.size();
-        if (wordHit(line, at, name) && column >= at && column < end)
+        if (rubyWordHit(line, at, name) && column >= at && column < end)
             return called(line, at, end) ? Token::Call : Token::Bare;
         from = qMax(end, at + 1);
     }

@@ -27,6 +27,34 @@ int rubySkip(const QString &line, int at)
     return at;
 }
 
+bool rubyWordChar(QChar ch)
+{
+    return ch.isLetterOrNumber() || ch == QLatin1Char('_');
+}
+
+bool rubyWordHit(const QString &line, int at, const QString &name)
+{
+    if (at < 0 || !line.mid(at).startsWith(name))
+        return false;
+    const int end = at + name.size();
+    const bool left = at == 0 || !rubyWordChar(line.at(at - 1));
+    return left && (end >= line.size() || !rubyWordChar(line.at(end)));
+}
+
+int rubyIndent(const QString &line)
+{
+    int col = 0;
+    for (const QChar ch : line) {
+        if (ch == QLatin1Char(' '))
+            ++col;
+        else if (ch == QLatin1Char('\t'))
+            col += 4;
+        else
+            break;
+    }
+    return col;
+}
+
 bool rubyWord(const QString &line, int at, QString *word, int *next)
 {
     if (at >= line.size() || (!line.at(at).isLetter() && line.at(at) != QLatin1Char('_')))
