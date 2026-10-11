@@ -42,6 +42,7 @@ void rubyAddHost(const QString &module, const QString &host);
 void rubyResetMix();
 QStringList rubyHosts(const QString &module);
 bool rubyAssigned(const QString &line, const QString &name);
+bool rubyBlockArg(const QString &line, const QString &name);
 void rubyForgetLocal();
 bool rubyLocal(const LangSpot &spot);
 QString rubyMethodAt(const QString &root, const QString &path, int line);

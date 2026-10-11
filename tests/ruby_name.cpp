@@ -144,8 +144,11 @@ LangDef lookupAt(const QString &root, const char *path, int line, int column, co
 bool localQuiet(const QString &root)
 {
     const LangDef local = lookupAt(root, "path_normalizer.rb", 8, 4, "normalized");
+    const LangDef block = lookupAt(root, "recorder.rb", 6, 6, "normalized");
+    const LangDef after = lookupAt(root, "recorder.rb", 8, 4, "normalized");
     const LangDef method = lookupAt(root, "other.rb", 1, 0, "normalized");
-    return !local.found() && method.path == QLatin1String("path_normalizer.rb") && method.line == 2;
+    return !local.found() && !block.found() && after.path == QLatin1String("path_normalizer.rb") && after.line == 2
+        && method.path == after.path && method.line == after.line;
 }
 
 void testLocal()
@@ -156,6 +159,10 @@ void testLocal()
     CHECK(putFile(root, "path_normalizer.rb",
                   "class PathNormalizer\n  def normalized(prices)\n    prices\n  end\n  def call\n"
                   "    normalized = path.dup\n\n    normalized.gsub!(\"a\", \"b\")\n  end\nend\n"));
+    CHECK(putFile(root, "recorder.rb",
+                  "class Recorder\n  def normalize(attributes)\n"
+                  "    attributes.each_with_object({}) do |(key, value), normalized|\n      next if value.nil?\n\n"
+                  "      normalized[key]\n    end\n    normalized\n  end\nend\n"));
     CHECK(putFile(root, "other.rb", "normalized(1)\n"));
     warmLang(root);
     CHECK(localQuiet(root));

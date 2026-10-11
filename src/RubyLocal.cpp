@@ -42,10 +42,26 @@ int methodEnd(const QStringList &lines, int defLine)
     return lines.size();
 }
 
-bool methodAssigns(const QStringList &lines, int defLine, const QString &name)
+int blockEnd(const QStringList &lines, int open, int last)
 {
-    for (int at = defLine, last = methodEnd(lines, defLine); at <= last; ++at) {
-        if (rubyAssigned(lines.at(at - 1), name))
+    const int indent = rubyIndent(lines.at(open - 1));
+    for (int at = open + 1; at <= last; ++at) {
+        const QString text = lines.at(at - 1);
+        if (text.isEmpty() || rubyIndent(text) > indent)
+            continue;
+        return rubyEndLine(text) ? at : open;
+    }
+    return open;
+}
+
+bool methodAssigns(const QStringList &lines, int defLine, int hover, const QString &name)
+{
+    const int last = methodEnd(lines, defLine);
+    for (int at = defLine; at <= last; ++at) {
+        const QString text = lines.at(at - 1);
+        if (rubyAssigned(text, name))
+            return true;
+        if (rubyBlockArg(text, name) && hover >= at && hover <= blockEnd(lines, at, last))
             return true;
     }
     return false;
@@ -111,5 +127,5 @@ bool rubyLocal(const LangSpot &spot)
     if (spot.line > lines.size() || tokenAt(lines.at(spot.line - 1), spot.column, spot.name) != Token::Bare)
         return false;
     const int defLine = defAt(lines, spot.line);
-    return defLine > 0 && methodAssigns(lines, defLine, spot.name);
+    return defLine > 0 && methodAssigns(lines, defLine, spot.line, spot.name);
 }
