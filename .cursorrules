@@ -42,7 +42,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/DiffSide.cpp` — one pane, word highlights, search highlights, selected text
 - `src/DiffSyntax.cpp` / `DiffSyntax.hpp` — paint syntax colors
 - `src/Syntax.hpp` / `SyntaxRule.hpp` / `SyntaxLang.cpp` / `SyntaxScan.cpp` / `SyntaxText.cpp` / `SyntaxWord.cpp` / `SyntaxMd.cpp` / `SyntaxEmph.cpp` — language tokens
-- `src/LangDef.hpp` / `LangDef.cpp` / `RubyDef.hpp` / `RubyDef.cpp` / `RubyDetail.hpp` / `RubyScan.cpp` / `RubyBody.cpp` / `RubyIndex.cpp` — hover lookup; Ruby method definition. Other languages fill the same result
+- `src/LangDef.hpp` / `LangDef.cpp` / `RubyDef.hpp` / `RubyDef.cpp` / `RubyDetail.hpp` / `RubyScan.cpp` / `RubyBody.cpp` / `RubyIndex.cpp` — hover lookup from the warm index, which keeps each method's text. Other languages fill the same result
 - `src/DiffHover.cpp` / `DiffPopup.hpp` / `DiffPopup.cpp` / `DefCode.hpp` / `DefCode.cpp` — definition popup on a hovered method, colored and wrapped like the diff, with the shared indent removed. Command-click or Control-click opens that file at the line, even with no diff
 - `src/DiffColors.cpp` / `DiffColors.hpp` — diff colors and the reviewed check
 - `src/DiffDoc.cpp` / `DiffDoc.hpp` — file and row model
