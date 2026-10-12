@@ -74,6 +74,9 @@ Feature: Diff view
     When I open the context menu on that file in the file list
     Then I can copy its relative path
     And the clipboard contains "src/app.rb"
+    When I open the context menu on the "src" folder in the file list
+    Then I can copy its relative path
+    And the clipboard contains "src"
 
   Scenario: Filter the file list
     Given a diff is on screen
@@ -269,6 +272,8 @@ Feature: Diff view
     Given a diff of a Ruby file
     When I hover a call such as "Post.comments", "http.active_requests", or "Telemetry::Metrics::VirtualProducts.missing_items"
     Then a popup shows that declaration, such as has_many, up_down, or counter
+    When I hover add or measure on a chain such as "Telemetry::Metrics::VirtualProducts.errors.add" or "Telemetry::Metrics::VirtualProducts.operation_duration.measure"
+    Then a popup shows that method on the class the declaration builds
 
   Scenario: Hover an ambiguous Ruby name
     Given a diff of a Ruby file
