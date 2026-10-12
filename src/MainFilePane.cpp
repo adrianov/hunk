@@ -78,9 +78,12 @@ QString listedPath(const QTreeWidget *tree, const DiffDoc &doc, const QPoint &po
     if (!item)
         return {};
     const int file = item->data(0, Qt::UserRole).toInt();
-    if (file < 0 || file >= doc.files.size())
+    if (file >= 0 && file < doc.files.size())
+        return doc.files.at(file).path();
+    if (item->parent())
         return {};
-    return doc.files.at(file).path();
+    const QString folder = item->text(0);
+    return folder == QLatin1String("(root)") ? QStringLiteral(".") : folder;
 }
 
 } // namespace
