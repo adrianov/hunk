@@ -69,6 +69,9 @@ add_library(hunk_core STATIC
   src/RubyLocal.cpp
   src/RubyAssign.cpp
   src/RubyDsl.cpp
+  src/RubyChain.cpp
+  src/RubyReceiver.cpp
+  src/RubyBuilt.cpp
   src/RubyBody.cpp
   src/RubyTune.cpp
   src/ReviewExport.cpp

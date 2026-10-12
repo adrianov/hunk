@@ -3,6 +3,7 @@
 
 #include "LangDef.hpp"
 #include "LangTune.hpp"
+#include "RubyDetail.hpp"
 
 #include <QDebug>
 #include <QDir>
@@ -251,6 +252,78 @@ void testMetric()
     CHECK(metricHit(root, "missing_items", "counter(:missing_items") && metricHit(root, "operation_duration", "buckets:"));
 }
 
+void testClassReceiver()
+{
+    const QString add = QStringLiteral("Telemetry::Metrics::VirtualProducts.errors.add(operation: 'cart_build')");
+    CHECK(rubyReceiver(add, add.indexOf(QLatin1String("add("))) == QLatin1String("Telemetry::Metrics::VirtualProducts.errors"));
+    CHECK(rubyReceiver(add, add.indexOf(QLatin1String("errors"))) == QLatin1String("Telemetry::Metrics::VirtualProducts"));
+}
+
+void testDurationReceiver()
+{
+    const QString measure = QStringLiteral("Telemetry::Metrics::VirtualProducts.operation_duration.measure");
+    CHECK(rubyReceiver(measure, measure.lastIndexOf(QLatin1String("measure")))
+          == QLatin1String("Telemetry::Metrics::VirtualProducts.operation_duration"));
+}
+
+void testPlainReceiver()
+{
+    const QString local = QStringLiteral("io.write(\"a\")");
+    const QString city = QStringLiteral("user.address.city");
+    CHECK(rubyReceiver(local, local.indexOf(QLatin1String("write"))) == QLatin1String("io"));
+    CHECK(rubyReceiver(city, city.lastIndexOf(QLatin1String("city"))) == QLatin1String("address"));
+}
+
+bool chainHit(const QString &root, const char *name, const char *receiver, const char *bit)
+{
+    LangSpot spot;
+    spot.root = root;
+    spot.path = QStringLiteral("app/build.rb");
+    spot.name = QLatin1String(name);
+    spot.receiver = QLatin1String(receiver);
+    const LangDef def = lookupDef(spot);
+    return def.path.endsWith(QLatin1String("recorder.rb")) && def.signature.contains(QLatin1String(bit));
+}
+
+void chainFiles(const QString &root)
+{
+    CHECK(putFile(root, "lib/telemetry/metrics/base.rb",
+                  "class Telemetry::Metrics::Base\n  class << self\n"
+                  "    def counter(...) = define_instrument(:create_counter, ...)\n"
+                  "    def histogram(method_name, description, buckets: nil)\n"
+                  "      register_buckets(method_name, buckets) if buckets\n"
+                  "      define_instrument(:create_histogram, method_name, description)\n    end\n"
+                  "    def register_buckets(name, buckets)\n"
+                  "      OpenTelemetry::SDK::Metrics::Aggregation::ExplicitBucketHistogram.new(boundaries: buckets)\n"
+                  "    end\n"
+                  "    def define_instrument(create, method_name, description, unit: nil, name: nil)\n"
+                  "      published = name || \"#{self.name.demodulize.underscore}.#{method_name}\"\n"
+                  "      var = :\"@#{method_name}\"\n"
+                  "      define_singleton_method(method_name) do\n"
+                  "        instance_variable_set(var, Telemetry::Metrics::Recorder.new(create, name: published))\n"
+                  "      end\n    end\n"
+                  "  end\nend\n"));
+    CHECK(putFile(root, "lib/telemetry/metrics/recorder.rb",
+                  "class Telemetry::Metrics::Recorder\n  def add(value = 1)\n    1\n  end\n  def measure\n    2\n  end\nend\n"));
+    CHECK(putFile(root, "lib/telemetry/metrics/virtual_products.rb",
+                  "class Telemetry::Metrics::VirtualProducts < Telemetry::Metrics::Base\n"
+                  "  counter(:errors, 'errors')\n  histogram(:operation_duration, 'duration')\nend\n"));
+    CHECK(putFile(root, "app/other.rb", "class Other\n  def add\n    9\n  end\nend\n"));
+}
+
+void testChain()
+{
+    QTemporaryDir dir;
+    CHECK(dir.isValid());
+    const QString root = dir.path();
+    chainFiles(root);
+    warmLang(root);
+    CHECK(chainHit(root, "add", "Telemetry::Metrics::VirtualProducts.errors", "def add"));
+    CHECK(chainHit(root, "measure", "Telemetry::Metrics::VirtualProducts.operation_duration", "def measure"));
+    CHECK(!chainHit(root, "add", "io", "def add") && !chainHit(root, "add", "errors", "def add"));
+    CHECK(metricHit(root, "errors", "counter(:errors"));
+}
+
 } // namespace
 
 LangDef superAt(const QString &root, const char *path, int line)
@@ -356,6 +429,10 @@ int rubyRecvTests()
     testLocalCall();
     testDsl();
     testMetric();
+    testClassReceiver();
+    testDurationReceiver();
+    testPlainReceiver();
+    testChain();
     testLooseMetric();
     return g_fails;
 }

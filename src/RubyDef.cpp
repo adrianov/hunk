@@ -13,20 +13,24 @@ bool classReceiver(const QString &name)
     return !name.isEmpty() && name.at(0).isUpper();
 }
 
-bool ownerMatch(const QString &owner, const QString &receiver)
+} // namespace
+
+bool rubyOwns(const QString &owner, const QString &name)
 {
-    if (owner.isEmpty())
+    if (owner.isEmpty() || name.isEmpty())
         return false;
-    if (owner == receiver || owner.endsWith(QStringLiteral("::") + receiver))
+    if (owner == name || owner.endsWith(QStringLiteral("::") + name))
         return true;
-    return receiver.endsWith(QStringLiteral("::") + owner);
+    return name.endsWith(QStringLiteral("::") + owner);
 }
+
+namespace {
 
 QList<LangDef> ownedHits(const QList<LangDef> &hits, const QString &receiver)
 {
     QList<LangDef> owned;
     for (const LangDef &def : hits) {
-        if (ownerMatch(def.owner, receiver))
+        if (rubyOwns(def.owner, receiver))
             owned.append(def);
     }
     return owned;
@@ -122,7 +126,7 @@ QList<LangDef> looseHits(const QList<LangDef> &hits, const QString &receiver)
     QList<LangDef> owned;
     QList<LangDef> paths;
     for (const LangDef &def : hits) {
-        if (ownerMatch(def.owner, camel))
+        if (rubyOwns(def.owner, camel))
             owned.append(def);
         else if (fileFits(def.path, file))
             paths.append(def);
@@ -160,6 +164,8 @@ LangDef rubyChoose(const QList<LangDef> &hits, const LangSpot &spot)
         if (model.found())
             return model;
     }
+    if (spot.receiver.contains(QLatin1Char('.')))
+        return rubyChain(hits, spot);
     if (classReceiver(spot.receiver))
         return selfCall(ownedHits(hits, spot.receiver), spot.path);
     if (spot.receiver.isEmpty())

@@ -4,42 +4,16 @@
 #include "DiffCanvas.hpp"
 
 #include "LangTune.hpp"
+#include "RubyDetail.hpp"
 
 namespace {
-
-bool receiverChar(QChar ch)
-{
-    return ch.isLetterOrNumber() || ch == QLatin1Char('_') || ch == QLatin1Char('@');
-}
-
-int constHead(const QString &text, int at)
-{
-    while (at >= 2 && text.at(at - 1) == QLatin1Char(':') && text.at(at - 2) == QLatin1Char(':')) {
-        at -= 2;
-        while (at > 0 && receiverChar(text.at(at - 1)))
-            --at;
-    }
-    return at;
-}
-
-QString receiverAt(const QString &text, int start)
-{
-    int tail = start - 1;
-    if (tail > 0 && text.at(tail - 1) == QLatin1Char('&'))
-        --tail;
-    int at = tail;
-    while (at > 0 && receiverChar(text.at(at - 1)))
-        --at;
-    at = constHead(text, at);
-    return at == tail ? QString() : text.mid(at, tail - at);
-}
 
 QString dotReceiver(const QString &text, const QList<SynSpan> &spans, int column)
 {
     for (const SynSpan &span : spans) {
         if (column < span.start || column >= span.end || span.start < 1 || text.at(span.start - 1) != QLatin1Char('.'))
             continue;
-        return receiverAt(text, span.start);
+        return rubyReceiver(text, span.start);
     }
     return {};
 }
