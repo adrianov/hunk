@@ -9,13 +9,6 @@
 
 namespace {
 
-int wordEnd(const QString &text, int at)
-{
-    while (at < text.size() && (text.at(at).isLetterOrNumber() || text.at(at) == QLatin1Char('_')))
-        ++at;
-    return at;
-}
-
 bool declLine(const QString &signature)
 {
     const QString line = signature.trimmed();
@@ -109,7 +102,7 @@ QList<LangDef> typedHits(const QList<LangDef> &hits, const QStringList &types)
 QString headWord(const QString &signature)
 {
     const QString line = signature.trimmed();
-    return line.left(wordEnd(line, 0));
+    return line.left(rubyWordEnd(line, 0));
 }
 
 LangDef chainPick(const QList<LangDef> &hits, const LangSpot &spot, const QString &host)

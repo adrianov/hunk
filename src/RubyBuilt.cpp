@@ -5,16 +5,9 @@
 
 namespace {
 
-int wordEnd(const QString &text, int at)
-{
-    while (at < text.size() && (text.at(at).isLetterOrNumber() || text.at(at) == QLatin1Char('_')))
-        ++at;
-    return at;
-}
-
 bool wordEdge(const QString &text, int at)
 {
-    return at == 0 || (!text.at(at - 1).isLetterOrNumber() && text.at(at - 1) != QLatin1Char('_'));
+    return at == 0 || !rubyWordChar(text.at(at - 1));
 }
 
 int skipString(const QString &text, int at)
@@ -31,7 +24,7 @@ int skipString(const QString &text, int at)
 
 bool identAt(const QString &text, int at)
 {
-    return at < text.size() && (text.at(at).isLetterOrNumber() || text.at(at) == QLatin1Char('_'));
+    return at < text.size() && rubyWordChar(text.at(at));
 }
 
 bool callNew(const QString &text, int at)
@@ -47,10 +40,10 @@ bool moreConst(const QString &text, int end)
 
 int readConst(const QString &text, int at, QString *path)
 {
-    int end = wordEnd(text, at);
+    int end = rubyWordEnd(text, at);
     *path = text.mid(at, end - at);
     while (moreConst(text, end)) {
-        const int next = wordEnd(text, end + 2);
+        const int next = rubyWordEnd(text, end + 2);
         path->append(text.mid(end, next - end));
         end = next;
     }
@@ -88,7 +81,7 @@ void keepCall(QStringList *calls, const QString &word)
 
 int takeCall(const QString &text, int at, QStringList *calls)
 {
-    const int end = wordEnd(text, at);
+    const int end = rubyWordEnd(text, at);
     if (bareCall(text, at, end))
         keepCall(calls, text.mid(at, end - at));
     return end;

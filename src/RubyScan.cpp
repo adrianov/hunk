@@ -32,6 +32,13 @@ bool rubyWordChar(QChar ch)
     return ch.isLetterOrNumber() || ch == QLatin1Char('_');
 }
 
+int rubyWordEnd(const QString &text, int at)
+{
+    while (at < text.size() && rubyWordChar(text.at(at)))
+        ++at;
+    return at;
+}
+
 bool rubyWordHit(const QString &line, int at, const QString &name)
 {
     if (at < 0 || !line.mid(at).startsWith(name))

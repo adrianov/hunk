@@ -11,6 +11,7 @@
 
 int rubySkip(const QString &line, int at);
 bool rubyWordChar(QChar ch);
+int rubyWordEnd(const QString &text, int at);
 bool rubyWordHit(const QString &line, int at, const QString &name);
 bool rubyEndLine(const QString &line);
 int rubyIndent(const QString &line);
