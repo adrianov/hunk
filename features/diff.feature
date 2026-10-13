@@ -209,10 +209,12 @@ Feature: Diff view
     When I double-click a word in the left or the right pane
     Then that word is selected
     When I select text in the left or the right pane
+    And the selection crosses a gap where that pane has no line
     And I open the pane menu
     Then Copy is there, with the shortcut Ctrl+C
     When I press Ctrl+C
     Then the clipboard contains that text
+    And the gap is not an empty line
 
   Scenario: A long line wraps inside the pane
     Given a changed line longer than the pane

@@ -89,7 +89,10 @@ void appendMarked(QStringList *lines, const FileDiff &file, const QList<FoldSpan
 {
     if (insideFold(hidden, row))
         return;
-    lines->append(lineSlice(file.rows.at(row), old, row, fromRow, fromPos, toRow, toPos));
+    const DiffRow &line = file.rows.at(row);
+    if ((old ? line.leftNum : line.rightNum) <= 0 && sideLine(line, old).isEmpty())
+        return;
+    lines->append(lineSlice(line, old, row, fromRow, fromPos, toRow, toPos));
 }
 
 } // namespace
