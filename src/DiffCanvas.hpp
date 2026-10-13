@@ -37,6 +37,7 @@ public:
     int scrollTop() const;
     void setScrollTop(int y);
     int headerHeight() const { return m_headerH; }
+    void barFile(int file);
     void markReviewed(int file) { if (file >= 0) emit reviewRequested(file); }
     bool hasSelection() const { return m_selFile >= 0 && m_selRow >= 0; }
     int selectedFile() const { return m_selFile; }
@@ -185,11 +186,13 @@ private:
     bool markSpan(int file, int row, bool oldSide, int size, int *start, int *end) const;
     QString markedText() const;
     void copyMarked();
+    bool copyPress(const QKeyEvent *key);
     void clearHover();
     const Band *bandAt(int y) const;
     bool inGutter(const FileDiff &file, int x, bool *oldSide) const;
     void emitVisibleFile();
     int fileAt(int y) const;
+    bool barHeads(int file) const { return file == m_barFile; }
     bool headerStuck(int scrollY) const;
 
     DiffDoc m_doc;
@@ -201,6 +204,7 @@ private:
     QList<Band> m_bands;
     QSet<QString> m_notes;
     QSet<int> m_skip;
+    int m_barFile = -1;
     QVector<QSet<int>> m_open;
     QVector<int> m_wrapW;
     QFont m_mono;

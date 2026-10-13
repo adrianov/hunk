@@ -9,7 +9,7 @@
 void DiffCanvas::showFile(int file)
 {
     for (const Band &band : m_bands) {
-        if (band.file == file && band.kind == Band::Header) {
+        if (band.file == file && (band.kind == Band::Header || band.kind == Band::Labels)) {
             verticalScrollBar()->setValue(band.y);
             return;
         }
@@ -24,7 +24,7 @@ void DiffCanvas::showRow(int file, int row, bool oldSide)
     revealRow(file, row);
     for (const Band &band : m_bands) {
         if (band.file == file && band.kind == Band::Row && band.row == row) {
-            verticalScrollBar()->setValue(qMax(0, band.y - m_headerH - 8));
+            verticalScrollBar()->setValue(qMax(0, band.y - (barHeads(file) ? 8 : m_headerH + 8)));
             break;
         }
     }
@@ -74,6 +74,8 @@ int DiffCanvas::fileAt(int y) const
 
 bool DiffCanvas::headerStuck(int scrollY) const
 {
+    if (barHeads(fileAt(scrollY)))
+        return false;
     int headerY = -1;
     for (const Band &band : m_bands) {
         if (band.kind == Band::Header && band.y <= scrollY)

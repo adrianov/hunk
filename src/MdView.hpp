@@ -37,7 +37,6 @@ private:
     void choose(int id);
     void apply();
     void showTitle(const FileDiff &file);
-    void coverHeader();
     void showDocs(const FileDiff &file);
     const FileDiff *currentFile() const;
 

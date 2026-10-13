@@ -211,7 +211,7 @@ Feature: Diff view
     When I select text in the left or the right pane
     And I open the pane menu
     Then Copy is there, with the shortcut Ctrl+C
-    When I copy
+    When I press Ctrl+C
     Then the clipboard contains that text
 
   Scenario: A long line wraps inside the pane
@@ -338,6 +338,7 @@ Feature: Diff view
   Scenario: A markdown file can be read rendered
     Given a diff of "README.md"
     Then Source and Rendered sit on that file's title, beside its added and removed counts
+    And that title is the only heading for the file
     When I choose Rendered
     Then that file is shown as a GitHub document
     And headings, tables, and code blocks are styled

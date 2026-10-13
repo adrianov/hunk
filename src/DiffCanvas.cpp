@@ -141,11 +141,22 @@ int DiffCanvas::rowHeight(const DiffRow &row, bool single) const
     return lines * m_rowH;
 }
 
+// This file's heading is the markdown title bar, so the canvas does not draw another. -1 draws them again.
+void DiffCanvas::barFile(int file)
+{
+    if (file == m_barFile)
+        return;
+    m_barFile = file;
+    rebuild();
+}
+
 void DiffCanvas::addFileBands(int fileIndex, int *y)
 {
     const FileDiff &file = m_doc.files.at(fileIndex);
-    m_bands.push_back(Band{Band::Header, fileIndex, -1, *y, m_headerH});
-    *y += m_headerH;
+    if (!barHeads(fileIndex)) {
+        m_bands.push_back(Band{Band::Header, fileIndex, -1, *y, m_headerH});
+        *y += m_headerH;
+    }
     m_bands.push_back(Band{Band::Labels, fileIndex, -1, *y, m_labelH});
     *y += m_labelH;
     if (file.binary || file.rows.isEmpty()) {

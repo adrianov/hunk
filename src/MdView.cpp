@@ -89,14 +89,13 @@ void MdView::apply()
     m_bar->setVisible(md);
     if (md)
         showTitle(*file);
-    if (!md || !m_on) {
+    if (md && m_on) {
+        showDocs(*file);
+        m_stack->setCurrentWidget(m_page);
+    } else {
         m_stack->setCurrentWidget(m_canvas);
-        coverHeader();
-        return;
     }
-    showDocs(*file);
-    m_stack->setCurrentWidget(m_page);
-    coverHeader();
+    m_canvas->barFile(md ? m_file : -1);
 }
 
 void MdView::showTitle(const FileDiff &file)
@@ -105,15 +104,6 @@ void MdView::showTitle(const FileDiff &file)
     m_title->setToolTip(file.title());
     m_counts->setText(QStringLiteral("<span style=\"color:%1\">+%2</span>  <span style=\"color:%3\">−%4</span>")
                           .arg(kAddFg.name(), QString::number(file.adds), kDelFg.name(), QString::number(file.dels)));
-}
-
-void MdView::coverHeader()
-{
-    const int header = m_canvas->headerHeight();
-    const bool cover = m_bar->isVisible() && !m_on;
-    static_cast<QVBoxLayout *>(layout())->setSpacing(cover ? -header : 0);
-    if (cover)
-        m_bar->raise();
 }
 
 void MdView::track(int file, const DiffDoc &doc, const QString &root)
