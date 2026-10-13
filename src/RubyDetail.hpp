@@ -34,6 +34,8 @@ bool rubyClosed(const QString &line);
 bool rubyDsl(const QString &line, QString *name);
 void rubyWrap(LangDef *def, const QStringList &opens);
 void noteRuby(const QStringList &lines, const QString &path, QHash<QString, QList<LangDef>> *out);
+void rubyUses(const QStringList &lines, const QString &path, const QStringList &names,
+              QHash<QString, QList<LangDef>> *out);
 void readSchemas(const QString &root, QHash<QString, LangDef> *out);
 void schemaBump(int ticket);
 void schemaStore(int ticket, const QString &root, QHash<QString, LangDef> columns);

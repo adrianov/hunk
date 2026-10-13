@@ -53,6 +53,8 @@ void DiffCanvas::pressRow(const Band &band, int x, int y, QMouseEvent *mouse)
         clearMark();
         return;
     }
+    if (!mouse->modifiers().testFlag(Qt::ShiftModifier) && takeLine(x, y))
+        return;
     beginText(x, y, mouse->modifiers().testFlag(Qt::ShiftModifier));
 }
 

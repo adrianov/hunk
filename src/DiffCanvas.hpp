@@ -161,6 +161,7 @@ private:
     void showDef();
     bool jumpMod(Qt::KeyboardModifiers mods) const;
     void chooseDef(int x, int y);
+    bool openSpot(const QString &path, int line, int column, const QString &name, const QString &receiver);
     void holdJump(const QString &name, const QString &path, int line, int column, const QString &receiver);
     void finishJump();
     bool mouseEvent(QEvent *event);
@@ -178,6 +179,12 @@ private:
     void beginText(int x, int y, bool extend);
     TextMark codeAt(TextMark mark, const DiffRow &row, int localX, int localY) const;
     void takeWord(const TextMark &hit);
+    bool wordFresh() const;
+    bool onWord(const TextMark &hit) const;
+    bool lineMarked(const TextMark &hit) const;
+    void markLine(const TextMark &hit, int size);
+    TextMark clickMark(const QMouseEvent *mouse) const;
+    bool takeLine(int x, int y);
     void dragText(int x, int y);
     void endText(QMouseEvent *mouse);
     void pickWord(QMouseEvent *mouse);
@@ -224,6 +231,7 @@ private:
     bool m_selOld = false;
     TextMark m_anchor;
     TextMark m_caret;
+    qint64 m_wordMs = 0;
     bool m_dragText = false;
     int m_hoverFile = -1;
     int m_hoverRow = -1;

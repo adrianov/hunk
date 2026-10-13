@@ -96,18 +96,24 @@ void MainWindow::keepShownFile()
     m_md->leaveFile(shown);
 }
 
+void MainWindow::noteReviewed(const FileDiff &diff)
+{
+    const QString stamp = changeStamp(diff);
+    m_hidden.insert(diff.path(), stamp);
+    if (m_seen.value(diff.path()) == stamp)
+        return;
+    m_seen.insert(diff.path(), stamp);
+    writeSeen(m_root, m_seen);
+}
+
 void MainWindow::hideReviewed(int file)
 {
     if (m_smoke || m_root.isEmpty() || file < 0 || file >= m_doc.files.size())
         return;
-    const FileDiff &diff = m_doc.files.at(file);
-    const QString stamp = changeStamp(diff);
-    m_hidden.insert(diff.path(), stamp);
-    if (m_seen.value(diff.path()) != stamp) {
-        m_seen.insert(diff.path(), stamp);
-        writeSeen(m_root, m_seen);
-    }
+    const int next = nextListed(file);
+    noteReviewed(m_doc.files.at(file));
     applyHidden();
+    showListed(next);
 }
 
 void MainWindow::unhideReviewed()

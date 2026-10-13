@@ -21,6 +21,8 @@ struct LangTune {
     bool (*extra)(const LangSpot &spot, LangDef *out) = nullptr;
     LangDef (*choose)(const QList<LangDef> &hits, const LangSpot &spot) = nullptr;
     void (*note)(const QStringList &lines, const QString &path, QHash<QString, QList<LangDef>> *out) = nullptr;
+    void (*use)(const QStringList &lines, const QString &path, const QStringList &names,
+                QHash<QString, QList<LangDef>> *out) = nullptr;
     void (*reset)(int ticket) = nullptr;
 };
 
@@ -30,8 +32,10 @@ QString langSeek(const QString &root, const QString &path, int line, const QStri
 void langReset(int ticket);
 
 QList<LangDef> langHits(const QString &root, const QString &name, Lang lang);
+QList<LangDef> langUses(const QString &root, const QString &name);
 void langEnsure(const QString &root, const QString &name);
 bool langSought(const QString &root, const QString &name);
 bool langCached(const QString &root);
 LangDef langPick(const QList<LangDef> &defs, const QString &path);
-void langWalk(const QString &root, const QStringList &names, QHash<QString, QList<LangDef>> *out);
+void langWalk(const QString &root, const QStringList &names, QHash<QString, QList<LangDef>> *out,
+             QHash<QString, QList<LangDef>> *uses);

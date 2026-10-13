@@ -5,8 +5,7 @@
 
 #include "DiffFold.hpp"
 
-#include <QMouseEvent>
-#include <QScrollBar>
+#include <QDateTime>
 #include <QStringList>
 
 namespace {
@@ -109,18 +108,8 @@ void DiffCanvas::takeWord(const TextMark &hit)
     m_selFile = hit.file;
     m_selRow = hit.row;
     m_selOld = hit.old;
+    m_wordMs = QDateTime::currentMSecsSinceEpoch();
     viewport()->update();
-}
-
-void DiffCanvas::pickWord(QMouseEvent *mouse)
-{
-    if (pressIgnored(mouse) || evenSplit(mouse) || headerPress(mouse))
-        return;
-    const TextMark hit = textAt(int(mouse->position().x()), int(mouse->position().y()) + verticalScrollBar()->value());
-    if (!hit.code)
-        return;
-    takeWord(hit);
-    endText(mouse);
 }
 
 bool DiffCanvas::markEnds(TextMark *from, TextMark *to) const

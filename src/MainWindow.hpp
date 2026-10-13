@@ -136,6 +136,9 @@ private:
     void loadSeen();
     void markSeenFile(int file);
     void hideReviewed(int file);
+    void noteReviewed(const FileDiff &diff);
+    int nextListed(int file) const;
+    void showListed(int file);
     void unhideReviewed();
     void revealReviewed(int file);
     void applyHidden();

@@ -17,6 +17,7 @@ QWaitCondition g_done;
 QString g_cached;
 int g_ticket = 0;
 QHash<QString, QList<LangDef>> g_names;
+QHash<QString, QList<LangDef>> g_uses;
 QSet<QString> g_sought;
 QSet<QString> g_pending;
 bool g_walking = false;
@@ -51,7 +52,8 @@ QStringList takePending(const QString &root, int ticket)
     return names;
 }
 
-bool storePending(const QString &root, int ticket, const QStringList &names, const QHash<QString, QList<LangDef>> &found)
+bool storePending(const QString &root, int ticket, const QStringList &names, const QHash<QString, QList<LangDef>> &found,
+                  const QHash<QString, QList<LangDef>> &uses)
 {
     if (g_ticket != ticket || g_cached != root) {
         g_done.wakeAll();
@@ -59,6 +61,7 @@ bool storePending(const QString &root, int ticket, const QStringList &names, con
     }
     for (const QString &name : names) {
         g_names.insert(name, found.value(name));
+        g_uses.insert(name, uses.value(name));
         g_sought.insert(name);
     }
     g_done.wakeAll();
@@ -74,6 +77,7 @@ void warmLang(const QString &root, QPointer<QObject> watch, std::function<void()
         if (g_cached != root) {
             g_cached = root;
             g_names.clear();
+            g_uses.clear();
             g_sought.clear();
             g_pending.clear();
             g_walking = false;
@@ -106,6 +110,14 @@ QList<LangDef> langHits(const QString &root, const QString &name, Lang lang)
     return hits;
 }
 
+QList<LangDef> langUses(const QString &root, const QString &name)
+{
+    const QMutexLocker lock(&g_mutex);
+    if (g_cached != root)
+        return {};
+    return g_uses.value(name);
+}
+
 bool langSought(const QString &root, const QString &name)
 {
     const QMutexLocker lock(&g_mutex);
@@ -130,9 +142,10 @@ void drain(const QString &root, int ticket)
         if (names.isEmpty())
             return;
         QHash<QString, QList<LangDef>> found;
-        langWalk(root, names, &found);
+        QHash<QString, QList<LangDef>> uses;
+        langWalk(root, names, &found, &uses);
         const QMutexLocker lock(&g_mutex);
-        if (!storePending(root, ticket, names, found))
+        if (!storePending(root, ticket, names, found, uses))
             return;
     }
 }

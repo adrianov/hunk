@@ -21,7 +21,8 @@ bool DiffCanvas::canFollow() const
     const QString name = langSeek(m_root, m_defPath, m_defLine, m_defName);
     if (name.isEmpty() || m_root.isEmpty() || !langSought(m_root, name))
         return false;
-    return lookupDef(defSpot(m_root, m_defPath, m_defLine, m_defColumn, m_defName, m_defReceiver)).found();
+    const LangSpot spot = defSpot(m_root, m_defPath, m_defLine, m_defColumn, m_defName, m_defReceiver);
+    return lookupDef(spot).found() || !moreUse(spot).isEmpty() || lookupUse(spot).found();
 }
 
 void DiffCanvas::followHand()
@@ -73,17 +74,32 @@ void DiffCanvas::chooseDef(int x, int y)
     const QString path = sidePath(m_doc.files.at(hit.file), hit.old);
     if (deferJump(name, path, line, hit.pos, receiver))
         return;
-    const LangDef def = lookupDef(defSpot(m_root, path, line, hit.pos, name, receiver));
+    openSpot(path, line, hit.pos, name, receiver);
+}
+
+bool DiffCanvas::openSpot(const QString &path, int line, int column, const QString &name, const QString &receiver)
+{
+    const LangSpot spot = defSpot(m_root, path, line, column, name, receiver);
+    LangDef def = lookupDef(spot);
+    if (def.found()) {
+        emit openDefinition(def.path, def.line);
+        return false;
+    }
+    if (!moreUse(spot).isEmpty()) {
+        holdJump(name, path, line, column, receiver);
+        seek(moreUse(spot));
+        return true;
+    }
+    def = lookupUse(spot);
     if (def.found())
         emit openDefinition(def.path, def.line);
+    return false;
 }
 
 void DiffCanvas::finishJump()
 {
     if (m_jumpName.isEmpty())
         return;
-    const LangDef def = lookupDef(defSpot(m_root, m_jumpPath, m_jumpLine, m_jumpColumn, m_jumpName, m_jumpReceiver));
-    m_jumpName.clear();
-    if (def.found())
-        emit openDefinition(def.path, def.line);
+    if (!openSpot(m_jumpPath, m_jumpLine, m_jumpColumn, m_jumpName, m_jumpReceiver))
+        m_jumpName.clear();
 }

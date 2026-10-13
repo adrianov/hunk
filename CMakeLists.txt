@@ -73,6 +73,8 @@ add_library(hunk_core STATIC
   src/RubyReceiver.cpp
   src/RubyBuilt.cpp
   src/RubyBody.cpp
+  src/RubyUse.cpp
+  src/RubyCite.cpp
   src/RubyTune.cpp
   src/ReviewExport.cpp
 )
@@ -91,6 +93,7 @@ add_executable(hunk
   src/MainFilePane.cpp
   src/MainTree.cpp
   src/MainHide.cpp
+  src/MainNext.cpp
   src/MainSeen.cpp
   src/MainFileRow.cpp
   src/MainHeat.cpp
@@ -126,6 +129,7 @@ add_executable(hunk
   src/DiffSelect.cpp
   src/DiffCopy.cpp
   src/DiffMark.cpp
+  src/DiffLine.cpp
   src/DiffHeader.cpp
   src/DiffPaint.cpp
   src/DiffFoldView.cpp
@@ -213,6 +217,7 @@ add_executable(hunk_test
   tests/ruby_pick.cpp
   tests/ruby_name.cpp
   tests/ruby_recv.cpp
+  tests/ruby_use.cpp
   src/ReviewStore.cpp
   src/ReviewSync.cpp
   src/ReviewShift.cpp

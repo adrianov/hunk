@@ -85,23 +85,37 @@ QStringList namesIn(const QString &text, const QStringList &names)
     return hit;
 }
 
-void noteFile(const QString &root, const QString &full, const QStringList &names, const LangTune *tune,
-              QHash<QString, QList<LangDef>> *out)
+void appendNamed(const QStringList &names, const QHash<QString, QList<LangDef>> &local,
+                 QHash<QString, QList<LangDef>> *out)
 {
-    const QString text = readFile(full);
-    const QStringList hit = namesIn(text, names);
-    if (hit.isEmpty())
-        return;
-    QHash<QString, QList<LangDef>> local;
-    tune->note(textLines(text), QDir(root).relativeFilePath(full), &local);
-    for (const QString &name : hit) {
+    for (const QString &name : names) {
         const QList<LangDef> found = local.value(name);
         if (!found.isEmpty())
             (*out)[name].append(found);
     }
 }
 
-void walkFiles(const QString &root, const QString &dir, const QStringList &names, QHash<QString, QList<LangDef>> *out, int depth)
+void noteFile(const QString &root, const QString &full, const QStringList &names, const LangTune *tune,
+              QHash<QString, QList<LangDef>> *out, QHash<QString, QList<LangDef>> *uses)
+{
+    const QString text = readFile(full);
+    const QStringList hit = namesIn(text, names);
+    if (hit.isEmpty())
+        return;
+    const QString path = QDir(root).relativeFilePath(full);
+    const QStringList lines = textLines(text);
+    QHash<QString, QList<LangDef>> local;
+    tune->note(lines, path, &local);
+    appendNamed(hit, local, out);
+    if (!uses || !tune->use)
+        return;
+    local.clear();
+    tune->use(lines, path, hit, &local);
+    appendNamed(hit, local, uses);
+}
+
+void walkFiles(const QString &root, const QString &dir, const QStringList &names, QHash<QString, QList<LangDef>> *out,
+               QHash<QString, QList<LangDef>> *uses, int depth)
 {
     if (depth > 24)
         return;
@@ -109,18 +123,19 @@ void walkFiles(const QString &root, const QString &dir, const QStringList &names
     for (const QFileInfo &info : folder.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot)) {
         if (info.isDir()) {
             if (!skipDir(info.fileName()))
-                walkFiles(root, info.filePath(), names, out, depth + 1);
+                walkFiles(root, info.filePath(), names, out, uses, depth + 1);
             continue;
         }
         const LangTune *tune = langTune(langFor(info.fileName()));
         if (tune && tune->note)
-            noteFile(root, info.filePath(), names, tune, out);
+            noteFile(root, info.filePath(), names, tune, out, uses);
     }
 }
 
 } // namespace
 
-void langWalk(const QString &root, const QStringList &names, QHash<QString, QList<LangDef>> *out)
+void langWalk(const QString &root, const QStringList &names, QHash<QString, QList<LangDef>> *out,
+             QHash<QString, QList<LangDef>> *uses)
 {
-    walkFiles(root, root, names, out, 0);
+    walkFiles(root, root, names, out, uses, 0);
 }

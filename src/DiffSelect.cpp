@@ -75,6 +75,7 @@ void DiffCanvas::clearMark()
     m_dragText = false;
     m_anchor = {};
     m_caret = {};
+    m_wordMs = 0;
 }
 
 DiffCanvas::TextMark DiffCanvas::codeAt(TextMark mark, const DiffRow &row, int localX, int localY) const
@@ -105,6 +106,7 @@ DiffCanvas::TextMark DiffCanvas::textAt(int x, int y) const
 
 void DiffCanvas::beginText(int x, int y, bool extend)
 {
+    m_wordMs = 0;
     const TextMark hit = textAt(x, y);
     if (!hit.code)
         return;

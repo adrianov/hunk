@@ -102,6 +102,8 @@ Feature: Diff view
     And the diff file title has that check on the left of the name
     When I mark a file reviewed
     Then that file leaves the list and the diff
+    And the next file in the list is selected
+    And when that file was the last one, the file before it is selected
     And the totals under the list no longer include it
     When that file changes
     Then it shows in the list and the diff again
@@ -208,6 +210,8 @@ Feature: Diff view
     Given a diff is on screen
     When I double-click a word in the left or the right pane
     Then that word is selected
+    When I double-click that word again without pausing
+    Then the whole line is selected
     When I select text in the left or the right pane
     And the selection crosses a gap where that pane has no line
     And I open the pane menu
@@ -262,6 +266,9 @@ Feature: Diff view
     When I Command-click a call to a method on macOS, or Control-click it on Linux
     Then the diff shows the file where that method is defined, at that line
     And that file stays listed even when it has no added or removed lines
+    When I Command-click a method name on its def on macOS, or Control-click it on Linux
+    Then the diff shows a call to that method
+    And for initialize that call is .new on the class
 
   Scenario: Hover a call on a class
     Given a diff of a Ruby file that defines its own call method
@@ -293,6 +300,8 @@ Feature: Diff view
     Then the popup shows app/models/user.rb
     When I Command-click that name on macOS, or Control-click it on Linux
     Then the diff shows that file at that line, even when it has no added or removed lines
+    When I Command-click the class name on its class or module line on macOS, or Control-click it on Linux
+    Then the diff shows a file that uses that class, at that line
 
   Scenario: Hover a Ruby constant
     Given a diff of a Ruby file

@@ -35,6 +35,10 @@ struct LangSpot {
 
 // Definition of the name at `spot`, or an empty result when that language has none.
 LangDef lookupDef(const LangSpot &spot);
+// A usage of the name when `spot` is its class, module, or def. Empty otherwise.
+LangDef lookupUse(const LangSpot &spot);
+// Another name to index before `lookupUse`, such as the class for `initialize`.
+QString moreUse(const LangSpot &spot);
 LangSpot defSpot(const QString &root, const QString &path, int line, int column, const QString &name,
                  const QString &receiver = {});
 // Remembers the project root. A new root clears every language cache. `done` runs on `watch`.
