@@ -26,6 +26,8 @@ bool refFieldMenu(QLineEdit *edit, const QPoint &global)
     return true;
 }
 
+namespace {
+
 QLineEdit *refEdit()
 {
     auto *edit = qobject_cast<QLineEdit *>(QApplication::focusWidget());
@@ -56,6 +58,8 @@ void listMenu(QAbstractItemView *popup, const QPoint &pos)
     if (takeCopy(&menu, popup->viewport()->mapToGlobal(pos)))
         QGuiApplication::clipboard()->setText(name);
 }
+
+} // namespace
 
 void armRefList(QAbstractItemView *popup)
 {
