@@ -35,7 +35,7 @@ DiffRow gapRow(const QStringList &left, const QStringList &right, int leftNum, i
     row.leftNum = leftNum;
     row.rightNum = rightNum;
     row.leftText = expandTabs(leftNum > 0 ? left.at(leftNum - 1) : right.at(rightNum - 1));
-    row.rightText = row.leftText;
+    row.rightText = expandTabs(rightNum > 0 ? right.at(rightNum - 1) : left.at(leftNum - 1));
     return row;
 }
 
@@ -64,13 +64,26 @@ bool gapReady(const FileDiff &file, const QStringList &left, const QStringList &
     return !left.isEmpty() && !right.isEmpty();
 }
 
+// A whitespace-only change is context in a -w diff, and that line is the new text.
+void ownSpaces(DiffRow *row, const QStringList &left, const QStringList &right)
+{
+    if (row->kind != RowKind::Context || row->leftNum < 1 || row->rightNum < 1)
+        return;
+    if (row->leftNum > left.size() || row->rightNum > right.size())
+        return;
+    row->leftText = expandTabs(left.at(row->leftNum - 1));
+    row->rightText = expandTabs(right.at(row->rightNum - 1));
+}
+
 void placeRow(QList<DiffRow> *out, const QStringList &left, const QStringList &right, int *leftAt, int *rightAt,
               const DiffRow &row)
 {
     const int leftNext = row.leftNum > 0 ? row.leftNum : *leftAt;
     const int rightNext = row.rightNum > 0 ? row.rightNum : *rightAt;
     appendGap(out, left, right, *leftAt, leftNext, *rightAt, rightNext);
-    out->push_back(row);
+    DiffRow shown = row;
+    ownSpaces(&shown, left, right);
+    out->push_back(shown);
     if (row.leftNum > 0)
         *leftAt = row.leftNum + 1;
     if (row.rightNum > 0)

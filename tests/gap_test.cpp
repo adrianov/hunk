@@ -86,6 +86,28 @@ void testGapRest()
     CHECK(rest.at(1).first == 42);
 }
 
+QString spaceDiff()
+{
+    return QStringLiteral("diff --git a.rb a.rb\n--- a.rb\n+++ a.rb\n@@ -1,3 +1,4 @@\n"
+                          "   call(\n+    1,\n     arg\n   )\n");
+}
+
+FileDiff spaceFile()
+{
+    FileDiff file = parseDiff(spaceDiff()).files.at(0);
+    fillGaps(&file, {QStringLiteral("  call("), QStringLiteral("  arg"), QStringLiteral(")")},
+             {QStringLiteral("  call("), QStringLiteral("    1,"), QStringLiteral("    arg"), QStringLiteral(")")});
+    return file;
+}
+
+void testGapSpaces()
+{
+    const FileDiff file = spaceFile();
+    CHECK(file.rows.at(2).kind == RowKind::Context);
+    CHECK(file.rows.at(2).leftText == QStringLiteral("  arg"));
+    CHECK(file.rows.at(2).rightText == QStringLiteral("    arg"));
+}
+
 void testGaps()
 {
     testGapSkip();
@@ -93,6 +115,7 @@ void testGaps()
     testGapFold();
     testGapSearch();
     testGapRest();
+    testGapSpaces();
 }
 
 } // namespace

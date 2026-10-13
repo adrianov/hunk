@@ -191,6 +191,11 @@ Feature: Diff view
     When I show 20 lines from the side of that bar
     Then a bar remains for the lines still hidden
 
+  Scenario: An indent-only line keeps each side's spaces
+    Given a line whose only change is its indent
+    Then the left pane shows the old indent
+    And the right pane shows the new indent
+
   Scenario: A rewritten line stays one block
     Given a changed line where only spaces stay the same
     Then that line is shown as removed and added
@@ -268,6 +273,8 @@ Feature: Diff view
     And that file stays listed even when it has no added or removed lines
     When I Command-click a method name on its def on macOS, or Control-click it on Linux
     Then the diff shows a call to that method
+    And that call is in the application when one exists, not a spec
+    And a short class name such as CatalogSource.model counts
     And for initialize that call is .new on the class
 
   Scenario: Hover a call on a class
