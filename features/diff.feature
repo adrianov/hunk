@@ -50,6 +50,7 @@ Feature: Diff view
     And I can type a ref that is not listed and press Return to use it
     And Escape puts the previous ref back
     And a branch name stays readable on the toolbar, shortened only when it does not fit there
+    And the context menu on either box, or on a branch in its list, copies that branch name
     And the diff is a merge request between them
     And uncommitted changes on the current branch are included
 

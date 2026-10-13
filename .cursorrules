@@ -25,6 +25,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/MainPath.cpp` — project path on the toolbar
 - `src/MainRef.cpp` / `MainRef.hpp` — mode, base, and branch dropdowns
 - `src/MainRefFilter.cpp` — typing in a base or branch field lists matching branches under it
+- `src/MainRefCopy.cpp` — context menu on Base or Branch copies that branch name
 - `src/MainWatch.cpp` — quiet reload on focus and when watched paths change
 - `src/MainDisk.cpp` / `MainDiskWalk.cpp` — filesystem watch for the worktree and git refs
 - `src/MainDetail.hpp` — theme and note label
