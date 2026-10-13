@@ -52,6 +52,14 @@ void testClassUse(const QString &root)
     CHECK(use.line == 1);
 }
 
+void testShortUse(const QString &root)
+{
+    const LangSpot spot = spotAt(root, "app/services/products/catalog_source.rb", 2, "model");
+    CHECK(!lookupDef(spot).found());
+    const LangDef use = lookupUse(spot);
+    CHECK(use.path == QLatin1String("app/services/products/find.rb"));
+    CHECK(use.signature.contains(QLatin1String("CatalogSource.model")));
+}
 void testMethodUse(const QString &root)
 {
     const LangSpot spot = spotAt(root, "lib/telemetry/metrics/counter.rb", 4, "add");
@@ -78,13 +86,23 @@ void testInitUse(const QString &root)
     CHECK(lookupUse(spot).signature.contains(QLatin1String(".new")));
 }
 
-} // namespace
-
-int rubyUseTests()
+void putModel(const QString &root)
 {
-    QTemporaryDir dir;
-    CHECK(dir.isValid());
-    const QString root = dir.path();
+    const char *source = "class Products::CatalogSource\n"
+                         "  def self.model = postgres?\n"
+                         "end\n";
+    const char *find = "include Dry::Monads[:result]\n"
+                       "fallback = CatalogSource.model\n";
+    const char *sourceSpec = "RSpec.describe Products::CatalogSource do\n"
+                             "  expect(described_class.model).to eq(1)\n"
+                             "end\n";
+    CHECK(putFile(root, "app/services/products/catalog_source.rb", source));
+    CHECK(putFile(root, "app/services/products/find.rb", find));
+    CHECK(putFile(root, "spec/services/products/catalog_source_spec.rb", sourceSpec));
+}
+
+void putCounter(const QString &root)
+{
     const char *counter = "class Telemetry::Metrics::Counter\n"
                           "  def initialize(instrument, name:)\n"
                           "  end\n"
@@ -99,9 +117,21 @@ int rubyUseTests()
     CHECK(putFile(root, "app/record.rb", record));
     CHECK(putFile(root, "spec/counter_spec.rb", spec));
     CHECK(putFile(root, "app/other.rb", other));
+}
+
+} // namespace
+
+int rubyUseTests()
+{
+    QTemporaryDir dir;
+    CHECK(dir.isValid());
+    const QString root = dir.path();
+    putCounter(root);
+    putModel(root);
     warmLang(root);
     testInitUse(root);
     testClassUse(root);
     testMethodUse(root);
+    testShortUse(root);
     return g_fails;
 }

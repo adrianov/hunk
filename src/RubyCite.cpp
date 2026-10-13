@@ -4,6 +4,7 @@
 #include "LangDef.hpp"
 
 #include "LangTune.hpp"
+#include "RubyDetail.hpp"
 
 namespace {
 
@@ -18,11 +19,33 @@ bool methodName(const QString &name)
     return !name.isEmpty() && !name.at(0).isUpper();
 }
 
+bool hasWord(const QString &text, const QString &name)
+{
+    int from = 0;
+    while (from < text.size()) {
+        const int at = text.indexOf(name, from);
+        if (at < 0)
+            return false;
+        if (rubyWordHit(text, at, name))
+            return true;
+        from = at + 1;
+    }
+    return false;
+}
+
+bool namesOwner(const QString &text, const QString &owner)
+{
+    if (hasWord(text, owner))
+        return true;
+    const int cut = owner.lastIndexOf(QLatin1String("::"));
+    return cut >= 0 && hasWord(text, owner.mid(cut + 2));
+}
+
 bool ownedUse(const LangDef &use, const LangDef &def, const QString &name)
 {
     if (!methodName(name) || def.owner.isEmpty() || use.path == def.path)
         return true;
-    return use.body.contains(def.owner);
+    return namesOwner(use.signature, def.owner) || namesOwner(use.body, def.owner);
 }
 
 int useRank(const LangDef &use, const LangDef &def, const QString &name)
@@ -31,11 +54,11 @@ int useRank(const LangDef &use, const LangDef &def, const QString &name)
         return 0;
     if (!ownedUse(use, def, name))
         return 0;
+    if (specPath(use.path))
+        return 1;
     int score = use.path == def.path ? 2 : 4;
     if (methodName(name) && use.signature.contains(QStringLiteral(".") + name))
         score += 2;
-    if (specPath(use.path))
-        --score;
     return score;
 }
 
