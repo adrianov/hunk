@@ -29,7 +29,7 @@ FetchContent_Declare(cmark_gfm
   GIT_TAG 0.29.0.gfm.13
   GIT_SHALLOW TRUE
   PATCH_COMMAND sed -i.bak "/ext_scanners\\.re/d" extensions/CMakeLists.txt
-  COMMAND sed -i.bak "1s/VERSION 3.0/VERSION 3.5/" CMakeLists.txt
+  COMMAND sed -i.bak "/cmake_minimum_required(VERSION 3\\.[0-4][^0-9]/s/VERSION 3\\.[0-4]/VERSION 3.5/" CMakeLists.txt
 )
 FetchContent_MakeAvailable(cmark_gfm)
 set(CMAKE_AUTOMOC ON)
