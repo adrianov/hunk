@@ -6,6 +6,7 @@
 #include <QAbstractItemView>
 #include <QComboBox>
 #include <QCompleter>
+#include <QContextMenuEvent>
 #include <QFocusEvent>
 #include <QKeyEvent>
 #include <QLineEdit>
@@ -43,6 +44,8 @@ public:
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override
     {
+        if (event->type() == QEvent::ContextMenu)
+            return refFieldMenu(m_box->lineEdit(), static_cast<QContextMenuEvent *>(event)->globalPos());
         if (trackEdit(event))
             return true;
         if (watched != m_box)
@@ -146,6 +149,7 @@ void tuneRefPopup(QCompleter *found)
     popup->setAttribute(Qt::WA_ShowWithoutActivating);
     popup->setWindowFlag(Qt::WindowDoesNotAcceptFocus);
     popup->setTextElideMode(Qt::ElideNone);
+    armRefList(popup);
     popup->setAutoFillBackground(true);
     popup->viewport()->setAutoFillBackground(true);
 }

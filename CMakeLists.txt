@@ -103,6 +103,7 @@ add_executable(hunk
   src/MainPath.cpp
   src/MainRef.cpp
   src/MainRefFilter.cpp
+  src/MainRefCopy.cpp
   src/MainWatch.cpp
   src/MainDisk.cpp
   src/MainDiskWalk.cpp
