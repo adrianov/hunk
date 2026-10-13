@@ -23,13 +23,13 @@ FetchContent_MakeAvailable(Qlementine)
 set(CMARK_TESTS OFF CACHE BOOL "" FORCE)
 set(CMARK_SHARED OFF CACHE BOOL "" FORCE)
 set(CMARK_STATIC ON CACHE BOOL "" FORCE)
-set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 set(CMAKE_AUTOMOC OFF)
 FetchContent_Declare(cmark_gfm
   GIT_REPOSITORY https://github.com/github/cmark-gfm.git
   GIT_TAG 0.29.0.gfm.13
   GIT_SHALLOW TRUE
   PATCH_COMMAND sed -i.bak "/ext_scanners\\.re/d" extensions/CMakeLists.txt
+  COMMAND sed -i.bak "1s/VERSION 3.0/VERSION 3.5/" CMakeLists.txt
 )
 FetchContent_MakeAvailable(cmark_gfm)
 set(CMAKE_AUTOMOC ON)
