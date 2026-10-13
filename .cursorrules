@@ -36,7 +36,8 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/DiffScroll.cpp` — scroll and sticky file tracking
 - `src/DiffInput.cpp` / `DiffTitle.cpp` — gutter clicks, and the reviewed check on the file title
 - `src/DiffSplit.cpp` — drag the border between panes
-- `src/DiffSelect.cpp` — drag to select text and the copy menu
+- `src/DiffSelect.cpp` — drag to select text
+- `src/DiffCopy.cpp` — copy that selection from the pane menu or with Ctrl+C
 - `src/DiffMark.cpp` — word selection and the copied text
 - `src/DiffHeader.cpp` — file header and labels
 - `src/DiffPaint.cpp` — row paint

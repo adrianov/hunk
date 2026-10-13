@@ -3,17 +3,28 @@
 
 #include "DiffCanvas.hpp"
 
-#include <QAction>
-#include <QClipboard>
-#include <QContextMenuEvent>
 #include <QFontMetrics>
-#include <QGuiApplication>
 #include <QKeyEvent>
-#include <QMenu>
 #include <QMouseEvent>
 #include <QTimer>
 
 namespace {
+
+const QKeyEvent *keyOf(const QEvent *event)
+{
+    const auto type = event->type();
+    if (type != QEvent::KeyPress && type != QEvent::KeyRelease)
+        return nullptr;
+    return static_cast<const QKeyEvent *>(event);
+}
+
+bool modKey(const QKeyEvent *key)
+{
+    if (key->isAutoRepeat())
+        return false;
+    const int code = key->key();
+    return code == Qt::Key_Control || code == Qt::Key_Meta;
+}
 
 int cutAt(const QFontMetrics &metrics, const QString &text, int start, int end, int local)
 {
@@ -128,31 +139,8 @@ void DiffCanvas::endText(QMouseEvent *mouse)
     viewport()->releaseMouse();
 }
 
-void DiffCanvas::copyMarked()
-{
-    const QString text = markedText();
-    if (text.isEmpty())
-        return;
-    QGuiApplication::clipboard()->setText(text);
-}
-
-void DiffCanvas::contextMenuEvent(QContextMenuEvent *event)
-{
-    QMenu menu(this);
-    QAction *copy = menu.addAction(QStringLiteral("Copy"));
-    copy->setShortcut(QKeySequence::Copy);
-    copy->setEnabled(!markedText().isEmpty());
-    if (menu.exec(event->globalPos()) == copy)
-        copyMarked();
-    event->accept();
-}
-
 void DiffCanvas::keyPressEvent(QKeyEvent *event)
 {
-    if (event->matches(QKeySequence::Copy)) {
-        copyMarked();
-        return;
-    }
     if (event->key() == Qt::Key_Escape) {
         stopDef();
         if (m_anchor.file >= 0) {
@@ -166,11 +154,12 @@ void DiffCanvas::keyPressEvent(QKeyEvent *event)
 
 bool DiffCanvas::eventFilter(QObject *watched, QEvent *event)
 {
-    const bool key = event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease;
-    if (key && !static_cast<const QKeyEvent *>(event)->isAutoRepeat()) {
-        const int code = static_cast<const QKeyEvent *>(event)->key();
-        if (code == Qt::Key_Control || code == Qt::Key_Meta)
-            QTimer::singleShot(0, this, &DiffCanvas::placeCursor);
-    }
+    const QKeyEvent *key = keyOf(event);
+    if (!key)
+        return QAbstractScrollArea::eventFilter(watched, event);
+    if (event->type() == QEvent::KeyPress && copyPress(key))
+        return true;
+    if (modKey(key))
+        QTimer::singleShot(0, this, &DiffCanvas::placeCursor);
     return QAbstractScrollArea::eventFilter(watched, event);
 }
