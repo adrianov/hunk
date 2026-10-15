@@ -4,6 +4,7 @@
 #include "GitDetail.hpp"
 
 #include <QDir>
+#include <QFileInfo>
 
 namespace {
 
@@ -30,6 +31,39 @@ QString joinStamp(const QString &head, const QString &base, const QString &statu
     return head + QLatin1Char('\n') + base + QLatin1Char('\n') + status + QLatin1Char('\n') + mainStamp(root);
 }
 
+QStringList listFresh(const QString &root)
+{
+    const GitCmd listed = runGit(root, {QStringLiteral("ls-files"), QStringLiteral("-o"), QStringLiteral("--exclude-standard"),
+                                        QStringLiteral("-z")});
+    if (listed.code != 0)
+        return {};
+    QStringList paths;
+    for (const QString &path : listed.out.split(QChar(u'\0'), Qt::SkipEmptyParts)) {
+        if (!path.endsWith(QLatin1Char('/')))
+            paths << path;
+    }
+    return paths;
+}
+
+QString freshStamp(const QString &root, const QStringList &paths)
+{
+    QString stamp;
+    for (const QString &path : paths) {
+        const QFileInfo info(QDir(root).filePath(path));
+        stamp += path + QLatin1Char(' ') + QString::number(info.lastModified().toMSecsSinceEpoch()) + QLatin1Char('\n');
+    }
+    return stamp;
+}
+
+QString workStamp(const QString &root, const QString &baseRef, const QString &headRef, const QStringList &fresh)
+{
+    const GitCmd head = runGit(root, {QStringLiteral("rev-parse"), QStringLiteral("HEAD")});
+    const GitCmd status = runGit(root, {QStringLiteral("status"), QStringLiteral("--porcelain"), QStringLiteral("-uno")});
+    if (head.code != 0 || status.code != 0)
+        return {};
+    return joinStamp(head.out.trimmed(), baseCommit(root, baseRef, headRef), status.out + freshStamp(root, fresh), root);
+}
+
 } // namespace
 
 QStringList ignoredDirs(const QString &root)
@@ -45,15 +79,6 @@ QStringList ignoredDirs(const QString &root)
     return dirs;
 }
 
-QString workStamp(const QString &root, const QString &baseRef, const QString &headRef)
-{
-    const GitCmd head = runGit(root, {QStringLiteral("rev-parse"), QStringLiteral("HEAD")});
-    const GitCmd status = runGit(root, {QStringLiteral("status"), QStringLiteral("--porcelain"), QStringLiteral("-uno")});
-    if (head.code != 0 || status.code != 0)
-        return {};
-    return joinStamp(head.out.trimmed(), baseCommit(root, baseRef, headRef), status.out + freshStamp(root), root);
-}
-
 QString stampKey(DiffMode mode, const QString &baseRef, const QString &headRef, const QString &disk)
 {
     return QString::number(static_cast<int>(mode)) + QLatin1Char('\n') + baseRef + QLatin1Char('\n') + headRef
@@ -63,7 +88,8 @@ QString stampKey(DiffMode mode, const QString &baseRef, const QString &headRef, 
 bool reuseDiff(GitResult &result, DiffMode mode, const QString &baseRef, const QString &headRef, const QString &previous,
                bool quiet)
 {
-    result.diskStamp = workStamp(result.root, baseRef, headRef);
+    result.untracked = listFresh(result.root);
+    result.diskStamp = workStamp(result.root, baseRef, headRef, result.untracked);
     result.stamp = stampKey(mode, baseRef.trimmed(), headRef.trimmed(), result.diskStamp);
     if (!quiet)
         return false;

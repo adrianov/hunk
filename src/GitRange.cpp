@@ -109,8 +109,8 @@ bool fillMerge(GitResult &result, QStringList *args)
     setMergeLabels(result, headRef, leftShort);
     noteConflicts(result, headRef);
     result.leftRev = leftCommit;
-    const bool worktree = headRef == QLatin1String("HEAD") || headRef == result.branch;
-    result.rightRev = worktree ? QString() : headRef;
+    result.worktree = headRef == QLatin1String("HEAD") || headRef == result.branch;
+    result.rightRev = result.worktree ? QString() : headRef;
     addRange(args, result, leftCommit, headRef);
     return true;
 }

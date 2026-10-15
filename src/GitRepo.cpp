@@ -69,6 +69,7 @@ void fillWorktree(GitResult &result, const QString &headShort, bool staged, QStr
 {
     result.leftLabel = headShort;
     result.leftRev = QStringLiteral("HEAD");
+    result.worktree = !staged;
     result.rightRev = staged ? QStringLiteral(":") : QString();
     if (staged) {
         result.rightLabel = QStringLiteral("Index");

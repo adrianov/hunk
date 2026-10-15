@@ -28,6 +28,8 @@ struct GitResult {
     QString diffText;
     QString leftRev;
     QString rightRev;
+    bool worktree = false;
+    QStringList untracked;
     DiffDoc doc;
     QString error;
     QString diskStamp;

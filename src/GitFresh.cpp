@@ -5,7 +5,6 @@
 
 #include <QDir>
 #include <QFile>
-#include <QFileInfo>
 
 namespace {
 
@@ -91,23 +90,6 @@ QString readDiff(const QString &path, QFile *file)
     return textHead(shownPath(path)) + plusBody(QString::fromUtf8(file->readAll()));
 }
 
-QString listedNames(const QString &root)
-{
-    const GitCmd listed = runGit(root, {QStringLiteral("ls-files"), QStringLiteral("-o"), QStringLiteral("--exclude-standard"),
-                                        QStringLiteral("-z")});
-    return listed.code == 0 ? listed.out : QString();
-}
-
-QStringList freshPaths(const QString &names)
-{
-    QStringList paths;
-    for (const QString &path : names.split(QChar(u'\0'), Qt::SkipEmptyParts)) {
-        if (!path.endsWith(QLatin1Char('/')))
-            paths << path;
-    }
-    return paths;
-}
-
 QString oneFile(const QString &root, const QString &path)
 {
     QFile file(QDir(root).filePath(path));
@@ -118,29 +100,13 @@ QString oneFile(const QString &root, const QString &path)
 
 } // namespace
 
-QString freshStamp(const QString &root)
-{
-    QString stamp;
-    for (const QString &path : freshPaths(listedNames(root))) {
-        const QFileInfo info(QDir(root).filePath(path));
-        stamp += path + QLatin1Char(' ') + QString::number(info.lastModified().toMSecsSinceEpoch()) + QLatin1Char('\n');
-    }
-    return stamp;
-}
-
-QString freshDiff(const QString &root)
-{
-    QString extra;
-    for (const QString &path : freshPaths(listedNames(root)))
-        extra += oneFile(root, path);
-    return extra;
-}
-
 void addUntracked(GitResult *result)
 {
-    if (!result->rightRev.isEmpty())
+    if (!result->worktree || result->untracked.isEmpty())
         return;
-    const QString extra = freshDiff(result->root);
+    QString extra;
+    for (const QString &path : result->untracked)
+        extra += oneFile(result->root, path);
     if (extra.isEmpty())
         return;
     if (!result->diffText.isEmpty() && !result->diffText.endsWith(QLatin1Char('\n')))
