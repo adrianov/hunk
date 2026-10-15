@@ -40,7 +40,7 @@ QLabel *lineStat(QWidget *parent)
 {
     auto *stat = new QLabel(parent);
     stat->setTextFormat(Qt::RichText);
-    stat->setContentsMargins(8, 4, 8, 4);
+    stat->setContentsMargins(8, 0, 8, 0);
     return stat;
 }
 
@@ -64,7 +64,7 @@ QWidget *statBar(QWidget *parent, QLabel *stat, QPushButton *unhide)
 {
     auto *bar = new QWidget(parent);
     auto *stats = new QHBoxLayout(bar);
-    stats->setContentsMargins(0, 0, 4, 0);
+    stats->setContentsMargins(0, 4, 4, 4);
     stats->setSpacing(0);
     stats->addWidget(stat, 0, Qt::AlignVCenter);
     stats->addStretch(1);
