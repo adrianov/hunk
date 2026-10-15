@@ -38,6 +38,12 @@ bool rowsBack(int row, int caret, bool upward)
     return upward ? row > caret : row < caret;
 }
 
+int clampCode(int x, int origin, int width, int gutter)
+{
+    const int code = origin + gutter + 8;
+    return qBound(code, x, qMax(code, origin + width - 8));
+}
+
 } // namespace
 
 void DiffCanvas::armDrag()
@@ -131,20 +137,18 @@ void DiffCanvas::trackDrag(int x, int viewY)
 
 int DiffCanvas::paneX(int x) const
 {
-    const FileDiff &file = m_doc.files.at(m_anchor.file);
+    if (m_anchor.file < 0 || m_anchor.file >= m_doc.files.size())
+        return x;
+    const bool single = m_doc.files.at(m_anchor.file).singlePane();
     const int viewW = qMax(1, viewport()->width());
-    const int paneW = file.singlePane() ? viewW : pairSplit(viewW);
-    const bool left = file.singlePane() || m_anchor.old;
-    const int origin = left ? 0 : paneW;
-    const int width = left ? paneW : viewW - paneW;
-    const int code = origin + m_gutterW + 8;
-    return qBound(code, x, qMax(code, origin + width - 8));
+    const int paneW = single ? viewW : pairSplit(viewW);
+    const int origin = single || m_anchor.old ? 0 : paneW;
+    const int width = origin == 0 ? paneW : viewW - paneW;
+    return clampCode(x, origin, width, m_gutterW);
 }
 
 void DiffCanvas::dragEdge(int x, int y, bool upward)
 {
-    if (m_anchor.file < 0 || m_anchor.file >= m_doc.files.size())
-        return;
     const int atX = paneX(x);
     const int step = upward ? m_rowH : -m_rowH;
     for (int n = 0; n <= kScrollSpan; ++n) {
