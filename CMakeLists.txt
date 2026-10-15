@@ -127,8 +127,12 @@ add_executable(hunk
   src/DiffTitle.cpp
   src/DiffSplit.cpp
   src/DiffSelect.cpp
+  src/DiffDrag.cpp
   src/DiffCopy.cpp
   src/DiffMark.cpp
+  src/DiffAll.cpp
+  src/DiffMove.cpp
+  src/DiffStep.cpp
   src/DiffLine.cpp
   src/DiffHeader.cpp
   src/DiffPaint.cpp

@@ -70,11 +70,13 @@ int charAt(const QString &text, const QList<Piece> &pieces, int localX, int loca
 
 void DiffCanvas::clearMark()
 {
+    m_dragTimer.stop();
     if (m_dragText)
         viewport()->releaseMouse();
     m_dragText = false;
     m_anchor = {};
     m_caret = {};
+    m_goal = -1;
     m_wordMs = 0;
 }
 
@@ -116,6 +118,7 @@ void DiffCanvas::beginText(int x, int y, bool extend)
     if (!extend || m_anchor.file != hit.file || m_anchor.old != hit.old)
         m_anchor = hit;
     m_caret = hit;
+    m_goal = -1;
     m_dragText = true;
     viewport()->grabMouse();
     viewport()->setCursor(Qt::IBeamCursor);
@@ -130,6 +133,7 @@ void DiffCanvas::dragText(int x, int y)
     if (hit.row == m_caret.row && hit.pos == m_caret.pos)
         return;
     m_caret = hit;
+    m_goal = -1;
     viewport()->update();
 }
 
@@ -137,6 +141,7 @@ void DiffCanvas::endText(QMouseEvent *mouse)
 {
     if (!m_dragText || mouse->button() != Qt::LeftButton)
         return;
+    m_dragTimer.stop();
     m_dragText = false;
     viewport()->releaseMouse();
 }
@@ -159,7 +164,7 @@ bool DiffCanvas::eventFilter(QObject *watched, QEvent *event)
     const QKeyEvent *key = keyOf(event);
     if (!key)
         return QAbstractScrollArea::eventFilter(watched, event);
-    if (event->type() == QEvent::KeyPress && copyPress(key))
+    if (event->type() == QEvent::KeyPress && paneKey(key))
         return true;
     if (modKey(key))
         QTimer::singleShot(0, this, &DiffCanvas::placeCursor);

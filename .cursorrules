@@ -38,8 +38,12 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/DiffInput.cpp` / `DiffTitle.cpp` — gutter clicks, and the reviewed check on the file title
 - `src/DiffSplit.cpp` — drag the border between panes
 - `src/DiffSelect.cpp` — drag to select text
+- `src/DiffDrag.cpp` — the file scrolls when that drag leaves the view
 - `src/DiffCopy.cpp` — copy that selection from the pane menu or with Ctrl+C
 - `src/DiffMark.cpp` — word selection and the copied text
+- `src/DiffAll.cpp` — Ctrl+A selects that pane's file
+- `src/DiffMove.cpp` — arrow keys move and extend the selection
+- `src/DiffStep.cpp` — caret steps by character, word, and line
 - `src/DiffLine.cpp` — a second double-click selects that whole line
 - `src/DiffHeader.cpp` — file header and labels
 - `src/DiffPaint.cpp` — row paint
@@ -47,7 +51,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/DiffSyntax.cpp` / `DiffSyntax.hpp` — paint syntax colors
 - `src/Syntax.hpp` / `SyntaxRule.hpp` / `SyntaxLang.cpp` / `SyntaxScan.cpp` / `SyntaxText.cpp` / `SyntaxWord.cpp` / `SyntaxMd.cpp` / `SyntaxEmph.cpp` — language tokens
 - `src/LangDef.hpp` / `LangDef.cpp` / `LangTune.hpp` / `LangTune.cpp` / `LangIndex.cpp` / `LangWalk.cpp` — shared hover lookup. One walk stores every queued name. Each language is a layer of names, exclusions, and ranking
-- `src/RubyDef.hpp` / `RubyDef.cpp` / `RubyDetail.hpp` / `RubyTune.cpp` / `RubyScan.cpp` / `RubySig.cpp` / `RubyConst.cpp` / `RubyParent.cpp` / `RubySchema.cpp` / `RubyColumn.cpp` / `RubyTable.cpp` / `RubySuper.cpp` / `RubyMix.cpp` / `RubyHost.cpp` / `RubyScope.cpp` / `RubyNest.cpp` / `RubyLocal.cpp` / `RubyAssign.cpp` / `RubyDsl.cpp` / `RubyChain.cpp` / `RubyBuilt.cpp` / `RubyReceiver.cpp` / `RubyBody.cpp` / `RubyUse.cpp` / `RubyCite.cpp` — Ruby layer. A call on a class opens that class's method, or a DSL declaration such as has_many or counter. A model such as User opens app/models/user.rb when other files reopen the class. A nested class such as Telemetry::KarafkaMonitor shows the wrapping module around that class. A column such as product_gold_erp_id shows its schema line. Hovering super shows the parent method. http.active_requests can open up_down(:active_requests). A chain such as VirtualProducts.errors.add opens the method on the class that declaration builds. Command-click on the class or def opens a usage in the app when one exists
+- `src/RubyDef.hpp` / `RubyDef.cpp` / `RubyDetail.hpp` / `RubyTune.cpp` / `RubyScan.cpp` / `RubySig.cpp` / `RubyConst.cpp` / `RubyParent.cpp` / `RubySchema.cpp` / `RubyColumn.cpp` / `RubyTable.cpp` / `RubySuper.cpp` / `RubyMix.cpp` / `RubyHost.cpp` / `RubyScope.cpp` / `RubyNest.cpp` / `RubyLocal.cpp` / `RubyAssign.cpp` / `RubyDsl.cpp` / `RubyChain.cpp` / `RubyBuilt.cpp` / `RubyReceiver.cpp` / `RubyBody.cpp` / `RubyUse.cpp` / `RubyCite.cpp` — Ruby layer. A call on a class opens that class's method, or a DSL declaration such as has_many or counter. A model such as User opens app/models/user.rb when other files reopen the class. A nested class such as Telemetry::KarafkaMonitor shows the wrapping module around that class. A column such as product_gold_erp_id shows its schema line. Hovering super shows the parent method. http.active_requests can open up_down(:active_requests). A chain such as VirtualProducts.errors.add opens the method on the class that declaration builds. Command-click on the class or def opens a usage in the app when one exists, including a bare call in the same module. A field of that name on another class does not
 - `src/DiffHover.cpp` / `DiffName.cpp` / `DiffJump.cpp` / `DiffPopup.hpp` / `DiffPopup.cpp` / `DefCode.hpp` / `DefCode.cpp` — definition popup on a hovered method, class, or constant, colored and wrapped like the diff, with the shared indent removed. Same file when the definition is in the file under the cursor. Command-click or Control-click opens that file at the line, even with no diff. A hash key, a local variable, or a call on a local such as io.write stays quiet
 - `src/DiffColors.cpp` / `DiffColors.hpp` — diff colors and the reviewed check
 - `src/DiffDoc.cpp` / `DiffDoc.hpp` — file and row model

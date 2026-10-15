@@ -224,6 +224,15 @@ Feature: Diff view
     When I press Ctrl+C
     Then the clipboard contains that text
     And the gap is not an empty line
+    When I drag a selection past the top or the bottom of the diff
+    Then the diff scrolls that way
+    And the selection continues into the lines that come into view
+    When I press Ctrl+A in that pane
+    Then the whole file in that pane is selected
+    And copying it puts that file's text on the clipboard
+    When I hold Shift and press an arrow key in that pane
+    Then the selection extends in that direction
+    And an arrow key without Shift collapses it to that edge
 
   Scenario: A long line wraps inside the pane
     Given a changed line longer than the pane
@@ -275,6 +284,8 @@ Feature: Diff view
     Then the diff shows a call to that method
     And that call is in the application when one exists, not a spec
     And a short class name such as CatalogSource.model counts
+    And a bare call in the same module counts
+    And a field of that name on another class, such as Current.status_change_context, does not
     And for initialize that call is .new on the class
 
   Scenario: Hover a call on a class

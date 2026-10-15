@@ -36,6 +36,27 @@ void DiffCanvas::copyMarked()
     QGuiApplication::clipboard()->setText(text);
 }
 
+bool DiffCanvas::paneFocus() const
+{
+    const QWidget *focus = QApplication::focusWidget();
+    return focus == this || focus == viewport();
+}
+
+bool DiffCanvas::selectPress(const QKeyEvent *key)
+{
+    if (key->isAutoRepeat() || !key->matches(QKeySequence::SelectAll) || !paneFocus())
+        return false;
+    selectAll();
+    return true;
+}
+
+bool DiffCanvas::paneKey(const QKeyEvent *key)
+{
+    if (copyPress(key) || selectPress(key))
+        return true;
+    return movePress(key);
+}
+
 bool DiffCanvas::copyPress(const QKeyEvent *key)
 {
     if (key->isAutoRepeat() || !key->matches(QKeySequence::Copy) || markedText().isEmpty())

@@ -140,7 +140,7 @@ void DiffCanvas::onMove(QMouseEvent *mouse)
     if (dragSplit(x, mouse))
         return;
     if (m_dragText && mouse->buttons().testFlag(Qt::LeftButton)) {
-        dragText(x, y);
+        moveDrag(x, y);
         return;
     }
     trackHover(mouse, x, y);

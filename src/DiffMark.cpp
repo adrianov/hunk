@@ -108,6 +108,7 @@ void DiffCanvas::takeWord(const TextMark &hit)
     m_selFile = hit.file;
     m_selRow = hit.row;
     m_selOld = hit.old;
+    m_goal = -1;
     m_wordMs = QDateTime::currentMSecsSinceEpoch();
     viewport()->update();
 }
@@ -155,7 +156,7 @@ QString DiffCanvas::markedText() const
     if (!markEnds(&from, &to))
         return {};
     const FileDiff &file = m_doc.files.at(from.file);
-    const QList<FoldSpan> hidden = foldSpans(file.rows, pinnedRows(from.file));
+    const QList<FoldSpan> hidden = fullMark(from, to) ? QList<FoldSpan>() : foldSpans(file.rows, pinnedRows(from.file));
     QStringList lines;
     for (int row = from.row; row <= to.row; ++row)
         appendMarked(&lines, file, hidden, row, from.old, from.row, from.pos, to.row, to.pos);

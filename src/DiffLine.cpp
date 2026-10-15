@@ -50,6 +50,7 @@ void DiffCanvas::markLine(const TextMark &hit, int size)
     m_selFile = hit.file;
     m_selRow = hit.row;
     m_selOld = hit.old;
+    m_goal = -1;
     viewport()->update();
 }
 
