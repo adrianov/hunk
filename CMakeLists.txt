@@ -71,6 +71,11 @@ add_library(hunk_core STATIC
   src/RubyDsl.cpp
   src/RubyChain.cpp
   src/RubyLead.cpp
+  src/RubyDetail.cpp
+  src/RubyType.cpp
+  src/RubyReturn.cpp
+  src/RubyFollow.cpp
+  src/RubyOwner.cpp
   src/RubyFactory.cpp
   src/RubyReceiver.cpp
   src/RubyBuilt.cpp
@@ -224,6 +229,8 @@ add_executable(hunk_test
   tests/ruby_pick.cpp
   tests/ruby_name.cpp
   tests/ruby_recv.cpp
+  tests/ruby_type.cpp
+  tests/ruby_prec.cpp
   tests/ruby_use.cpp
   src/ReviewStore.cpp
   src/ReviewSync.cpp

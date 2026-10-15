@@ -26,13 +26,14 @@ QString nestName(const QList<Scope> &stack, const QString &name)
     return stack.constLast().name + QStringLiteral("::") + name;
 }
 
-void pushScope(const QString &text, int line, const QString &name, QList<Scope> *stack)
+QString pushScope(const QString &text, int line, const QString &name, QList<Scope> *stack)
 {
     Scope scope;
     scope.indent = rubyIndent(text);
     scope.line = line;
     scope.name = nestName(*stack, name);
     stack->append(scope);
+    return scope.name;
 }
 
 QStringList parentOpens(const QStringList &lines, const QList<Scope> &stack)
@@ -79,12 +80,11 @@ void pushMethod(const QString &line, QList<Scope> *stack)
 
 bool doWord(const QString &text)
 {
-    const QString key = QStringLiteral(" do");
     for (int from = 0; from < text.size();) {
-        const int at = text.indexOf(key, from);
+        const int at = text.indexOf(QLatin1String(" do"), from);
         if (at < 0)
             return false;
-        const int end = at + key.size();
+        const int end = at + 3;
         if (end >= text.size() || !rubyWordChar(text.at(end)))
             return true;
         from = end;
@@ -121,12 +121,13 @@ bool noteScope(const QStringList &lines, int line, const QString &path, const QS
     }
     if (!rubyTypeName(text, &name))
         return false;
-    pushScope(text, line, name, stack);
-    const QString full = stack->constLast().name;
+    const QString full = pushScope(text, line, name, stack);
     noteOwned(lines, line, path, full, {}, out);
     rubyWrap(&(*out)[full].last(), parentOpens(lines, *stack));
     if (full != name)
         (*out)[name].append((*out)[full].constLast());
+    if (rubyClosed(text))
+        stack->removeLast();
     return true;
 }
 

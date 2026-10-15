@@ -21,6 +21,30 @@ bool rubyOwns(const QString &owner, const QString &name);
 void rubyNoteBuilt(const QString &text, QStringList *types, QStringList *calls);
 void rubyFactory(const QString &root, const QString &text, QStringList *types);
 QString rubyLead(const LangSpot &spot, const QString &line = {});
+QString rubyTyped(const LangSpot &spot, const QString &line);
+
+// One read of the hovered file and the method that encloses that line.
+struct RubyBound {
+    QStringList lines;
+    int opened = 0;
+    int last = 0;
+};
+
+QStringList readLines(const QString &root, const QString &path);
+int defLine(const QStringList &lines, int line);
+int methodLast(const QStringList &lines, int opened);
+bool defSig(const LangDef &def);
+QString constBefore(const QString &text, int dot);
+bool keepOwner(QString *found, const QString &owner);
+bool plainName(const QString &name);
+RubyBound rubyBound(const LangSpot &spot);
+QString methodType(const QString &root, const QString &name);
+bool finderWord(const QString &word);
+QString wordAt(const QString &text, int at);
+QString followText(const QString &root, const QString &text, const QString &nest, const QString &method);
+QString rubyFollow(const LangSpot &spot, const RubyBound &bound);
+void rubyKeepLines(const QString &root, const QString &path, const QStringList &lines);
+void rubyForgetLines();
 LangDef rubyChain(const QList<LangDef> &hits, const LangSpot &spot);
 bool rubyDefName(const QString &line, QString *name);
 QString rubyConst(const QString &text, int start, int end);

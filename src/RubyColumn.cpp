@@ -112,7 +112,7 @@ LangDef schemaFind(const QString &root, const QString &receiver, const QString &
 {
     schemaLazy(root);
     const LangDef known = receiverColumn(root, receiver, column);
-    if (known.found())
+    if (known.found() || (!receiver.isEmpty() && receiver.at(0).isUpper()))
         return known;
     const QList<LangDef> hits = namedColumns(root, column);
     if (hits.isEmpty())

@@ -117,6 +117,7 @@ void rubyForgetLocal()
     const QMutexLocker lock(&g_mutex);
     g_key.clear();
     g_lines.clear();
+    rubyForgetLines();
 }
 
 bool rubyLocal(const LangSpot &spot)

@@ -34,7 +34,7 @@ QString spanName(const QString &text, const QList<SynSpan> &spans, int column, c
 QString ledReceiver(const QString &root, const QString &path, int line, int column, const QString &name,
                     const QString &text, const QString &receiver)
 {
-    const QString lead = rubyLead(defSpot(root, path, line, column, name, receiver), text);
+    const QString lead = rubyTyped(defSpot(root, path, line, column, name, receiver), text);
     return lead.isEmpty() ? receiver : lead;
 }
 
