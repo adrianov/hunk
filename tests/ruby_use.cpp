@@ -141,6 +141,8 @@ void putCounter(const QString &root)
 
 } // namespace
 
+int rubyTypeTests();
+
 int rubyUseTests()
 {
     QTemporaryDir dir;
@@ -155,5 +157,5 @@ int rubyUseTests()
     testMethodUse(root);
     testShortUse(root);
     testBareUse(root);
-    return g_fails;
+    return g_fails + rubyTypeTests();
 }
