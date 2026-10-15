@@ -24,6 +24,31 @@ bool headKey(const QString &line, QLatin1String key, int *at)
     return *at < line.size() && line.at(*at).isUpper();
 }
 
+int constBack(const QString &line, int at)
+{
+    while (at > 0 && (rubyWordChar(line.at(at - 1)) || line.at(at - 1) == QLatin1Char(':')))
+        --at;
+    return at;
+}
+
+bool mixCall(const QString &line, QLatin1String key, QString *module, QString *host)
+{
+    const QString token = QLatin1Char('.') + key + QLatin1Char('(');
+    const int at = line.indexOf(token);
+    if (at <= 0)
+        return false;
+    const QString type = rubyConst(line, constBack(line, at), at);
+    if (type.isEmpty())
+        return false;
+    const int arg = rubySkip(line, at + token.size());
+    const QString mod = rubyConst(line, arg, rubyWordEnd(line, arg));
+    if (mod.isEmpty())
+        return false;
+    *module = mod;
+    *host = type;
+    return true;
+}
+
 } // namespace
 
 bool rubyMixin(const QString &line, QString *name)
@@ -39,6 +64,12 @@ bool rubyMixin(const QString &line, QString *name)
         return false;
     *name = path;
     return true;
+}
+
+bool rubyCallMix(const QString &line, QString *module, QString *host)
+{
+    return mixCall(line, QLatin1String("prepend"), module, host)
+        || mixCall(line, QLatin1String("include"), module, host);
 }
 
 void rubyResetMix()
@@ -61,4 +92,20 @@ QStringList rubyHosts(const QString &module)
 {
     const QMutexLocker lock(&g_mix);
     return g_hosts.value(module);
+}
+
+QStringList rubyMixed(const QString &tail)
+{
+    if (tail.isEmpty())
+        return {};
+    const QString suffix = QStringLiteral("::") + tail;
+    QStringList mods;
+    const QMutexLocker lock(&g_mix);
+    for (auto it = g_hosts.cbegin(); it != g_hosts.cend(); ++it) {
+        for (const QString &host : it.value()) {
+            if ((host == tail || host.endsWith(suffix)) && !mods.contains(it.key()))
+                mods.append(it.key());
+        }
+    }
+    return mods;
 }

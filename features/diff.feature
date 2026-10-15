@@ -307,7 +307,7 @@ Feature: Diff view
     Given a diff of a Ruby file
     When I hover a call such as "Post.comments", "http.active_requests", or "Telemetry::Metrics::VirtualProducts.missing_items"
     Then a popup shows that declaration, such as has_many, up_down, or counter
-    When I hover add or measure on a chain such as "Telemetry::Metrics::VirtualProducts.errors.add" or "Telemetry::Metrics::VirtualProducts.operation_duration.measure"
+    When I hover add or measure on a chain such as "Telemetry::Metrics::VirtualProducts.errors.add", "Telemetry::Metrics::VirtualProducts.operation_duration.measure", or "metrics.generate_duration.measure" where this file has "def metrics = Telemetry::Metrics::ProductFeeds"
     Then a popup shows that method on the class the declaration builds
 
   Scenario: Hover an ambiguous Ruby name

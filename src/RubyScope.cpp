@@ -77,14 +77,21 @@ void pushMethod(const QString &line, QList<Scope> *stack)
     stack->append(method);
 }
 
+bool blockOpen(const QString &signature)
+{
+    if (signature.contains(QLatin1String(" do")))
+        return true;
+    const QString trimmed = signature.trimmed();
+    return trimmed.endsWith(QLatin1Char('{')) || trimmed.endsWith(QLatin1String("{|"));
+}
+
 void noteMetric(const QStringList &lines, int line, const QString &path, const QString &name, const QString &owner,
                 QHash<QString, QList<LangDef>> *out)
 {
-    LangDef def;
-    def.path = path;
-    def.line = line;
-    def.signature = rubyJoin(lines, line, rubySigEnd(lines, line));
+    LangDef def = rubyAt(lines, line, path);
     def.owner = owner;
+    if (!blockOpen(def.signature))
+        def.body.clear();
     (*out)[name].push_back(def);
 }
 
@@ -134,6 +141,14 @@ void noteMixin(const QString &text, const QList<Scope> &stack)
         rubyAddHost(name, host);
 }
 
+void noteCallMix(const QString &text)
+{
+    QString module;
+    QString host;
+    if (rubyCallMix(text, &module, &host))
+        rubyAddHost(module, host);
+}
+
 void scanLine(const QStringList &lines, int line, const QString &path, QList<Scope> *stack, QHash<QString, QList<LangDef>> *out)
 {
     const QString text = lines.at(line - 1);
@@ -141,6 +156,7 @@ void scanLine(const QStringList &lines, int line, const QString &path, QList<Sco
     if (!noteScope(lines, line, path, text, stack, out))
         noteValue(lines, line, path, text, *stack, out);
     noteMixin(text, *stack);
+    noteCallMix(text);
 }
 
 } // namespace

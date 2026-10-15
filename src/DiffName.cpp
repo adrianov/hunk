@@ -31,6 +31,13 @@ QString spanName(const QString &text, const QList<SynSpan> &spans, int column, c
     return {};
 }
 
+QString ledReceiver(const QString &root, const QString &path, int line, int column, const QString &name,
+                    const QString &text, const QString &receiver)
+{
+    const QString lead = rubyLead(defSpot(root, path, line, column, name, receiver), text);
+    return lead.isEmpty() ? receiver : lead;
+}
+
 } // namespace
 
 QString DiffCanvas::methodName(int file, int row, bool old, int column, int *line, QString *receiver) const
@@ -41,7 +48,8 @@ QString DiffCanvas::methodName(int file, int row, bool old, int column, int *lin
     const QString text = old ? lineRow.leftText : lineRow.rightText;
     const QList<SynSpan> spans = old ? lineRow.leftSyn : lineRow.rightSyn;
     *line = old ? lineRow.leftNum : lineRow.rightNum;
+    const QString name = spanName(text, spans, column, path);
     if (receiver)
-        *receiver = dotReceiver(text, spans, column);
-    return spanName(text, spans, column, path);
+        *receiver = ledReceiver(m_root, path, *line, column, name, text, dotReceiver(text, spans, column));
+    return name;
 }

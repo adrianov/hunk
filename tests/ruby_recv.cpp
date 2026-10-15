@@ -324,6 +324,63 @@ void testChain()
     CHECK(metricHit(root, "errors", "counter(:errors"));
 }
 
+bool feedHit(const QString &root, const char *path, int line, const char *text)
+{
+    const QString row = QLatin1String(text);
+    LangSpot spot;
+    spot.root = root;
+    spot.path = QLatin1String(path);
+    spot.line = line;
+    spot.column = row.indexOf(QLatin1String("measure"));
+    spot.name = QStringLiteral("measure");
+    const QString lead = rubyLead(spot, row);
+    spot.receiver = lead.isEmpty() ? QStringLiteral("generate_duration") : lead;
+    const LangDef def = lookupDef(spot);
+    return def.path.endsWith(QLatin1String("metrics/measure.rb")) && def.signature.contains(QLatin1String("def measure"));
+}
+
+void feedFiles(const QString &root)
+{
+    CHECK(putFile(root, "app/jobs/data_export_job.rb",
+                  "class DataExportJob\n"
+                  "  def perform\n"
+                  "    metrics.generate_duration.measure(\n"
+                  "      attributes: { operation: 'generate_file' }\n"
+                  "    )\n"
+                  "  end\n"
+                  "  def metrics = Telemetry::Metrics::ProductFeeds\n"
+                  "end\n"));
+    CHECK(putFile(root, "app/plain.rb",
+                  "class Plain\n  def perform\n    metrics.generate_duration.measure(operation: 'x')\n  end\nend\n"));
+    CHECK(putFile(root, "lib/telemetry/metrics/base.rb",
+                  "class Telemetry::Metrics::Base\n  class << self\n"
+                  "    def register(method_name, name = nil)\n"
+                  "      define_singleton_method(method_name) { name }\n    end\n  end\nend\n"));
+    CHECK(putFile(root, "lib/telemetry/metrics/product_feeds.rb",
+                  "class Telemetry::Metrics::ProductFeeds < Telemetry::Metrics::Base\n"
+                  "  register(:generate_duration) do |name|\n"
+                  "    Telemetry.meter.create_histogram(name, unit: 's')\n"
+                  "  end\nend\n"));
+    CHECK(putFile(root, "lib/telemetry/metrics/measure.rb",
+                  "module Telemetry::Metrics::Measure\n  def measure(attributes: {})\n    1\n  end\nend\n"));
+    CHECK(putFile(root, "lib/telemetry/metrics.rb",
+                  "module Telemetry\n  module Metrics\n    def setup\n"
+                  "      OpenTelemetry::SDK::Metrics::Instrument::Histogram.prepend(Measure)\n"
+                  "    end\n  end\nend\n"));
+    CHECK(putFile(root, "app/other.rb", "class Other\n  def measure\n    9\n  end\nend\n"));
+}
+
+void testFeed()
+{
+    QTemporaryDir dir;
+    CHECK(dir.isValid());
+    const QString root = dir.path();
+    feedFiles(root);
+    warmLang(root);
+    CHECK(feedHit(root, "app/jobs/data_export_job.rb", 3, "    metrics.generate_duration.measure("));
+    CHECK(!feedHit(root, "app/plain.rb", 3, "    metrics.generate_duration.measure(operation: 'x')"));
+}
+
 } // namespace
 
 LangDef superAt(const QString &root, const char *path, int line)
@@ -433,6 +490,7 @@ int rubyRecvTests()
     testDurationReceiver();
     testPlainReceiver();
     testChain();
+    testFeed();
     testLooseMetric();
     return g_fails;
 }

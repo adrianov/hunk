@@ -113,6 +113,7 @@ LangDef chainPick(const QList<LangDef> &hits, const LangSpot &spot, const QStrin
     QStringList types;
     QSet<QString> seen;
     builtFrom(spot.root, host, headWord(decl.signature), 0, &seen, &types);
+    rubyFactory(spot.root, decl.signature + QLatin1Char('\n') + decl.body, &types);
     return langPick(typedHits(hits, types), spot.path);
 }
 
