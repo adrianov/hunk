@@ -79,6 +79,9 @@ Feature: Diff view
     When I open the context menu on the "src" folder in the file list
     Then I can copy its relative path
     And the clipboard contains "src"
+    When I select more than one file, with Shift or with Command on macOS and Control on Linux
+    And I copy their relative paths
+    Then the clipboard contains each path on its own line
 
   Scenario: Filter the file list
     Given a diff is on screen

@@ -6,6 +6,7 @@
 #include "DiffColors.hpp"
 #include "MainSeen.hpp"
 
+#include <QAbstractItemView>
 #include <QClipboard>
 #include <QGuiApplication>
 #include <QHBoxLayout>
@@ -31,6 +32,7 @@ QTreeWidget *fileTree(QWidget *parent)
     auto *tree = new QTreeWidget(parent);
     tree->setHeaderHidden(true);
     tree->setIndentation(14);
+    tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
     tree->setContextMenuPolicy(Qt::CustomContextMenu);
     installSeenRows(tree);
     return tree;
@@ -72,11 +74,8 @@ QWidget *statBar(QWidget *parent, QLabel *stat, QPushButton *unhide)
     return bar;
 }
 
-QString listedPath(const QTreeWidget *tree, const DiffDoc &doc, const QPoint &pos)
+QString itemPath(const QTreeWidgetItem *item, const DiffDoc &doc)
 {
-    QTreeWidgetItem *item = tree->itemAt(pos);
-    if (!item)
-        return {};
     const int file = item->data(0, Qt::UserRole).toInt();
     if (file >= 0 && file < doc.files.size())
         return doc.files.at(file).path();
@@ -84,6 +83,30 @@ QString listedPath(const QTreeWidget *tree, const DiffDoc &doc, const QPoint &po
         return {};
     const QString folder = item->text(0);
     return folder == QLatin1String("(root)") ? QStringLiteral(".") : folder;
+}
+
+void collectPicked(QStringList *paths, const QTreeWidgetItem *item, const DiffDoc &doc)
+{
+    if (item->isSelected()) {
+        const QString path = itemPath(item, doc);
+        if (!path.isEmpty())
+            paths->append(path);
+    }
+    for (int index = 0; index < item->childCount(); ++index)
+        collectPicked(paths, item->child(index), doc);
+}
+
+QString listedPath(const QTreeWidget *tree, const DiffDoc &doc, const QPoint &pos)
+{
+    QTreeWidgetItem *hit = tree->itemAt(pos);
+    if (!hit)
+        return {};
+    if (!hit->isSelected() || tree->selectedItems().size() < 2)
+        return itemPath(hit, doc);
+    QStringList paths;
+    for (int index = 0; index < tree->topLevelItemCount(); ++index)
+        collectPicked(&paths, tree->topLevelItem(index), doc);
+    return paths.join(QLatin1Char('\n'));
 }
 
 } // namespace

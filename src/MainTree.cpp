@@ -9,6 +9,7 @@
 #include "MdView.hpp"
 
 #include <QHash>
+#include <QItemSelectionModel>
 #include <QLineEdit>
 #include <QStringList>
 #include <QTreeWidget>
@@ -149,9 +150,10 @@ void MainWindow::selectTreeFile(int file)
         return;
     markSeenFile(file);
     m_navLock = true;
+    const auto keep = m_tree->selectedItems().size() > 1 ? QItemSelectionModel::Current : QItemSelectionModel::ClearAndSelect;
     for (QTreeWidgetItem *item : m_tree->findItems(QStringLiteral("*"), Qt::MatchWildcard | Qt::MatchRecursive)) {
         if (item->data(0, Qt::UserRole).toInt() == file) {
-            m_tree->setCurrentItem(item);
+            m_tree->setCurrentItem(item, 0, keep);
             m_tree->scrollToItem(item);
             break;
         }

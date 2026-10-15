@@ -13,7 +13,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/MainRecent.cpp` — File menu recent repositories
 - `src/MainChrome.cpp` — splitter, review dock, and wiring
 - `src/MainAbout.cpp` — About dialog
-- `src/MainFilePane.cpp` — file list, name filter, content search, the totals bar, and copying a file or folder's relative path
+- `src/MainFilePane.cpp` — file list, name filter, content search, the totals bar, and copying one or more relative paths
 - `src/MainTree.cpp` — folder tree
 - `src/MainHide.cpp` — hide a reviewed file until it changes, and show it again
 - `src/MainNext.cpp` — after that check, select the next file in the list
