@@ -31,16 +31,34 @@ int constBack(const QString &line, int at)
     return at;
 }
 
+int mixAt(const QString &line, QLatin1String key, int *paren)
+{
+    const QString token = QLatin1Char('.') + key;
+    for (int from = 0; from < line.size();) {
+        const int at = line.indexOf(token, from);
+        if (at <= 0)
+            return -1;
+        const int after = at + token.size();
+        const int open = rubySkip(line, after);
+        if (wordEdge(line, after) && open < line.size() && line.at(open) == QLatin1Char('(')) {
+            *paren = open;
+            return at;
+        }
+        from = after;
+    }
+    return -1;
+}
+
 bool mixCall(const QString &line, QLatin1String key, QString *module, QString *host)
 {
-    const QString token = QLatin1Char('.') + key + QLatin1Char('(');
-    const int at = line.indexOf(token);
-    if (at <= 0)
+    int paren = 0;
+    const int at = mixAt(line, key, &paren);
+    if (at < 0)
         return false;
     const QString type = rubyConst(line, constBack(line, at), at);
     if (type.isEmpty())
         return false;
-    const int arg = rubySkip(line, at + token.size());
+    const int arg = rubySkip(line, paren + 1);
     const QString mod = rubyConst(line, arg, rubyWordEnd(line, arg));
     if (mod.isEmpty())
         return false;

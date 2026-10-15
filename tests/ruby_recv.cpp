@@ -181,14 +181,19 @@ void testLocalCall()
     CHECK(!writeCall(root, "stocks.rb", "io") && writeCall(root, "other.rb", "") && writeCall(root, "use.rb", "SentryEvent"));
 }
 
-bool metricHit(const QString &root, const char *name, const char *bit)
+LangDef metricDef(const QString &root, const char *name)
 {
     LangSpot spot;
     spot.root = root;
     spot.path = QLatin1String("app/build.rb");
     spot.name = QLatin1String(name);
     spot.receiver = QLatin1String("Telemetry::Metrics::VirtualProducts");
-    const LangDef def = lookupDef(spot);
+    return lookupDef(spot);
+}
+
+bool metricHit(const QString &root, const char *name, const char *bit)
+{
+    const LangDef def = metricDef(root, name);
     return def.signature.contains(QLatin1String(bit)) && !def.signature.contains(QLatin1String("class "));
 }
 
@@ -246,10 +251,12 @@ void testMetric()
     const QString root = dir.path();
     CHECK(putFile(root, "lib/telemetry/metrics/virtual_products.rb",
                   "class Telemetry::Metrics::VirtualProducts < Base\n"
+                  "  counter(:download, 'document')\n"
                   "  counter(:missing_items, 'Missing items', unit: '{item}')\n"
                   "  histogram(:operation_duration, 'Duration',\n            buckets: [1])\nend\n"));
     warmLang(root);
     CHECK(metricHit(root, "missing_items", "counter(:missing_items") && metricHit(root, "operation_duration", "buckets:"));
+    CHECK(metricHit(root, "download", "counter(:download") && metricDef(root, "download").body.isEmpty());
 }
 
 void testClassReceiver()
@@ -365,7 +372,8 @@ void feedFiles(const QString &root)
                   "module Telemetry::Metrics::Measure\n  def measure(attributes: {})\n    1\n  end\nend\n"));
     CHECK(putFile(root, "lib/telemetry/metrics.rb",
                   "module Telemetry\n  module Metrics\n    def setup\n"
-                  "      OpenTelemetry::SDK::Metrics::Instrument::Histogram.prepend(Measure)\n"
+                  "      OpenTelemetry::SDK::Metrics::Instrument::Histogram.prepend (\n"
+                  "        Measure)\n"
                   "    end\n  end\nend\n"));
     CHECK(putFile(root, "app/other.rb", "class Other\n  def measure\n    9\n  end\nend\n"));
 }

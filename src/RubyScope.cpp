@@ -77,9 +77,24 @@ void pushMethod(const QString &line, QList<Scope> *stack)
     stack->append(method);
 }
 
+bool doWord(const QString &text)
+{
+    const QString key = QStringLiteral(" do");
+    for (int from = 0; from < text.size();) {
+        const int at = text.indexOf(key, from);
+        if (at < 0)
+            return false;
+        const int end = at + key.size();
+        if (end >= text.size() || !rubyWordChar(text.at(end)))
+            return true;
+        from = end;
+    }
+    return false;
+}
+
 bool blockOpen(const QString &signature)
 {
-    if (signature.contains(QLatin1String(" do")))
+    if (doWord(signature))
         return true;
     const QString trimmed = signature.trimmed();
     return trimmed.endsWith(QLatin1Char('{')) || trimmed.endsWith(QLatin1String("{|"));
@@ -141,8 +156,11 @@ void noteMixin(const QString &text, const QList<Scope> &stack)
         rubyAddHost(name, host);
 }
 
-void noteCallMix(const QString &text)
+void noteCallMix(const QStringList &lines, int line)
 {
+    QString text = lines.at(line - 1);
+    if (line < lines.size())
+        text += QLatin1Char('\n') + lines.at(line);
     QString module;
     QString host;
     if (rubyCallMix(text, &module, &host))
@@ -156,7 +174,7 @@ void scanLine(const QStringList &lines, int line, const QString &path, QList<Sco
     if (!noteScope(lines, line, path, text, stack, out))
         noteValue(lines, line, path, text, *stack, out);
     noteMixin(text, *stack);
-    noteCallMix(text);
+    noteCallMix(lines, line);
 }
 
 } // namespace
