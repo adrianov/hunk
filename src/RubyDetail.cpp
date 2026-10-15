@@ -3,6 +3,7 @@
 
 #include "RubyDetail.hpp"
 
+#include <QCache>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -19,16 +20,14 @@ struct CachedFile {
 
 constexpr int kLineKeep = 8;
 
-QHash<QString, CachedFile> g_files;
+QCache<QString, CachedFile> g_files(kLineKeep);
 
 void storeLines(const QString &key, qint64 mtime, const QStringList &lines)
 {
-    CachedFile cached;
-    cached.mtime = mtime;
-    cached.lines = lines;
+    auto *cached = new CachedFile;
+    cached->mtime = mtime;
+    cached->lines = lines;
     const QMutexLocker lock(&g_mutex);
-    if (!g_files.contains(key) && g_files.size() >= kLineKeep)
-        g_files.erase(g_files.begin());
     g_files.insert(key, cached);
 }
 
@@ -50,8 +49,8 @@ QStringList linesFor(const QString &root, const QString &path)
     const qint64 mtime = fileMtime(root, path);
     {
         const QMutexLocker lock(&g_mutex);
-        const auto found = g_files.constFind(key);
-        if (found != g_files.cend() && found->mtime == mtime)
+        const CachedFile *found = g_files.object(key);
+        if (found && found->mtime == mtime)
             return found->lines;
     }
     const QStringList lines = readLines(root, path);
