@@ -142,8 +142,9 @@ int DiffCanvas::paneX(int x) const
     const bool single = m_doc.files.at(m_anchor.file).singlePane();
     const int viewW = qMax(1, viewport()->width());
     const int paneW = single ? viewW : pairSplit(viewW);
-    const int origin = single || m_anchor.old ? 0 : paneW;
-    const int width = origin == 0 ? paneW : viewW - paneW;
+    const bool left = single || m_anchor.old;
+    const int origin = left ? 0 : paneW;
+    const int width = left ? paneW : viewW - paneW;
     return clampCode(x, origin, width, m_gutterW);
 }
 
