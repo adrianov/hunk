@@ -43,7 +43,11 @@ bool namesOwner(const QString &text, const QString &owner)
 
 bool ownedUse(const LangDef &use, const LangDef &def, const QString &name)
 {
-    if (!methodName(name) || def.owner.isEmpty() || use.path == def.path)
+    if (!methodName(name))
+        return true;
+    if (!def.owner.isEmpty() && rubyForeignCall(use.signature, name, def.owner))
+        return false;
+    if (def.owner.isEmpty() || use.path == def.path)
         return true;
     return namesOwner(use.signature, def.owner) || namesOwner(use.body, def.owner);
 }

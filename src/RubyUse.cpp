@@ -37,14 +37,11 @@ bool definedHere(const QString &line, const QString &name)
     return rubyAssign(line, &found) && found == name;
 }
 
-bool dotted(const QString &line, int at)
+bool marked(const QString &line, int at, int end)
 {
-    return at > 0 && line.at(at - 1) == QLatin1Char('.');
-}
-
-bool parenAfter(const QString &line, int end)
-{
-    return end < line.size() && line.at(end) == QLatin1Char('(');
+    if (at > 0 && line.at(at - 1) == QLatin1Char(':'))
+        return true;
+    return end < line.size() && line.at(end) == QLatin1Char(':');
 }
 
 bool callHere(const QString &line, const QString &name)
@@ -54,11 +51,28 @@ bool callHere(const QString &line, const QString &name)
         const int at = line.indexOf(name, from);
         if (at < 0)
             return false;
-        if (nameHit(line, at, name) && (dotted(line, at) || parenAfter(line, at + name.size())))
+        if (nameHit(line, at, name) && !marked(line, at, at + name.size()))
             return true;
         from = at + qMax(1, name.size());
     }
     return false;
+}
+
+QString receiverAt(const QString &line, int at)
+{
+    if (at < 1 || line.at(at - 1) != QLatin1Char('.'))
+        return {};
+    int start = at - 1;
+    while (start > 0 && rubyWordChar(line.at(start - 1)))
+        --start;
+    return line.mid(start, at - 1 - start);
+}
+
+bool ownReceiver(const QString &receiver, const QString &owner)
+{
+    if (receiver.isEmpty() || !receiver.at(0).isUpper())
+        return true;
+    return rubyOwns(owner, receiver);
 }
 
 bool keptUse(const QString &line, const QString &name)
@@ -79,6 +93,26 @@ QString scopeText(const QStringList &lines)
 }
 
 } // namespace
+
+bool rubyForeignCall(const QString &line, const QString &name, const QString &owner)
+{
+    int from = 0;
+    bool foreign = false;
+    while (from < line.size()) {
+        const int at = line.indexOf(name, from);
+        if (at < 0)
+            return foreign;
+        if (!nameHit(line, at, name)) {
+            from = at + 1;
+            continue;
+        }
+        if (ownReceiver(receiverAt(line, at), owner))
+            return false;
+        foreign = true;
+        from = at + name.size();
+    }
+    return foreign;
+}
 
 void rubyUses(const QStringList &lines, const QString &path, const QStringList &names, QHash<QString, QList<LangDef>> *out)
 {

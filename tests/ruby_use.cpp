@@ -52,6 +52,14 @@ void testClassUse(const QString &root)
     CHECK(use.line == 1);
 }
 
+void testBareUse(const QString &root)
+{
+    const LangSpot spot = spotAt(root, "app/models/concerns/order_history.rb", 5, "status_change_context");
+    CHECK(!lookupDef(spot).found());
+    const LangDef use = lookupUse(spot);
+    CHECK(use.line == 3);
+    CHECK(use.signature.contains(QLatin1String("context: status_change_context")));
+}
 void testShortUse(const QString &root)
 {
     const LangSpot spot = spotAt(root, "app/services/products/catalog_source.rb", 2, "model");
@@ -86,6 +94,18 @@ void testInitUse(const QString &root)
     CHECK(lookupUse(spot).signature.contains(QLatin1String(".new")));
 }
 
+void putHistory(const QString &root)
+{
+    const char *history = "module OrderHistory\n"
+                          "  def log\n"
+                          "    details = { context: status_change_context }\n"
+                          "  end\n"
+                          "  def status_change_context\n"
+                          "    Current.status_change_context\n"
+                          "  end\n"
+                          "end\n";
+    CHECK(putFile(root, "app/models/concerns/order_history.rb", history));
+}
 void putModel(const QString &root)
 {
     const char *source = "class Products::CatalogSource\n"
@@ -128,10 +148,12 @@ int rubyUseTests()
     const QString root = dir.path();
     putCounter(root);
     putModel(root);
+    putHistory(root);
     warmLang(root);
     testInitUse(root);
     testClassUse(root);
     testMethodUse(root);
     testShortUse(root);
+    testBareUse(root);
     return g_fails;
 }
