@@ -15,7 +15,7 @@ struct FoldSpan {
 
 constexpr int kFoldStep = 20;
 constexpr int kFoldEdge = 64;
-constexpr int kFoldWide = 500;
+constexpr int kFoldWide = 200;
 
 // Hidden stretches of unchanged lines. Rows in `open` stay visible.
 // When lines outside a block were loaded, a block of at most kFoldWide unchanged lines stays open.
