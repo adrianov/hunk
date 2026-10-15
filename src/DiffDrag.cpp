@@ -143,6 +143,8 @@ int DiffCanvas::paneX(int x) const
 
 void DiffCanvas::dragEdge(int x, int y, bool upward)
 {
+    if (m_anchor.file < 0 || m_anchor.file >= m_doc.files.size())
+        return;
     const int atX = paneX(x);
     const int step = upward ? m_rowH : -m_rowH;
     for (int n = 0; n <= kScrollSpan; ++n) {
