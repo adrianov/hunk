@@ -240,6 +240,7 @@ private:
     void clearHover();
     const Band *bandAt(int y) const;
     bool inGutter(const FileDiff &file, int x, bool *oldSide) const;
+    int pointFile() const;
     void emitVisibleFile();
     int fileAt(int y) const;
     bool barHeads(int file) const { return file == m_barFile; }

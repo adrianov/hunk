@@ -211,6 +211,13 @@ Feature: Diff view
     When I scroll inside that file
     Then its name stays at the top of the diff
 
+  Scenario: The file list follows the pointer
+    Given a diff of several files
+    When I move the pointer over a file that is not at the top of the diff
+    Then that file is selected in the file list
+    When I scroll and the pointer stays over that file
+    Then that file stays selected in the file list
+
   Scenario: Copy text from a diff pane
     Given a diff is on screen
     When I double-click a word in the left or the right pane

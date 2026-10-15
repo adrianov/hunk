@@ -3,6 +3,7 @@
 
 #include "DiffCanvas.hpp"
 
+#include <QCursor>
 #include <QResizeEvent>
 #include <QScrollBar>
 
@@ -84,13 +85,25 @@ bool DiffCanvas::headerStuck(int scrollY) const
     return headerY >= 0 && headerY < scrollY;
 }
 
+int DiffCanvas::pointFile() const
+{
+    const QPoint pos = viewport()->mapFromGlobal(QCursor::pos());
+    if (!viewport()->rect().contains(pos))
+        return -1;
+    const int scroll = verticalScrollBar()->value();
+    const int y = stickyZone(pos.y(), scroll) ? scroll : pos.y() + scroll;
+    return fileAt(y);
+}
+
 void DiffCanvas::emitVisibleFile()
 {
     if (m_bands.isEmpty())
         return;
-    const int scrollY = verticalScrollBar()->value();
-    const int y = scrollY + (headerStuck(scrollY) ? m_headerH : 0) + 2;
-    const int file = fileAt(y);
+    int file = pointFile();
+    if (file < 0) {
+        const int scrollY = verticalScrollBar()->value();
+        file = fileAt(scrollY + (headerStuck(scrollY) ? m_headerH : 0) + 2);
+    }
     if (file < 0 || file == m_lastFile)
         return;
     m_lastFile = file;

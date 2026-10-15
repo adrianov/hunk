@@ -144,6 +144,7 @@ void DiffCanvas::onMove(QMouseEvent *mouse)
         return;
     }
     trackHover(mouse, x, y);
+    emitVisibleFile();
 }
 
 bool DiffCanvas::mouseEvent(QEvent *event)
