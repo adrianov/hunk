@@ -4,9 +4,6 @@
 #include "LangTune.hpp"
 #include "RubyDetail.hpp"
 
-#include <QDir>
-#include <QFile>
-
 namespace {
 
 int indentOf(const QString &line)
@@ -68,27 +65,19 @@ bool enclose(const QStringList &lines, int line, Encl *out)
     return !out->method.isEmpty();
 }
 
-QStringList fileLines(const QString &root, const QString &path)
-{
-    QFile file(QDir(root).filePath(path));
-    if (!file.open(QIODevice::ReadOnly))
-        return {};
-    return rubyLines(QString::fromUtf8(file.readAll()));
-}
-
 } // namespace
 
 QString rubyMethodAt(const QString &root, const QString &path, int line)
 {
     Encl encl;
-    enclose(fileLines(root, path), line, &encl);
+    enclose(linesFor(root, path), line, &encl);
     return encl.method;
 }
 
 LangDef rubySuper(const LangSpot &spot)
 {
     Encl encl;
-    if (!enclose(fileLines(spot.root, spot.path), spot.line, &encl) || encl.method.isEmpty())
+    if (!enclose(linesFor(spot.root, spot.path), spot.line, &encl) || encl.method.isEmpty())
         return {};
     langEnsure(spot.root, encl.method);
     const QList<LangDef> hits = langHits(spot.root, encl.method, Lang::Ruby);
