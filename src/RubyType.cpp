@@ -7,7 +7,7 @@ namespace {
 
 int skipOp(const QString &line, int at)
 {
-    while (at < line.size() && QStringLiteral("+-*/%&|^<>").contains(line.at(at)))
+    while (at < line.size() && QStringLiteral("+-*/%&|^").contains(line.at(at)))
         ++at;
     if (at + 1 < line.size() && QStringLiteral("=>~").contains(line.at(at + 1)))
         return -1;
