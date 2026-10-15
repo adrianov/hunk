@@ -17,7 +17,20 @@ struct CachedFile {
     QStringList lines;
 };
 
+constexpr int kLineKeep = 8;
+
 QHash<QString, CachedFile> g_files;
+
+void storeLines(const QString &key, qint64 mtime, const QStringList &lines)
+{
+    CachedFile cached;
+    cached.mtime = mtime;
+    cached.lines = lines;
+    const QMutexLocker lock(&g_mutex);
+    if (!g_files.contains(key) && g_files.size() >= kLineKeep)
+        g_files.erase(g_files.begin());
+    g_files.insert(key, cached);
+}
 
 QString fileKey(const QString &root, const QString &path)
 {
@@ -28,6 +41,8 @@ qint64 fileMtime(const QString &root, const QString &path)
 {
     return QFileInfo(QDir(root).filePath(path)).lastModified().toMSecsSinceEpoch();
 }
+
+} // namespace
 
 QStringList linesFor(const QString &root, const QString &path)
 {
@@ -40,23 +55,8 @@ QStringList linesFor(const QString &root, const QString &path)
             return found->lines;
     }
     const QStringList lines = readLines(root, path);
-    CachedFile cached;
-    cached.mtime = mtime;
-    cached.lines = lines;
-    const QMutexLocker lock(&g_mutex);
-    g_files.insert(key, cached);
+    storeLines(key, mtime, lines);
     return lines;
-}
-
-} // namespace
-
-void rubyKeepLines(const QString &root, const QString &path, const QStringList &lines)
-{
-    CachedFile cached;
-    cached.mtime = fileMtime(root, path);
-    cached.lines = lines;
-    const QMutexLocker lock(&g_mutex);
-    g_files.insert(fileKey(root, path), cached);
 }
 
 void rubyForgetLines()

@@ -37,7 +37,7 @@ void rubyReset(int ticket)
 {
     schemaBump(ticket);
     rubyResetMix();
-    rubyForgetLocal();
+    rubyForgetLines();
 }
 
 } // namespace

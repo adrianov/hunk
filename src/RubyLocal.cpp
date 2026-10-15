@@ -3,15 +3,7 @@
 
 #include "RubyDetail.hpp"
 
-#include <QDir>
-#include <QFile>
-#include <QMutex>
-
 namespace {
-
-QMutex g_mutex;
-QString g_key;
-QStringList g_lines;
 
 int defAt(const QStringList &lines, int line)
 {
@@ -92,39 +84,13 @@ Token tokenAt(const QString &line, int column, const QString &name)
     return Token::Miss;
 }
 
-QStringList fileLines(const QString &root, const QString &path)
-{
-    const QString key = root + QLatin1Char('\n') + path;
-    {
-        const QMutexLocker lock(&g_mutex);
-        if (g_key == key)
-            return g_lines;
-    }
-    QFile file(QDir(root).filePath(path));
-    QStringList lines;
-    if (file.open(QIODevice::ReadOnly))
-        lines = rubyLines(QString::fromUtf8(file.readAll()));
-    const QMutexLocker lock(&g_mutex);
-    g_key = key;
-    g_lines = lines;
-    return g_lines;
-}
-
 } // namespace
-
-void rubyForgetLocal()
-{
-    const QMutexLocker lock(&g_mutex);
-    g_key.clear();
-    g_lines.clear();
-    rubyForgetLines();
-}
 
 bool rubyLocal(const LangSpot &spot)
 {
     if (spot.line < 1 || spot.name.isEmpty() || spot.name.at(0).isUpper() || spot.name.startsWith(QLatin1Char('@')))
         return false;
-    const QStringList lines = fileLines(spot.root, spot.path);
+    const QStringList lines = linesFor(spot.root, spot.path);
     if (spot.line > lines.size() || tokenAt(lines.at(spot.line - 1), spot.column, spot.name) != Token::Bare)
         return false;
     const int defLine = defAt(lines, spot.line);

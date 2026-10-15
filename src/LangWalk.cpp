@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "LangTune.hpp"
-#include "RubyDetail.hpp"
 
 #include <QDir>
 #include <QFile>
@@ -105,7 +104,6 @@ void noteFile(const QString &root, const QString &full, const QStringList &names
         return;
     const QString path = QDir(root).relativeFilePath(full);
     const QStringList lines = textLines(text);
-    rubyKeepLines(root, path, lines);
     QHash<QString, QList<LangDef>> local;
     tune->note(lines, path, &local);
     appendNamed(hit, local, out);

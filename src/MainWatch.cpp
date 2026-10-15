@@ -38,7 +38,7 @@ void MainWindow::startLoad(const QString &path)
 
 void MainWindow::askLoad(bool keepScroll, bool quiet)
 {
-    rubyForgetLocal();
+    rubyForgetLines();
     const QString path = m_root.isEmpty() ? m_startPath : m_root;
     if (path.isEmpty())
         return;
