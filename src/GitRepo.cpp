@@ -98,28 +98,11 @@ bool runDiff(GitResult &result, const QStringList &args)
         return false;
     }
     result.diffText = diff.out;
+    addUntracked(&result);
     result.doc = parseDiff(result.diffText);
     joinIndexRenames(&result);
     fillDocGaps(&result.doc, result);
     return true;
-}
-
-QString stampKey(DiffMode mode, const QString &baseRef, const QString &headRef, const QString &disk)
-{
-    return QString::number(static_cast<int>(mode)) + QLatin1Char('\n') + baseRef + QLatin1Char('\n') + headRef
-        + QLatin1Char('\n') + disk;
-}
-
-bool reuseDiff(GitResult &result, DiffMode mode, const QString &baseRef, const QString &headRef, const QString &previous,
-               bool quiet)
-{
-    result.diskStamp = workStamp(result.root, baseRef, headRef);
-    result.stamp = stampKey(mode, baseRef.trimmed(), headRef.trimmed(), result.diskStamp);
-    if (!quiet)
-        return false;
-    if (result.diskStamp.isEmpty())
-        return true;
-    return !previous.isEmpty() && result.stamp == previous;
 }
 
 void fillIgnored(GitResult &result)

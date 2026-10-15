@@ -28,6 +28,11 @@ QString refState(const QString &root);
 QString mainStamp(const QString &root);
 QString branchDrift(const QString &root);
 QString workStamp(const QString &root, const QString &baseRef, const QString &headRef);
+QString freshStamp(const QString &root);
 QStringList ignoredDirs(const QString &root);
+QString stampKey(DiffMode mode, const QString &baseRef, const QString &headRef, const QString &disk);
+bool reuseDiff(GitResult &result, DiffMode mode, const QString &baseRef, const QString &headRef, const QString &previous,
+               bool quiet);
+void addUntracked(GitResult *result);
 bool fillMerge(GitResult &result, QStringList *args);
 void fillDocGaps(DiffDoc *doc, const GitResult &result);

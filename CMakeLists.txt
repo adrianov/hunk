@@ -148,6 +148,7 @@ add_executable(hunk
   src/GitBlob.cpp
   src/GitCmd.cpp
   src/GitStamp.cpp
+  src/GitFresh.cpp
   src/GitDrift.cpp
   src/GitRef.cpp
   src/GitRange.cpp

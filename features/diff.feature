@@ -58,6 +58,7 @@ Feature: Diff view
     Given a repository is on screen
     When I choose Uncommitted
     Then the diff is staged and unstaged changes against HEAD
+    And a new file that is not committed yet is listed
     And Uncommitted is still selected the next time hunk opens
     When I choose Staged
     Then the diff is staged changes only
