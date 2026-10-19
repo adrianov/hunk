@@ -71,6 +71,7 @@ Feature: Diff view
   Scenario: The file list shows added and removed lines
     Given a diff is on screen
     Then files are grouped by folder
+    And hovering a folder shows its full path, even when the list cuts the name short
     And the diff lists those files in that same order
     And each file's added count is green and its removed count is red
     And under the file list the total added lines are green and the total removed lines are red

@@ -106,6 +106,7 @@ void addFolder(QTreeWidget *tree, const Group &group, const DiffDoc &doc, const 
     auto *folderItem = new QTreeWidgetItem(tree, {name});
     folderItem->setData(0, Qt::UserRole, -1);
     folderItem->setForeground(0, kMuted);
+    folderItem->setToolTip(0, group.folder);
     for (int fileIndex : group.files)
         addFileItem(folderItem, doc.files.at(fileIndex), fileIndex, seen, tree);
 }
