@@ -84,10 +84,12 @@ void testConstDef()
     QTemporaryDir dir;
     CHECK(dir.isValid());
     const QString root = dir.path();
-    CHECK(putFile(root, "pay.rb", "# Card\nDEFAULT_PAYMENT = 'card'\nprivate_constant :DEFAULT_PAYMENT\n"));
+    CHECK(putFile(root, "pay.rb",
+                  "module Shop\n  class Pay\n    # Card\n    DEFAULT_PAYMENT = 'card'\n"
+                  "    private_constant :DEFAULT_PAYMENT\n  end\nend\n"));
     warmLang(root);
-    const LangDef def = lookupName(root, "use.rb", "DEFAULT_PAYMENT");
-    CHECK(def.path == QLatin1String("pay.rb") && def.line == 2 && def.signature.contains(QLatin1String("'card'"))
+    const LangDef def = lookupName(root, "use.rb", "Pay::DEFAULT_PAYMENT");
+    CHECK(def.path == QLatin1String("pay.rb") && def.line == 4 && def.signature.contains(QLatin1String("'card'"))
           && def.comment.contains(QLatin1String("Card")));
 }
 

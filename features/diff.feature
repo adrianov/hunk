@@ -352,7 +352,7 @@ Feature: Diff view
 
   Scenario: Hover a Ruby constant
     Given a diff of a Ruby file
-    When I hover a constant such as "DEFAULT_PAYMENT" or ":DEFAULT_PAYMENT"
+    When I hover a constant such as "DEFAULT_PAYMENT", ":DEFAULT_PAYMENT", or "ExchangerTrigger::ACCESSIBLE_EXTRA_DATA"
     Then a popup shows its assignment, such as "DEFAULT_PAYMENT = 'card'"
     And an array value shows every element, through the closing bracket
     When I Command-click that constant on macOS, or Control-click it on Linux

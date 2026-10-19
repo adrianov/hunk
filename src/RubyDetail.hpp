@@ -51,6 +51,9 @@ QString rubyConst(const QString &text, int start, int end);
 QString rubyParentName(const QString &line);
 bool rubyTypeName(const QString &line, QString *name);
 bool rubyAssign(const QString &line, QString *name);
+// Drops the body of the last `name` constant and files it under each scope of `owner`:
+// in `A::B`, also as `A::B::NAME` and `B::NAME`.
+void rubyConstDef(const QString &owner, const QString &name, QHash<QString, QList<LangDef>> *out);
 QStringList rubyLines(const QString &text);
 QString rubyComment(const QStringList &lines, int line);
 int rubySigEnd(const QStringList &lines, int line);

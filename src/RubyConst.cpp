@@ -109,3 +109,10 @@ bool rubyAssign(const QString &line, QString *name)
     *name = path;
     return true;
 }
+
+void rubyConstDef(const QString &owner, const QString &name, QHash<QString, QList<LangDef>> *out)
+{
+    (*out)[name].last().body.clear();
+    for (QString scope = owner; !scope.isEmpty(); scope = scope.section(QStringLiteral("::"), 1))
+        (*out)[scope + QStringLiteral("::") + name].append((*out)[name].constLast());
+}

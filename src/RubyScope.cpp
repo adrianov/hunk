@@ -135,12 +135,12 @@ bool noteValue(const QStringList &lines, int line, const QString &path, const QS
                QHash<QString, QList<LangDef>> *out)
 {
     QString name;
+    const QString owner = classOwner(stack);
     if (rubyAssign(text, &name)) {
         noteOwned(lines, line, path, name, {}, out);
-        (*out)[name].last().body.clear();
+        rubyConstDef(owner, name, out);
         return true;
     }
-    const QString owner = classOwner(stack);
     if (owner.isEmpty() || inMethod(stack) || !rubyDsl(text, &name))
         return false;
     noteMetric(lines, line, path, name, owner, out);
