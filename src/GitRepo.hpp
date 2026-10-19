@@ -10,7 +10,7 @@
 #include <QStringList>
 
 // What to ask git for.
-enum class DiffMode { MergeRequest, Uncommitted, Staged };
+enum class DiffMode { MergeRequest, Uncommitted, Staged, LastCommit };
 
 // Result of one git diff load. `error` is empty on success.
 struct GitResult {

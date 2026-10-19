@@ -54,7 +54,7 @@ Feature: Diff view
     And the diff is a merge request between them
     And uncommitted changes on the current branch are included
 
-  Scenario: Uncommitted and staged diffs
+  Scenario: Uncommitted, staged, and last commit diffs
     Given a repository is on screen
     When I choose Uncommitted
     Then the diff is staged and unstaged changes against HEAD
@@ -62,6 +62,11 @@ Feature: Diff view
     And Uncommitted is still selected the next time hunk opens
     When I choose Staged
     Then the diff is staged changes only
+    When I choose Last commit
+    Then the diff is the HEAD commit against its first parent
+    And Base and Branch are disabled
+    And the panes are labeled with the parent and the HEAD commit
+    And in a repository with one commit, every file of that commit is added
 
   Scenario: The file list shows added and removed lines
     Given a diff is on screen

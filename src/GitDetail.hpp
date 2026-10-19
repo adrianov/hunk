@@ -33,4 +33,5 @@ bool reuseDiff(GitResult &result, DiffMode mode, const QString &baseRef, const Q
                bool quiet);
 void addUntracked(GitResult *result);
 bool fillMerge(GitResult &result, QStringList *args);
+void fillLast(GitResult &result, const QString &headShort, QStringList *args);
 void fillDocGaps(DiffDoc *doc, const GitResult &result);

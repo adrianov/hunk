@@ -63,7 +63,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/DiffFold.cpp` / `DiffFold.hpp` — which unchanged lines collapse
 - `src/DiffFoldView.cpp` — fold bar paint and clicks; a search match opens that fold
 - `src/DiffLayout.cpp` — per-file line wrap cache and band relayout
-- `src/GitRepo.cpp` / `GitRepo.hpp` / `GitRename.cpp` — background git load; a staged rename stays one file; an untracked file is listed with uncommitted changes
+- `src/GitRepo.cpp` / `GitRepo.hpp` / `GitRename.cpp` — background git load for merge request, uncommitted, staged, and last commit; a staged rename stays one file; an untracked file is listed with uncommitted changes
 - `src/GitBlob.cpp` — file text for each side of a diff
 - `src/GitCmd.cpp` / `GitDetail.hpp` — git process, base and branch refs
 - `src/GitStamp.cpp` — head, worktree status, one list of untracked paths and their times, resolved base, and ignored directories
@@ -71,6 +71,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/GitDrift.cpp` — whether local main or master is ahead or behind origin
 - `src/GitRef.cpp` — mtime of refs and packed-refs
 - `src/GitRange.cpp` — merge-request range
+- `src/GitLast.cpp` — last commit against its first parent
 - `src/GitPoint.cpp` / `GitFork.cpp` — branching point: the branch this work was cut from, or `branch^` / `branch~N`
 - `src/ReviewStore.cpp` / `ReviewStore.hpp` / `ReviewSync.cpp` — comments in QSettings, and keeping them when lines move
 - `src/ReviewShift.cpp` / `ReviewShift.hpp` / `ReviewSpan.cpp` / `ReviewMatch.hpp` — moved comment line or span

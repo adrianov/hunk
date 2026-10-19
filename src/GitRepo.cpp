@@ -84,11 +84,13 @@ void fillWorktree(GitResult &result, const QString &headShort, bool staged, QStr
 
 bool applyMode(GitResult &result, DiffMode mode, const QString &headShort, QStringList *args)
 {
-    if (mode != DiffMode::MergeRequest) {
+    if (mode == DiffMode::MergeRequest)
+        return fillMerge(result, args);
+    if (mode == DiffMode::LastCommit)
+        fillLast(result, headShort, args);
+    else
         fillWorktree(result, headShort, mode == DiffMode::Staged, args);
-        return true;
-    }
-    return fillMerge(result, args);
+    return true;
 }
 
 bool runDiff(GitResult &result, const QStringList &args)

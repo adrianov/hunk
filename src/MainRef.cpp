@@ -150,10 +150,12 @@ void armMode(QComboBox *box)
 void MainWindow::addModeBox(QToolBar *bar)
 {
     m_mode = new QComboBox(this);
-    const QStringList labels{QStringLiteral("Merge request"), QStringLiteral("Uncommitted"), QStringLiteral("Staged")};
+    const QStringList labels{QStringLiteral("Merge request"), QStringLiteral("Uncommitted"), QStringLiteral("Staged"),
+                             QStringLiteral("Last commit")};
     const QStringList tips{QStringLiteral("Three-dot diff from the base, including uncommitted changes"),
                            QStringLiteral("Staged and unstaged changes against HEAD"),
-                           QStringLiteral("Staged changes only")};
+                           QStringLiteral("Staged changes only"),
+                           QStringLiteral("Changes in the HEAD commit against its first parent")};
     for (int index = 0; index < labels.size(); ++index) {
         m_mode->addItem(labels.at(index));
         m_mode->setItemData(index, tips.at(index), Qt::ToolTipRole);
