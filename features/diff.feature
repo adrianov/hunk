@@ -400,6 +400,7 @@ Feature: Diff view
     When I choose Rendered
     Then that file is shown as a GitHub document
     And headings, tables, and code blocks are styled
+    And a "mermaid" code block is drawn as its diagram
     And both sides are shown when the file changed on each side
     When I choose Source
     Then the diff of that file is on screen again

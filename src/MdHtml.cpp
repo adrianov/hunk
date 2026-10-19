@@ -75,6 +75,23 @@ QString gfmBody(const QString &markdown)
     return body;
 }
 
+// Turns ```mermaid blocks into diagrams; runs before highlight.js would color them as code.
+// Mermaid is over the 2 MB setHtml limit, so it loads from the resource instead of inline.
+QString mermaidScript(bool dark)
+{
+    return QStringLiteral("<script src=\"qrc:/md/mermaid.js\"></script><script>"
+                          "for (const code of document.querySelectorAll('pre > code.language-mermaid')) {"
+                          "const box = document.createElement('div');"
+                          "box.className = 'mermaid';"
+                          "box.textContent = code.textContent;"
+                          "code.parentNode.replaceWith(box);"
+                          "}"
+                          "mermaid.initialize({startOnLoad: false, theme: '%1'});"
+                          "mermaid.run();"
+                          "</script>")
+        .arg(dark ? QStringLiteral("dark") : QStringLiteral("default"));
+}
+
 QString pageFor(const QString &body, bool dark)
 {
     QString page;
@@ -87,7 +104,10 @@ QString pageFor(const QString &body, bool dark)
     page += body;
     page += QStringLiteral("<script>");
     page += asset(":/md/highlight.js");
-    page += QStringLiteral("</script><script>hljs.highlightAll();</script></body></html>");
+    page += QStringLiteral("</script>");
+    if (body.contains(QLatin1String("language-mermaid")))
+        page += mermaidScript(dark);
+    page += QStringLiteral("<script>hljs.highlightAll();</script></body></html>");
     return page;
 }
 

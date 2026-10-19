@@ -185,12 +185,14 @@ set_source_files_properties(third_party/markdown/github-dark.css PROPERTIES QT_R
 set_source_files_properties(third_party/markdown/highlight.js PROPERTIES QT_RESOURCE_ALIAS highlight.js)
 set_source_files_properties(third_party/markdown/hl-light.css PROPERTIES QT_RESOURCE_ALIAS hl-light.css)
 set_source_files_properties(third_party/markdown/hl-dark.css PROPERTIES QT_RESOURCE_ALIAS hl-dark.css)
+set_source_files_properties(third_party/markdown/mermaid.js PROPERTIES QT_RESOURCE_ALIAS mermaid.js)
 qt_add_resources(hunk hunk_md PREFIX "/md" FILES
   third_party/markdown/github-light.css
   third_party/markdown/github-dark.css
   third_party/markdown/highlight.js
   third_party/markdown/hl-light.css
   third_party/markdown/hl-dark.css
+  third_party/markdown/mermaid.js
 )
 
 if(APPLE)
