@@ -144,7 +144,6 @@ void prepareMarkdown(QWebEngineView *view)
 void showMarkdown(QWebEngineView *view, const MdSide &side, const QString &dir, bool dark)
 {
     const QString base = dir.endsWith(QLatin1Char('/')) ? dir : dir + QLatin1Char('/');
-    const QColor ground = dark ? QColor(0x0d, 0x11, 0x17) : QColor(Qt::white);
-    view->page()->setBackgroundColor(ground);
-    view->setHtml(pageFor(gfmBody(side.text), changeMarks(side, ground), dark), QUrl::fromLocalFile(base));
+    view->page()->setBackgroundColor(dark ? QColor(0x0d, 0x11, 0x17) : QColor(Qt::white));
+    view->setHtml(pageFor(gfmBody(side.text), changeMarks(side), dark), QUrl::fromLocalFile(base));
 }

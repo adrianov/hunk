@@ -14,7 +14,7 @@
 
 namespace {
 
-// Changed lines are marked only when both sides are shown; a blank one has nothing to tint.
+// Changed lines are marked only when both sides are shown.
 MdSide sideDoc(const FileDiff &file, bool left, bool pair)
 {
     MdSide side;
@@ -23,9 +23,8 @@ MdSide sideDoc(const FileDiff &file, bool left, bool pair)
     for (const DiffRow &row : file.rows) {
         if ((left ? row.leftNum : row.rightNum) <= 0)
             continue;
-        const QString &text = left ? row.leftText : row.rightText;
-        lines.append(text);
-        if (pair && row.kind != RowKind::Context && !text.trimmed().isEmpty())
+        lines.append(left ? row.leftText : row.rightText);
+        if (pair && row.kind != RowKind::Context)
             side.marks.append(lines.size());
     }
     side.text = lines.join(QLatin1Char('\n'));
