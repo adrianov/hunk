@@ -18,6 +18,8 @@ bool DiffCanvas::jumpMod(Qt::KeyboardModifiers mods) const
 
 bool DiffCanvas::canFollow() const
 {
+    if (!m_link.isEmpty())
+        return true;
     const QString name = langSeek(m_root, m_defPath, m_defLine, m_defName);
     if (name.isEmpty() || m_root.isEmpty() || !langSought(m_root, name))
         return false;
@@ -69,6 +71,10 @@ void DiffCanvas::chooseDef(int x, int y)
     QString receiver;
     const QString name = hit.code ? methodName(hit.file, hit.row, hit.old, hit.pos, &line, &receiver) : QString();
     stopDef();
+    if (const QString link = linkPath(hit); !link.isEmpty()) {
+        emit openDefinition(link, 1);
+        return;
+    }
     if (name.isEmpty() || line <= 0 || m_root.isEmpty())
         return;
     const QString path = sidePath(m_doc.files.at(hit.file), hit.old);

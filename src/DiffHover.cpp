@@ -109,6 +109,7 @@ void DiffCanvas::stopDef()
     m_defLine = 0;
     m_defReceiver.clear();
     m_defWait = false;
+    m_link.clear();
     m_jumpName.clear();
     m_jumpReceiver.clear();
     if (m_defPopup)
@@ -132,6 +133,7 @@ void DiffCanvas::keepDef(const QString &name, const QString &path, int line, int
 void DiffCanvas::hoverDef(int x, int y)
 {
     const TextMark hit = textAt(x, y);
+    m_link = linkPath(hit);
     int line = 0;
     QString receiver;
     const QString name = hit.code ? methodName(hit.file, hit.row, hit.old, hit.pos, &line, &receiver) : QString();

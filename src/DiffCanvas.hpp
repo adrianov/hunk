@@ -156,6 +156,7 @@ private:
     void armHover();
     void onScroll();
     QString methodName(int file, int row, bool old, int column, int *line, QString *receiver) const;
+    QString linkPath(const TextMark &hit) const;
     void hoverDef(int x, int y);
     void keepDef(const QString &name, const QString &path, int line, int column, const QString &receiver);
     void showDef();
@@ -289,6 +290,7 @@ private:
     int m_defColumn = 0;
     QString m_defReceiver;
     bool m_defWait = false;
+    QString m_link;
     QString m_jumpName;
     QString m_jumpPath;
     int m_jumpLine = 0;

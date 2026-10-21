@@ -393,6 +393,16 @@ Feature: Diff view
     And "gone" is struck through
     And the "**", "*", and "~~" marks are colored as keywords
 
+  Scenario: Open a file a markdown link names
+    Given a diff of "docs/README.md"
+    When I hold Command on macOS, or Control on Linux, over "[METRICS.md](OPENTELEMETRY/METRICS.md)"
+    Then the pointer is a hand
+    When I Command-click that link on macOS, or Control-click it on Linux
+    Then the diff shows "docs/OPENTELEMETRY/METRICS.md" from its first line
+    And that file stays listed even when it has no added or removed lines
+    And a link that starts with "/" is read from the repository root
+    And a web link, an "#anchor" link, or a link to a missing file keeps the text cursor
+
   Scenario: A markdown file can be read rendered
     Given a diff of "README.md"
     Then Source and Rendered sit on that file's title, beside its added and removed counts
