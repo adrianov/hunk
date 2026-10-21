@@ -4,6 +4,7 @@
 #pragma once
 
 #include "DiffDoc.hpp"
+#include "MdHtml.hpp"
 
 #include <QColor>
 #include <QString>
@@ -15,13 +16,13 @@ bool markdownFile(const FileDiff &file);
 
 struct ReadText {
     QString dir;
-    QString left;
-    QString right;
+    MdSide left;
+    MdSide right;
     bool pair = false;
     bool oldOnly = false;
 };
 
 ReadText readFile(const FileDiff &file, const QString &root);
-void fillBrowser(QWebEngineView *view, const QString &text, const QString &dir);
+void fillBrowser(QWebEngineView *view, const MdSide &side, const QString &dir);
 void tintWidget(QWidget *widget, const QColor &color);
 void paintGround(QWidget *widget);

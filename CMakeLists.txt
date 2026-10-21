@@ -124,11 +124,13 @@ add_executable(hunk
   src/MdChrome.cpp
   src/MdRead.cpp
   src/MdHtml.cpp
+  src/MdMark.cpp
   src/DiffScroll.cpp
   src/DiffInput.cpp
   src/DiffHover.cpp
   src/DiffName.cpp
   src/DiffJump.cpp
+  src/DiffLink.cpp
   src/DiffPopup.cpp
   src/DefCode.cpp
   src/DiffTitle.cpp

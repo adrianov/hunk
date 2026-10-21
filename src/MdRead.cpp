@@ -14,15 +14,22 @@
 
 namespace {
 
-QString sideDoc(const FileDiff &file, bool left)
+// Changed lines are marked only when both sides are shown; a blank one has nothing to tint.
+MdSide sideDoc(const FileDiff &file, bool left, bool pair)
 {
+    MdSide side;
+    side.added = !left;
     QStringList lines;
     for (const DiffRow &row : file.rows) {
         if ((left ? row.leftNum : row.rightNum) <= 0)
             continue;
-        lines.append(left ? row.leftText : row.rightText);
+        const QString &text = left ? row.leftText : row.rightText;
+        lines.append(text);
+        if (pair && row.kind != RowKind::Context && !text.trimmed().isEmpty())
+            side.marks.append(lines.size());
     }
-    return lines.join(QLatin1Char('\n'));
+    side.text = lines.join(QLatin1Char('\n'));
+    return side;
 }
 
 QString docDir(const QString &root, const FileDiff &file)
@@ -43,16 +50,16 @@ ReadText readFile(const FileDiff &file, const QString &root)
 {
     ReadText text;
     text.dir = docDir(root, file);
-    text.left = sideDoc(file, true);
-    text.right = sideDoc(file, false);
     text.oldOnly = file.removed;
     text.pair = !file.removed && !file.singlePane();
+    text.left = sideDoc(file, true, text.pair);
+    text.right = sideDoc(file, false, text.pair);
     return text;
 }
 
-void fillBrowser(QWebEngineView *view, const QString &text, const QString &dir)
+void fillBrowser(QWebEngineView *view, const MdSide &side, const QString &dir)
 {
-    showMarkdown(view, text, dir, kBg.lightness() < 128);
+    showMarkdown(view, side, dir, kBg.lightness() < 128);
 }
 
 void tintWidget(QWidget *widget, const QColor &color)

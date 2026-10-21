@@ -402,6 +402,9 @@ Feature: Diff view
     And headings, tables, and code blocks are styled
     And a "mermaid" code block is drawn as its diagram
     And both sides are shown when the file changed on each side
+    And a paragraph, heading, list item, or table row with a removed line is tinted red on the old side
+    And one with an added line is tinted green on the new side
+    And inside a code block only the changed lines are tinted
     When I choose Source
     Then the diff of that file is on screen again
 

@@ -34,6 +34,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/MainTheme.cpp` — theme menu and live system theme
 - `src/DiffCanvas.cpp` / `DiffCanvas.hpp` — diff view state
 - `src/MdView.cpp` / `MdView.hpp` / `MdChrome.cpp` / `MdRead.cpp` / `MdHtml.cpp` / `third_party/markdown/` — GitHub markdown preview with Mermaid diagrams, and the switch back to the diff
+- `src/MdMark.cpp` — changed blocks in that preview tinted red and green
 - `src/DiffScroll.cpp` — scroll, sticky file tracking, and the file list follows the pointer
 - `src/DiffInput.cpp` / `DiffTitle.cpp` — gutter clicks, and the reviewed check on the file title
 - `src/DiffSplit.cpp` — drag the border between panes

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "DiffDoc.hpp"
+#include "MdRead.hpp"
 
 #include <QWidget>
 
@@ -58,11 +59,9 @@ private:
     QWebEngineView *m_left = nullptr;
     QWebEngineView *m_right = nullptr;
     QString m_root;
-    QString m_dir;
     QString m_leftName;
     QString m_rightName;
-    QString m_leftText;
-    QString m_rightText;
+    ReadText m_text;
     int m_file = -1;
     bool m_on = false;
 };

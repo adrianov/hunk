@@ -57,6 +57,24 @@ void useExt(cmark_parser *parser, const char *name)
         cmark_parser_attach_syntax_extension(parser, syntax);
 }
 
+// Tags each fenced block: its first source line is the fence, so its code starts one line lower.
+QString fencedHtml(cmark_node *doc, const char *rendered)
+{
+    QString html = QString::fromUtf8(rendered ? rendered : "");
+    cmark_iter *iter = cmark_iter_new(doc);
+    while (cmark_iter_next(iter) != CMARK_EVENT_DONE) {
+        cmark_node *node = cmark_iter_get_node(iter);
+        int size = 0;
+        char fence = 0;
+        if (!cmark_node_get_fenced(node, &size, &size, &fence))
+            continue;
+        const QString pos = QStringLiteral(" data-sourcepos=\"%1:").arg(cmark_node_get_start_line(node));
+        html.replace(QStringLiteral("<pre") + pos, QStringLiteral("<pre data-fence") + pos);
+    }
+    cmark_iter_free(iter);
+    return html;
+}
+
 QString gfmBody(const QString &markdown)
 {
     const QByteArray utf8 = markdown.toUtf8();
@@ -67,8 +85,8 @@ QString gfmBody(const QString &markdown)
         useExt(parser, name);
     cmark_parser_feed(parser, utf8.constData(), static_cast<size_t>(utf8.size()));
     cmark_node *doc = cmark_parser_finish(parser);
-    char *html = cmark_render_html(doc, CMARK_OPT_DEFAULT, cmark_parser_get_syntax_extensions(parser));
-    const QString body = QString::fromUtf8(html ? html : "");
+    char *html = cmark_render_html(doc, CMARK_OPT_SOURCEPOS, cmark_parser_get_syntax_extensions(parser));
+    const QString body = fencedHtml(doc, html);
     free(html);
     cmark_node_free(doc);
     cmark_parser_free(parser);
@@ -82,7 +100,7 @@ QString mermaidScript(bool dark)
     return QStringLiteral("<script src=\"qrc:/md/mermaid.js\"></script><script>"
                           "for (const code of document.querySelectorAll('pre > code.language-mermaid')) {"
                           "const box = document.createElement('div');"
-                          "box.className = 'mermaid';"
+                          "box.className = code.parentNode.className + ' mermaid';"
                           "box.textContent = code.textContent;"
                           "code.parentNode.replaceWith(box);"
                           "}"
@@ -92,7 +110,7 @@ QString mermaidScript(bool dark)
         .arg(dark ? QStringLiteral("dark") : QStringLiteral("default"));
 }
 
-QString pageFor(const QString &body, bool dark)
+QString pageFor(const QString &body, const QString &marks, bool dark)
 {
     QString page;
     page += QStringLiteral("<!doctype html><html><head><meta charset=\"utf-8\"><style>");
@@ -102,6 +120,7 @@ QString pageFor(const QString &body, bool dark)
     page += QStringLiteral("</style><style>.markdown-body{box-sizing:border-box;padding:28px 36px;}</style></head>"
                            "<body class=\"markdown-body\">");
     page += body;
+    page += marks;
     page += QStringLiteral("<script>");
     page += asset(":/md/highlight.js");
     page += QStringLiteral("</script>");
@@ -122,9 +141,10 @@ void prepareMarkdown(QWebEngineView *view)
     view->setPage(page);
 }
 
-void showMarkdown(QWebEngineView *view, const QString &markdown, const QString &dir, bool dark)
+void showMarkdown(QWebEngineView *view, const MdSide &side, const QString &dir, bool dark)
 {
     const QString base = dir.endsWith(QLatin1Char('/')) ? dir : dir + QLatin1Char('/');
-    view->page()->setBackgroundColor(dark ? QColor(0x0d, 0x11, 0x17) : QColor(Qt::white));
-    view->setHtml(pageFor(gfmBody(markdown), dark), QUrl::fromLocalFile(base));
+    const QColor ground = dark ? QColor(0x0d, 0x11, 0x17) : QColor(Qt::white);
+    view->page()->setBackgroundColor(ground);
+    view->setHtml(pageFor(gfmBody(side.text), changeMarks(side, ground), dark), QUrl::fromLocalFile(base));
 }

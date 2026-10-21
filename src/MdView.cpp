@@ -66,16 +66,13 @@ void MdView::choose(int id)
 
 void MdView::showDocs(const FileDiff &file)
 {
-    const ReadText text = readFile(file, m_root);
-    m_dir = text.dir;
-    m_leftText = text.left;
-    m_rightText = text.right;
+    m_text = readFile(file, m_root);
     ensureBrowser(&m_left, m_leftPane);
     ensureBrowser(&m_right, m_rightPane);
-    fillBrowser(m_left, text.left, text.dir);
-    fillBrowser(m_right, text.right, text.dir);
-    m_leftPane->setVisible(text.pair || text.oldOnly);
-    m_rightPane->setVisible(!text.oldOnly);
+    fillBrowser(m_left, m_text.left, m_text.dir);
+    fillBrowser(m_right, m_text.right, m_text.dir);
+    m_leftPane->setVisible(m_text.pair || m_text.oldOnly);
+    m_rightPane->setVisible(!m_text.oldOnly);
     m_leftCaption->setText(m_leftName);
     m_leftCaption->setToolTip(m_leftName);
     m_rightCaption->setText(m_rightName);
@@ -140,7 +137,7 @@ void MdView::applyTheme()
     tintWidget(m_rightCaption, kMuted);
     paintGround(m_page);
     if (m_left)
-        fillBrowser(m_left, m_leftText, m_dir);
+        fillBrowser(m_left, m_text.left, m_text.dir);
     if (m_right)
-        fillBrowser(m_right, m_rightText, m_dir);
+        fillBrowser(m_right, m_text.right, m_text.dir);
 }
