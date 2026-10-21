@@ -86,6 +86,7 @@ QWidget *MainWindow::reviewPanel()
 void MainWindow::buildReviews()
 {
     m_dock = new QDockWidget(QStringLiteral("Reviews"), this);
+    m_dock->setObjectName(QStringLiteral("reviews"));
     m_dock->setWidget(reviewPanel());
     addDockWidget(Qt::BottomDockWidgetArea, m_dock);
     auto *view = menuBar()->addMenu(QStringLiteral("View"));
