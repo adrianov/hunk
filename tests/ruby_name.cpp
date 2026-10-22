@@ -80,10 +80,10 @@ void testConstArray()
     const QString root = dir.path();
     CHECK(putFile(root, "tags.rb",
                   "ACTIVE_REQUEST_ATTRIBUTES = [\n  :one,\n  :two,\n  :three,\n  :four,\n  :five,\n  :six,\n"
-                  "  \"ho]st\",\n  :host,\n]\n\nFOR_SHOP = <<~SQL.squish.freeze\n  JOIN shops\nSQL\n\ndef labels\nend\n"));
+                  "  \"ho]st\",\n  :host,\n]\n\nFOR_SHOP = <<SQL.squish.freeze\n  JOIN shops\n  SQL\nSQL\n\ndef labels\nend\n"));
     warmLang(root);
     CHECK(arrayShown(lookupName(root, "use.rb", "ACTIVE_REQUEST_ATTRIBUTES")));
-    CHECK(lookupName(root, "use.rb", "FOR_SHOP").signature.endsWith(u"JOIN shops\nSQL"));
+    CHECK(lookupName(root, "use.rb", "FOR_SHOP").signature.endsWith(u"JOIN shops\n  SQL\nSQL"));
 }
 
 void testConstDef()

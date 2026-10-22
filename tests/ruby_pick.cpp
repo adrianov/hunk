@@ -72,6 +72,7 @@ void testRubyEndless()
     CHECK(bodyAt("def shut(kind = \"end\"); end\n", 1).body.isEmpty());
     CHECK(bodyAt("def plain = 1\n", 1).body.isEmpty());
     CHECK(bodyAt("def plain() = 1\n", 1).body.isEmpty());
+    CHECK(!bodyAt("def shift = a <<TAG # see <<SQL\nTAG\nSQL\n", 1).signature.contains(u'\n'));
 }
 
 void testRubyOrder()
