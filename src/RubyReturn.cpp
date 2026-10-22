@@ -82,11 +82,11 @@ QString camelName(const QString &word)
 
 QString singular(const QString &name)
 {
-    if (name.endsWith(QLatin1String("ies")))
-        return name.chopped(3) + QLatin1Char('y');
-    for (const char *end : {"sses", "ches", "shes", "xes"}) {
-        if (name.endsWith(QLatin1String(end)))
-            return name.chopped(2);
+    static const char *ends[][2] = {{"people", "person"}, {"children", "child"}, {"men", "man"}, {"ies", "y"},
+                                    {"sses", "ss"}, {"ches", "ch"}, {"shes", "sh"}, {"xes", "x"}};
+    for (const auto &end : ends) {
+        if (name.endsWith(QLatin1String(end[0])))
+            return name.chopped(qstrlen(end[0])) + QLatin1String(end[1]);
     }
     return name.endsWith(QLatin1Char('s')) ? name.chopped(1) : name;
 }
