@@ -165,6 +165,7 @@ void testBody()
 } // namespace
 
 int rubyPrecTests();
+int rubyScopeTests();
 
 int rubyTypeTests()
 {
@@ -174,5 +175,5 @@ int rubyTypeTests()
     testOr();
     testMiss();
     testBody();
-    return g_fails + rubyPrecTests();
+    return g_fails + rubyPrecTests() + rubyScopeTests();
 }

@@ -236,6 +236,7 @@ add_executable(hunk_test
   tests/ruby_recv.cpp
   tests/ruby_type.cpp
   tests/ruby_prec.cpp
+  tests/ruby_scope.cpp
   tests/ruby_use.cpp
   src/ReviewStore.cpp
   src/ReviewSync.cpp
