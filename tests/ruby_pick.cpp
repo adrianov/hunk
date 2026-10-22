@@ -73,6 +73,7 @@ void testRubyEndless()
     CHECK(bodyAt("def plain = 1\n", 1).body.isEmpty());
     CHECK(bodyAt("def plain() = 1\n", 1).body.isEmpty());
     CHECK(!bodyAt("def shift = a <<TAG # see <<SQL\nTAG\nSQL\n", 1).signature.contains(u'\n'));
+    CHECK(bodyAt("def list = [<<~ONE, <<~TWO]\n  1\nONE\n  2\nTWO\n", 1).signature.endsWith(u"2\nTWO"));
 }
 
 void testRubyOrder()

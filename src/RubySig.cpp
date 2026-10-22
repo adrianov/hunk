@@ -7,16 +7,18 @@
 
 namespace {
 
-// The pattern of the line that closes a heredoc opened at the end of `text`, such as
-// "X = <<~SQL.squish.freeze", or empty. A plain <<SQL closes only at column 0; <<~SQL and <<-SQL may close indented.
+// The pattern of the line that closes the last heredoc opened on `text`, such as "X = <<~SQL.squish.freeze",
+// "[<<~SQL, <<~OTHER]", or "merge(<<~SQL, scope)", or empty. A plain <<SQL closes only at column 0;
+// <<~SQL and <<-SQL may close indented.
 QString closeTag(const QString &text)
 {
-    static const QRegularExpression open(
-        QStringLiteral("[=(,]\\s*<<([~-]?)(['\"]?)([A-Z_][A-Z0-9_]*)\\2(?:\\.\\w+[!?]?)*\\s*$"));
+    static const QRegularExpression open(QStringLiteral(
+        ".*[=(,\\[]\\s*<<([~-]?)(['\"]?)([A-Z_][A-Z0-9_]*)\\2(?:\\.\\w+[!?]?)*(?:[,)\\]].*)?\\s*$"));
     const QRegularExpressionMatch match = open.match(text);
     if (!match.hasMatch())
         return {};
-    return QStringLiteral("^%1%2\\s*$").arg(QStringLiteral("\\s*").repeated(match.capturedLength(1)), match.captured(3));
+    const QString lead = match.captured(1).isEmpty() ? QString() : QStringLiteral("\\s*");
+    return QStringLiteral("^%1%2\\s*$").arg(lead, match.captured(3));
 }
 
 // The line that closes a heredoc opened on `line`, or 0.
