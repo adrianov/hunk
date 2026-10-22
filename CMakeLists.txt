@@ -46,6 +46,7 @@ add_library(hunk_core STATIC
   src/SyntaxLang.cpp
   src/SyntaxScan.cpp
   src/SyntaxText.cpp
+  src/SyntaxInterp.cpp
   src/SyntaxWord.cpp
   src/SyntaxMd.cpp
   src/SyntaxEmph.cpp

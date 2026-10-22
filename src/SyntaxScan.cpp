@@ -24,6 +24,8 @@ int takeText(const QString &text, int index, const Rule &rule, Scan *scan, QList
 {
     if (const int next = eatTriple(text, index, rule, scan, out); next != index)
         return next;
+    if (const int next = eatInterp(text, index, rule, scan, out); next != index)
+        return next;
     if (const int next = eatString(text, index, out); next != index)
         return next;
     if (const int next = eatBlock(text, index, rule, scan, out); next != index)
@@ -31,23 +33,6 @@ int takeText(const QString &text, int index, const Rule &rule, Scan *scan, QList
     if (const int next = eatLine(text, index, rule, out); next != index)
         return next;
     return index;
-}
-
-int takeToken(const QString &text, int index, const Rule &rule, Scan *scan, QList<SynSpan> *out)
-{
-    if (const int next = takeText(text, index, rule, scan, out); next != index)
-        return next;
-    if (const int next = eatHash(text, index, rule, out); next != index)
-        return next;
-    if (const int next = eatTag(text, index, rule, out); next != index)
-        return next;
-    if (const int next = eatHex(text, index, rule, out); next != index)
-        return next;
-    if (const int next = eatNumber(text, index, out); next != index)
-        return next;
-    if (const int next = eatMark(text, index, rule, out); next != index)
-        return next;
-    return eatWord(text, index, rule, out);
 }
 
 int nextMark(const QString &text, int index, const Rule &rule, Scan *scan, QList<SynSpan> *out)
@@ -73,6 +58,23 @@ void scanLine(const QString &text, const Rule &rule, Scan *scan, QList<SynSpan> 
 }
 
 } // namespace
+
+int takeToken(const QString &text, int index, const Rule &rule, Scan *scan, QList<SynSpan> *out)
+{
+    if (const int next = takeText(text, index, rule, scan, out); next != index)
+        return next;
+    if (const int next = eatHash(text, index, rule, out); next != index)
+        return next;
+    if (const int next = eatTag(text, index, rule, out); next != index)
+        return next;
+    if (const int next = eatHex(text, index, rule, out); next != index)
+        return next;
+    if (const int next = eatNumber(text, index, out); next != index)
+        return next;
+    if (const int next = eatMark(text, index, rule, out); next != index)
+        return next;
+    return eatWord(text, index, rule, out);
+}
 
 int eatBlock(const QString &text, int index, const Rule &rule, Scan *scan, QList<SynSpan> *out)
 {

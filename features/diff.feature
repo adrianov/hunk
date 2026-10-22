@@ -357,6 +357,8 @@ Feature: Diff view
     And an array value shows every element, through the closing bracket
     When I Command-click that constant on macOS, or Control-click it on Linux
     Then the diff shows that file at that line
+    When the constant sits inside string interpolation, such as "COALESCE(quantum, #{DEFAULT_MIN_AVAILABLE_STOCK})"
+    Then it is colored as code, and hover and Command-click work the same way
 
   Scenario: Hover an Active Record column
     Given a diff of a Ruby file

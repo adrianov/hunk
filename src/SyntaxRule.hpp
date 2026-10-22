@@ -43,7 +43,9 @@ void colorSide(FileDiff *file, bool left, const Rule &rule);
 
 void addSpan(QList<SynSpan> *out, int start, int end, SynKind kind);
 bool wordChar(QChar ch, const Rule &rule);
+int takeToken(const QString &text, int index, const Rule &rule, Scan *scan, QList<SynSpan> *out);
 int eatString(const QString &text, int index, QList<SynSpan> *out);
+int eatInterp(const QString &text, int index, const Rule &rule, Scan *scan, QList<SynSpan> *out);
 int eatTriple(const QString &text, int index, const Rule &rule, Scan *scan, QList<SynSpan> *out);
 int eatNumber(const QString &text, int index, QList<SynSpan> *out);
 int eatHex(const QString &text, int index, const Rule &rule, QList<SynSpan> *out);
