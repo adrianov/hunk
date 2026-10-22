@@ -3,7 +3,21 @@
 
 #include "RubyDetail.hpp"
 
+#include <QRegularExpression>
+
 namespace {
+
+// The line that closes a heredoc opened on `line`, such as SQL after "<<~SQL.squish", or 0.
+int heredocEnd(const QStringList &lines, int line)
+{
+    static const QRegularExpression open(QStringLiteral("<<[~-]?(['\"]?)([A-Z_][A-Z0-9_]*)\\1"));
+    const QString tag = open.match(lines.at(line - 1)).captured(2);
+    for (int at = line + 1; !tag.isEmpty() && at <= lines.size(); ++at) {
+        if (lines.at(at - 1).trimmed() == tag)
+            return at;
+    }
+    return 0;
+}
 
 int skipQuote(const QString &line, int at)
 {
@@ -67,9 +81,7 @@ bool unitLine(const QString &line)
         || headWord(line, QLatin1String("module")) || headWord(line, QLatin1String("end"));
 }
 
-} // namespace
-
-int rubySigEnd(const QStringList &lines, int line)
+int nestEnd(const QStringList &lines, int line)
 {
     int depth = 0;
     for (int at = line; at <= lines.size(); ++at) {
@@ -81,6 +93,13 @@ int rubySigEnd(const QStringList &lines, int line)
             return at;
     }
     return lines.size();
+}
+
+} // namespace
+
+int rubySigEnd(const QStringList &lines, int line)
+{
+    return qMax(heredocEnd(lines, line), nestEnd(lines, line));
 }
 
 QString rubyJoin(const QStringList &lines, int first, int last)

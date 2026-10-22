@@ -24,13 +24,20 @@ void check(bool ok, const char *text, int line)
 
 #define CHECK(cond) check(static_cast<bool>(cond), #cond, __LINE__)
 
-LangDef lookupName(const QString &root, const char *path, const char *name)
+LangDef lookupAt(const QString &root, const char *path, int line, int column, const char *name)
 {
     LangSpot spot;
     spot.root = root;
     spot.path = QLatin1String(path);
+    spot.line = line;
+    spot.column = column;
     spot.name = QLatin1String(name);
     return lookupDef(spot);
+}
+
+LangDef lookupName(const QString &root, const char *path, const char *name)
+{
+    return lookupAt(root, path, 0, 0, name);
 }
 
 bool putFile(const QString &root, const char *rel, const char *text)
@@ -62,9 +69,8 @@ void testAssign()
 
 bool arrayShown(const LangDef &def)
 {
-    return def.signature.contains(QLatin1String("ho]st")) && def.signature.contains(QLatin1String(":host"))
-        && def.signature.trimmed().endsWith(QLatin1String("]")) && !def.signature.contains(QLatin1String("def labels"))
-        && def.body.isEmpty();
+    return def.signature.contains(u"ho]st") && def.signature.contains(u":host") && def.signature.trimmed().endsWith(u"]")
+        && !def.signature.contains(u"def labels") && def.body.isEmpty();
 }
 
 void testConstArray()
@@ -74,9 +80,10 @@ void testConstArray()
     const QString root = dir.path();
     CHECK(putFile(root, "tags.rb",
                   "ACTIVE_REQUEST_ATTRIBUTES = [\n  :one,\n  :two,\n  :three,\n  :four,\n  :five,\n  :six,\n"
-                  "  \"ho]st\",\n  :host,\n]\n\ndef labels\nend\n"));
+                  "  \"ho]st\",\n  :host,\n]\n\nFOR_SHOP = <<~SQL.squish.freeze\n  JOIN shops\nSQL\n\ndef labels\nend\n"));
     warmLang(root);
     CHECK(arrayShown(lookupName(root, "use.rb", "ACTIVE_REQUEST_ATTRIBUTES")));
+    CHECK(lookupName(root, "use.rb", "FOR_SHOP").signature.endsWith(u"JOIN shops\nSQL"));
 }
 
 void testConstDef()
@@ -130,17 +137,6 @@ void testNestedClass()
                   "module Telemetry\n  # monitor\n  class KarafkaMonitor < Karafka::Instrumentation::Monitor\n    def instrument\n      1\n    end\n  end\nend\n"));
     warmLang(root);
     CHECK(nestedClass(root));
-}
-
-LangDef lookupAt(const QString &root, const char *path, int line, int column, const char *name)
-{
-    LangSpot spot;
-    spot.root = root;
-    spot.path = QLatin1String(path);
-    spot.line = line;
-    spot.column = column;
-    spot.name = QLatin1String(name);
-    return lookupDef(spot);
 }
 
 bool localQuiet(const QString &root)

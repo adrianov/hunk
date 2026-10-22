@@ -355,6 +355,7 @@ Feature: Diff view
     When I hover a constant such as "DEFAULT_PAYMENT", ":DEFAULT_PAYMENT", or "ExchangerTrigger::ACCESSIBLE_EXTRA_DATA"
     Then a popup shows its assignment, such as "DEFAULT_PAYMENT = 'card'"
     And an array value shows every element, through the closing bracket
+    And a heredoc value such as "<<~SQL.squish.freeze" shows every line, through the closing "SQL"
     When I Command-click that constant on macOS, or Control-click it on Linux
     Then the diff shows that file at that line
     When the constant sits inside string interpolation, such as "COALESCE(quantum, #{DEFAULT_MIN_AVAILABLE_STOCK})"
