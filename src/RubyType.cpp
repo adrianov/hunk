@@ -76,7 +76,11 @@ QStringList chainCalls(const QString &expr)
 // A scope such as active, or a query such as where, returns the model of the call before it.
 bool keepsModel(const QString &root, const QString &word)
 {
-    static const QStringList queries = {"all", "where", "not", "order", "joins", "includes", "merge", "limit", "lock"};
+    static const QStringList queries = {
+        "all", "where", "not", "or", "order", "reorder", "joins", "left_joins", "includes", "preload", "eager_load",
+        "references", "merge", "select", "distinct", "group", "having", "limit", "offset", "lock", "readonly",
+        "unscoped", "none",
+    };
     if (queries.contains(word))
         return true;
     langEnsure(root, word);
