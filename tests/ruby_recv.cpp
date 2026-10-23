@@ -36,6 +36,15 @@ bool putFile(const QString &root, const char *rel, const char *text)
     return file.write(QLatin1String(text).toUtf8()) >= 0;
 }
 
+bool warmed(void (*files)(const QString &), bool (*hit)(const QString &))
+{
+    QTemporaryDir dir;
+    CHECK(dir.isValid());
+    files(dir.path());
+    warmLang(dir.path());
+    return hit(dir.path());
+}
+
 void schemaFiles(const QString &root)
 {
     CHECK(putFile(root, "db/schema.rb",
@@ -123,12 +132,7 @@ void testBareColumn()
 
 void testSchemaColumn()
 {
-    QTemporaryDir dir;
-    CHECK(dir.isValid());
-    const QString root = dir.path();
-    schemaFiles(root);
-    warmLang(root);
-    CHECK(orderColumn(root) && priceColumn(root) && sColumn(root));
+    CHECK(warmed(schemaFiles, [](const QString &root) { return orderColumn(root) && priceColumn(root) && sColumn(root); }));
 }
 
 void callFiles(const QString &root)
@@ -151,12 +155,7 @@ bool classCall(const QString &root)
 
 void testClassCall()
 {
-    QTemporaryDir dir;
-    CHECK(dir.isValid());
-    const QString root = dir.path();
-    callFiles(root);
-    warmLang(root);
-    CHECK(classCall(root));
+    CHECK(warmed(callFiles, classCall));
 }
 
 bool writeCall(const QString &root, const char *path, const char *receiver)
@@ -318,17 +317,17 @@ void chainFiles(const QString &root)
     CHECK(putFile(root, "app/other.rb", "class Other\n  def add\n    9\n  end\nend\n"));
 }
 
+bool chainHits(const QString &root)
+{
+    return chainHit(root, "add", "Telemetry::Metrics::VirtualProducts.errors", "def add")
+        && chainHit(root, "measure", "Telemetry::Metrics::VirtualProducts.operation_duration", "def measure")
+        && !chainHit(root, "add", "io", "def add") && !chainHit(root, "add", "errors", "def add")
+        && metricHit(root, "errors", "counter(:errors");
+}
+
 void testChain()
 {
-    QTemporaryDir dir;
-    CHECK(dir.isValid());
-    const QString root = dir.path();
-    chainFiles(root);
-    warmLang(root);
-    CHECK(chainHit(root, "add", "Telemetry::Metrics::VirtualProducts.errors", "def add"));
-    CHECK(chainHit(root, "measure", "Telemetry::Metrics::VirtualProducts.operation_duration", "def measure"));
-    CHECK(!chainHit(root, "add", "io", "def add") && !chainHit(root, "add", "errors", "def add"));
-    CHECK(metricHit(root, "errors", "counter(:errors"));
+    CHECK(warmed(chainFiles, chainHits));
 }
 
 bool feedHit(const QString &root, const char *path, int line, const char *text)
@@ -378,15 +377,15 @@ void feedFiles(const QString &root)
     CHECK(putFile(root, "app/other.rb", "class Other\n  def measure\n    9\n  end\nend\n"));
 }
 
+bool feedHits(const QString &root)
+{
+    return feedHit(root, "app/jobs/data_export_job.rb", 3, "    metrics.generate_duration.measure(")
+        && !feedHit(root, "app/plain.rb", 3, "    metrics.generate_duration.measure(operation: 'x')");
+}
+
 void testFeed()
 {
-    QTemporaryDir dir;
-    CHECK(dir.isValid());
-    const QString root = dir.path();
-    feedFiles(root);
-    warmLang(root);
-    CHECK(feedHit(root, "app/jobs/data_export_job.rb", 3, "    metrics.generate_duration.measure("));
-    CHECK(!feedHit(root, "app/plain.rb", 3, "    metrics.generate_duration.measure(operation: 'x')"));
+    CHECK(warmed(feedFiles, feedHits));
 }
 
 } // namespace
@@ -436,12 +435,7 @@ void manyFiles(const QString &root)
 
 void testSuper()
 {
-    QTemporaryDir dir;
-    CHECK(dir.isValid());
-    const QString root = dir.path();
-    superFiles(root);
-    warmLang(root);
-    CHECK(parentSuper(root) && prependSuper(root));
+    CHECK(warmed(superFiles, [](const QString &root) { return parentSuper(root) && prependSuper(root); }));
 }
 
 bool batchHit(const QString &root, const char *path, const char *name, const char *bit)
@@ -473,14 +467,23 @@ void testSeekBatch()
     CHECK(batchHit(root, "a.rb", "foo", "1") && batchHit(root, "b.rb", "bar", "2"));
 }
 
+bool lateDef(const QString &root)
+{
+    const LangSpot spot = defSpot(root, QStringLiteral("job.rb"), 2, 3, QStringLiteral("zero_out"));
+    const bool missed = !lookupDef(spot).found();
+    CHECK(putFile(root, "stock.rb", "class Stock\n  def self.zero_out\n    0\n  end\nend\n"));
+    forgetLang();
+    return missed && lookupDef(spot).path == QLatin1String("stock.rb");
+}
+
+void testLateDef()
+{
+    CHECK(warmed([](const QString &root) { CHECK(putFile(root, "job.rb", "Stock.where(id: 1)\n  .zero_out\n")); }, lateDef));
+}
+
 void testManySuper()
 {
-    QTemporaryDir dir;
-    CHECK(dir.isValid());
-    const QString root = dir.path();
-    manyFiles(root);
-    warmLang(root);
-    CHECK(manySuper(root));
+    CHECK(warmed(manyFiles, manySuper));
 }
 
 int rubyRecvTests()
@@ -489,6 +492,7 @@ int rubyRecvTests()
     testSuper();
     testManySuper();
     testSeekBatch();
+    testLateDef();
     testBareColumn();
     testClassCall();
     testLocalCall();

@@ -5,6 +5,7 @@
 
 #include "DiffCanvas.hpp"
 #include "GitRepo.hpp"
+#include "LangDef.hpp"
 #include "MdView.hpp"
 #include "MainSeen.hpp"
 #include "ReviewStore.hpp"
@@ -120,6 +121,7 @@ void MainWindow::showLoadedDiff(const GitResult &result)
     m_leftLabel = result.leftLabel;
     m_rightLabel = result.rightLabel;
     m_doc = result.doc;
+    forgetLang();
     keepOpened();
     m_bodies.clear();
     applySeen(&m_doc, m_seen);

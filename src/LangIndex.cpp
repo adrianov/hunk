@@ -24,6 +24,17 @@ bool g_walking = false;
 
 enum class Seek { Done, Walk, Wait };
 
+void dropNames()
+{
+    g_names.clear();
+    g_uses.clear();
+    g_sought.clear();
+    g_pending.clear();
+    g_walking = false;
+    langReset(++g_ticket);
+    g_done.wakeAll();
+}
+
 Seek beginSeek(const QString &root, const QString &name, int *ticket)
 {
     if (g_cached != root || g_sought.contains(name))
@@ -76,19 +87,19 @@ void warmLang(const QString &root, QPointer<QObject> watch, std::function<void()
         const QMutexLocker lock(&g_mutex);
         if (g_cached != root) {
             g_cached = root;
-            g_names.clear();
-            g_uses.clear();
-            g_sought.clear();
-            g_pending.clear();
-            g_walking = false;
-            langReset(++g_ticket);
-            g_done.wakeAll();
+            dropNames();
         }
     }
     QObject *target = watch.data();
     if (!target || !done)
         return;
     QMetaObject::invokeMethod(target, [done = std::move(done)] { done(); }, Qt::QueuedConnection);
+}
+
+void forgetLang()
+{
+    const QMutexLocker lock(&g_mutex);
+    dropNames();
 }
 
 bool langCached(const QString &root)

@@ -287,6 +287,9 @@ Feature: Diff view
     And shared leading spaces are removed
     When I hover that method's definition
     Then no definition popup appears
+    When I hover a call such as ".zero_out" before its method is written
+    And "def self.zero_out" is added and the diff reloads
+    Then hovering or Command-clicking ".zero_out" opens that method
 
   Scenario: Jump to a Ruby definition
     Given a diff of a Ruby file
@@ -356,6 +359,7 @@ Feature: Diff view
     Then a popup shows its assignment, such as "DEFAULT_PAYMENT = 'card'"
     And an array value shows every element, through the closing bracket
     And a heredoc value such as "<<~SQL.squish.freeze" shows every line, through the closing "SQL"
+    And a line that opens several heredocs, such as "[<<~SQL, <<~OTHER]", shows through the last closing tag
     When I Command-click that constant on macOS, or Control-click it on Linux
     Then the diff shows that file at that line
     When the constant sits inside string interpolation, such as "COALESCE(quantum, #{DEFAULT_MIN_AVAILABLE_STOCK})"

@@ -43,4 +43,6 @@ LangSpot defSpot(const QString &root, const QString &path, int line, int column,
                  const QString &receiver = {});
 // Remembers the project root. A new root clears every language cache. `done` runs on `watch`.
 void warmLang(const QString &root, QPointer<QObject> watch = {}, std::function<void()> done = {});
+// Drops every found name, so a definition added or moved since is found on the next hover.
+void forgetLang();
 bool langReady(const QString &root, const QString &path);
