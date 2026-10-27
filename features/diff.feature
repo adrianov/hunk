@@ -318,6 +318,10 @@ Feature: Diff view
     When this method assigned "parent = order_trigger.tpsl_exchanger" and I hover "parent.store_leg_quantity!"
     And tpsl_exchanger belongs to Exchanger, or that method returns Exchanger
     Then a popup shows store_leg_quantity! on Exchanger
+    When this method assigned "scope = current_user.exchanger_triggers.active" and I hover "scope.public_find"
+    And Member has_many exchanger_triggers and active is a scope
+    Then a popup shows public_find on ExchangerTrigger
+    And that still works through a query such as where or distinct, and through has_many :children as Child
     When this file defines settings as MarketSettings.for, that returns Local or Broken, and those inherit Base
     And I hover "settings.precision_for"
     Then a popup shows precision_for on MarketSettings::Base

@@ -3,6 +3,10 @@
 
 #include "RubyDetail.hpp"
 
+#include "LangTune.hpp"
+
+#include <algorithm>
+
 namespace {
 
 int skipOp(const QString &line, int at)
@@ -52,13 +56,49 @@ QString constCall(const QString &expr)
     return finderWord(wordAt(expr, rubySkip(expr, dot + 1))) ? type : QString();
 }
 
-QString tailCall(const QString &expr)
+// Words called after each dot outside brackets: exchanger_triggers and active in user.exchanger_triggers.active.
+QStringList chainCalls(const QString &expr)
 {
-    const int dot = expr.lastIndexOf(QLatin1Char('.'));
-    if (dot < 0)
-        return {};
-    const QString word = wordAt(expr, dot + 1);
-    return word.isEmpty() || word.at(0).isUpper() ? QString() : word;
+    QStringList calls;
+    int depth = 0;
+    for (int at = 0; at < expr.size(); ++at) {
+        const QChar ch = expr.at(at);
+        if (QStringLiteral("([{").contains(ch))
+            ++depth;
+        else if (QStringLiteral(")]}").contains(ch))
+            --depth;
+        else if (ch == QLatin1Char('.') && depth == 0)
+            calls.append(wordAt(expr, at + 1));
+    }
+    return calls;
+}
+
+// A scope such as active, or a query such as where, returns the model of the call before it.
+bool keepsModel(const QString &root, const QString &word)
+{
+    static const QStringList queries = {
+        "all", "where", "not", "or", "order", "reorder", "joins", "left_joins", "includes", "preload", "eager_load",
+        "references", "merge", "select", "distinct", "group", "having", "limit", "offset", "lock", "readonly",
+        "unscoped", "none",
+    };
+    if (queries.contains(word))
+        return true;
+    langEnsure(root, word);
+    const QList<LangDef> hits = langHits(root, word, Lang::Ruby);
+    return std::any_of(hits.cbegin(), hits.cend(),
+                       [](const LangDef &def) { return def.signature.trimmed().startsWith(QLatin1String("scope ")); });
+}
+
+QString chainType(const QString &root, const QStringList &calls)
+{
+    for (auto call = calls.crbegin(); call != calls.crend(); ++call) {
+        if (call->isEmpty() || call->at(0).isUpper())
+            return {};
+        const QString type = methodType(root, *call);
+        if (!type.isEmpty() || !keepsModel(root, *call))
+            return type;
+    }
+    return {};
 }
 
 QString exprType(const QString &root, const QString &expr)
@@ -66,8 +106,7 @@ QString exprType(const QString &root, const QString &expr)
     const int at = rubySkip(expr, 0);
     if (at < expr.size() && expr.at(at).isUpper())
         return constCall(expr);
-    const QString word = tailCall(expr);
-    return word.isEmpty() ? QString() : methodType(root, word);
+    return chainType(root, chainCalls(expr));
 }
 
 QString localType(const LangSpot &spot, const RubyBound &bound)

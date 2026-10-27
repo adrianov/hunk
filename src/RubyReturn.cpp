@@ -80,16 +80,26 @@ QString camelName(const QString &word)
     return out;
 }
 
-bool assocSig(const QString &signature)
+QString singular(const QString &name)
 {
-    const QString line = signature.trimmed();
-    return line.startsWith(QLatin1String("belongs_to")) || line.startsWith(QLatin1String("has_one"));
+    static const char *ends[][2] = {{"people", "person"}, {"children", "child"}, {"men", "man"}, {"ies", "y"},
+                                    {"sses", "ss"}, {"ches", "ch"}, {"shes", "sh"}, {"xes", "x"}};
+    for (const auto &end : ends) {
+        if (name.endsWith(QLatin1String(end[0])))
+            return name.chopped(qstrlen(end[0])) + QLatin1String(end[1]);
+    }
+    return name.endsWith(QLatin1Char('s')) ? name.chopped(1) : name;
 }
 
-QString namedType(const QString &signature, const QString &name)
+// belongs_to :market is Market, has_many :exchanger_triggers is ExchangerTrigger, unless class_name says otherwise.
+QString assocType(const QString &signature, const QString &name)
 {
+    const QString line = signature.trimmed();
+    const bool many = line.startsWith(QLatin1String("has_many"));
+    if (!many && !line.startsWith(QLatin1String("belongs_to")) && !line.startsWith(QLatin1String("has_one")))
+        return {};
     const QString named = classOption(signature);
-    return named.isEmpty() ? camelName(name) : named;
+    return named.isEmpty() ? camelName(many ? singular(name) : name) : named;
 }
 
 bool specFile(const QString &path)
@@ -100,8 +110,9 @@ bool specFile(const QString &path)
 
 QString defType(const LangDef &def, const QString &name)
 {
-    if (assocSig(def.signature))
-        return namedType(def.signature, name);
+    const QString assoc = assocType(def.signature, name);
+    if (!assoc.isEmpty())
+        return assoc;
     if (!def.signature.trimmed().startsWith(QLatin1String("def ")))
         return {};
     const QString body = bodyConst(def.body);
