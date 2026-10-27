@@ -4,3 +4,4 @@ cmake-build-*/
 *.user
 CMakeUserPresets.json
 hunk.pro
+aqtinstall.log
