@@ -277,6 +277,14 @@ Feature: Diff view
     Then "zero?" is colored as a method
     And "amount" and "ask_rate" are colored as variables
 
+  Scenario: A regex with quotes inside stays one string
+    Given a diff of "spec/xml_spec.rb"
+    When a line adds "io.scan(/id="([^"]+)"/).flatten).to eq(ids)"
+    Then the regex "/id="([^"]+)"/" is colored as a string
+    And "flatten" is colored as a method
+    And "ids" is colored as a variable
+    And division such as "total / 2", "x /= 2", and tags such as "<Foo />" or "</p>" are not regexes
+
   Scenario: Hover a Ruby method
     Given a diff of a Ruby file
     When I hover a call to a method

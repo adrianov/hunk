@@ -60,16 +60,13 @@ void testRubyDef()
     const DiffRow row = firstRow("lib/app.rb", "def greet(name) # hi");
     CHECK(rightHas(row, SynKind::Keyword, "def"));
     CHECK(rightHas(row, SynKind::Method, "greet"));
+    CHECK(rightHas(row, SynKind::Variable, "name"));
     CHECK(rightHas(row, SynKind::Comment, "# hi"));
 }
 
 void testBareDef()
 {
     CHECK(rightHas(firstRow("lib/app.rb", "def wave"), SynKind::Method, "wave"));
-}
-
-void testNotDef()
-{
     CHECK(rightHas(firstRow("lib/app.rb", "mydef wave"), SynKind::Variable, "wave"));
 }
 
@@ -78,11 +75,7 @@ void testScopeType()
     const DiffRow row = firstRow("src/app.cpp", "Foo::Bar");
     CHECK(rightHas(row, SynKind::Type, "Foo"));
     CHECK(rightHas(row, SynKind::Type, "Bar"));
-}
-
-void testRubyParam()
-{
-    CHECK(rightHas(firstRow("lib/app.rb", "def greet(name)"), SynKind::Variable, "name"));
+    CHECK(rightHas(firstRow("src/app.cpp", "int x;"), SynKind::Variable, "x"));
 }
 
 void testRubyCall()
@@ -108,16 +101,19 @@ void testRubyInterp()
     CHECK(rightHas(row, SynKind::String, "}\""));
 }
 
+void testRubyRegex()
+{
+    const DiffRow row = firstRow("spec/a_spec.rb", "expect(io.scan(/id=\"([^\"]+)\"/).flatten).to eq(ids / 2 + rest / 3)");
+    CHECK(rightHas(row, SynKind::String, "/id=\"([^\"]+)\"/"));
+    CHECK(rightHas(row, SynKind::Variable, "rest"));
+    CHECK(rightHas(firstRow("app.tsx", "<Foo /> x /= 2; <p>a</p>"), SynKind::Variable, "a"));
+}
+
 void testBlock()
 {
     const QList<DiffRow> rows = colorFile(QStringLiteral("src/app.cpp"), {QStringLiteral("/* start"), QStringLiteral(" still"), QStringLiteral(" end */ int x;")}).files.at(0).rows;
     CHECK(hasText(rows.at(1).rightSyn, SynKind::Comment, rows.at(1).rightText, QStringLiteral(" still")));
     CHECK(hasText(rows.at(2).rightSyn, SynKind::Keyword, rows.at(2).rightText, QStringLiteral("int")));
-}
-
-void testCppName()
-{
-    CHECK(rightHas(firstRow("src/app.cpp", "int x;"), SynKind::Variable, "x"));
 }
 
 void testPlain()
@@ -159,14 +155,12 @@ int main(int argc, char **argv)
     QCoreApplication app(argc, argv);
     testRubyDef();
     testBareDef();
-    testNotDef();
     testScopeType();
-    testRubyParam();
     testRubyCall();
     testRubyValue();
     testRubyInterp();
+    testRubyRegex();
     testBlock();
-    testCppName();
     testPlain();
     g_fails += mdTests();
     g_fails += emphTests();

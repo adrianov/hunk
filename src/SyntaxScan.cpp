@@ -32,7 +32,7 @@ int takeText(const QString &text, int index, const Rule &rule, Scan *scan, QList
         return next;
     if (const int next = eatLine(text, index, rule, out); next != index)
         return next;
-    return index;
+    return eatRegex(text, index, rule, out);
 }
 
 int nextMark(const QString &text, int index, const Rule &rule, Scan *scan, QList<SynSpan> *out)

@@ -110,11 +110,11 @@ Rule scriptRule(Lang lang)
 {
     switch (lang) {
     case Lang::Ruby:
-        return {"#", "=begin", "=end", kRuby, RubyId | Marks | Caps};
+        return {"#", "=begin", "=end", kRuby, RubyId | Marks | Caps | Regex};
     case Lang::Py:
         return {"#", nullptr, nullptr, kPy, Triple | Caps};
     case Lang::Js:
-        return {"//", "/*", "*/", kJs, Caps};
+        return {"//", "/*", "*/", kJs, Caps | Regex};
     case Lang::Shell:
         return {"#", nullptr, nullptr, kShell, Marks};
     case Lang::Php:
