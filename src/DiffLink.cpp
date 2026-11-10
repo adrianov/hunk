@@ -7,6 +7,7 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <QRegularExpression>
 #include <QUrl>
 
 namespace {
@@ -32,19 +33,42 @@ QString linkRel(const QString &doc, const QUrl &target)
     return rel.startsWith(QLatin1String("../")) ? QString() : rel;
 }
 
+// Targets for the path-like word under the column, such as config/initializers/http.rb in a comment:
+// beside the doc first, then from the root unless it starts with "./" or "../".
+QStringList pathTargets(const QString &text, int column)
+{
+    static const QRegularExpression path(QStringLiteral(R"(((?:\.\.?/)*)\.?[\w-]+(?:[./]+[\w-]+)+)"));
+    for (auto it = path.globalMatch(text); it.hasNext();) {
+        const QRegularExpressionMatch match = it.next();
+        if (column < match.capturedStart() || column >= match.capturedEnd())
+            continue;
+        const QString word = match.captured();
+        return match.capturedLength(1) ? QStringList{word} : QStringList{word, QLatin1Char('/') + word};
+    }
+    return {};
+}
+
+// The first of those targets, read from the doc, that is a file under the root.
+QString firstFile(const QString &root, const QString &doc, const QStringList &targets)
+{
+    for (const QString &target : targets)
+        if (const QString rel = linkRel(doc, QUrl(target)); !rel.isEmpty() && QFileInfo(QDir(root).filePath(rel)).isFile())
+            return rel;
+    return {};
+}
+
 } // namespace
 
-// The repository file named by the markdown link under the pointer.
+// The repository file named by the markdown link or the path under the pointer.
 QString DiffCanvas::linkPath(const TextMark &hit) const
 {
     if (!hit.code || m_root.isEmpty())
         return {};
     const FileDiff &file = m_doc.files.at(hit.file);
     const QString path = sidePath(file, hit.old);
-    if (langFor(path) != Lang::Markdown)
-        return {};
     const DiffRow &row = file.rows.at(hit.row);
-    const QString rel =
-        linkRel(path, QUrl(linkTarget(hit.old ? row.leftText : row.rightText, hit.old ? row.leftSyn : row.rightSyn, hit.pos)));
-    return QFileInfo(QDir(m_root).filePath(rel)).isFile() ? rel : QString();
+    const QString &text = hit.old ? row.leftText : row.rightText;
+    const QString target =
+        langFor(path) == Lang::Markdown ? linkTarget(text, hit.old ? row.leftSyn : row.rightSyn, hit.pos) : QString();
+    return firstFile(m_root, path, QStringList{target} + pathTargets(text, hit.pos));
 }

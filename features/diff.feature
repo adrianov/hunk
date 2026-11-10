@@ -422,6 +422,17 @@ Feature: Diff view
     And a link that starts with "/" is read from the repository root
     And a web link, an "#anchor" link, or a link to a missing file keeps the text cursor
 
+  Scenario: Open a file a path in the code names
+    Given a diff of "app/services/dixy_bitrix_api/base.rb"
+    And a line reads "# global ssl_context in config/initializers/http.rb"
+    When I hold Command on macOS, or Control on Linux, over "config/initializers/http.rb"
+    Then the pointer is a hand
+    When I Command-click that path on macOS, or Control-click it on Linux
+    Then the diff shows "config/initializers/http.rb" from its first line
+    And a path is read beside the file that names it first, then from the repository root
+    And a path that starts with "./" or "../" is read only beside that file
+    And a path to a missing file, or the blank space after a path, keeps the text cursor
+
   Scenario: A markdown file can be read rendered
     Given a diff of "README.md"
     Then Source and Rendered sit on that file's title, beside its added and removed counts
