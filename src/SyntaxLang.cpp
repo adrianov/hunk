@@ -91,7 +91,7 @@ const Ext kExts[] = {
     {"html", Lang::Html}, {"htm", Lang::Html}, {"xml", Lang::Html}, {"svg", Lang::Html}, {"vue", Lang::Html},
     {"json", Lang::Json}, {"yml", Lang::Yaml}, {"yaml", Lang::Yaml},
     {"sql", Lang::Sql}, {"php", Lang::Php}, {"lua", Lang::Lua}, {"ex", Lang::Elixir}, {"exs", Lang::Elixir},
-    {"md", Lang::Markdown}, {"markdown", Lang::Markdown},
+    {"md", Lang::Markdown}, {"markdown", Lang::Markdown}, {"env", Lang::Env},
 };
 
 QString baseName(const QString &path)
@@ -127,6 +127,8 @@ Rule scriptRule(Lang lang)
         return {nullptr, nullptr, nullptr, kJson, 0};
     case Lang::Yaml:
         return {"#", nullptr, nullptr, kYaml, 0};
+    case Lang::Env:
+        return {"#", nullptr, nullptr, nullptr, Env};
     default:
         return {};
     }
@@ -169,7 +171,10 @@ bool active(const Rule &rule)
 
 Lang langFor(const QString &path)
 {
-    const QString ext = extOf(baseName(path));
+    const QString base = baseName(path);
+    if (base.startsWith(QLatin1String(".env.")))
+        return Lang::Env;
+    const QString ext = extOf(base);
     for (const Ext &item : kExts) {
         if (ext == QLatin1String(item.ext))
             return item.lang;

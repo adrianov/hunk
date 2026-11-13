@@ -7,7 +7,7 @@
 
 enum class Lang {
     None, Ruby, Py, Js, Cpp, Rust, Go, Java, Kotlin, Swift, Shell, Css, Html, Json, Yaml, Sql, Php, Lua, Elixir,
-    Markdown
+    Markdown, Env
 };
 
 enum RuleFlag : unsigned {
@@ -20,7 +20,8 @@ enum RuleFlag : unsigned {
     Css = 64,
     Fold = 128,
     Md = 256,
-    Regex = 512
+    Regex = 512,
+    Env = 1024
 };
 
 struct Rule {
@@ -60,5 +61,6 @@ int eatTag(const QString &text, int index, const Rule &rule, QList<SynSpan> *out
 int resumeBlock(const QString &text, const Rule &rule, Scan *scan, QList<SynSpan> *out);
 int resumeString(const QString &text, Scan *scan, QList<SynSpan> *out);
 int eatMarkdown(const QString &text, int index, const Rule &rule, Scan *scan, QList<SynSpan> *out);
+int eatEnv(const QString &text, int index, const Rule &rule, QList<SynSpan> *out);
 int eatEmph(const QString &text, int index, QList<SynSpan> *out);
 int resumeFence(const QString &text, Scan *scan, QList<SynSpan> *out);

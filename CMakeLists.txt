@@ -50,6 +50,7 @@ add_library(hunk_core STATIC
   src/SyntaxInterp.cpp
   src/SyntaxWord.cpp
   src/SyntaxMd.cpp
+  src/SyntaxEnv.cpp
   src/SyntaxEmph.cpp
   src/LangDef.cpp
   src/LangTune.cpp
@@ -247,7 +248,7 @@ add_executable(hunk_test
 )
 target_link_libraries(hunk_test PRIVATE hunk_core Qt6::Core)
 
-add_executable(hunk_syntax tests/syntax_test.cpp tests/md_test.cpp tests/emph_test.cpp)
+add_executable(hunk_syntax tests/syntax_test.cpp tests/md_test.cpp tests/emph_test.cpp tests/env_test.cpp)
 target_link_libraries(hunk_syntax PRIVATE hunk_core Qt6::Core)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

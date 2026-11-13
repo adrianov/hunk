@@ -39,6 +39,8 @@ int nextMark(const QString &text, int index, const Rule &rule, Scan *scan, QList
 {
     if (const int next = eatMarkdown(text, index, rule, scan, out); next != index)
         return next;
+    if (const int next = eatEnv(text, index, rule, out); next != index)
+        return next;
     return takeToken(text, index, rule, scan, out);
 }
 

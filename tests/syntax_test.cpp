@@ -111,9 +111,9 @@ void testRubyRegex()
 
 void testBlock()
 {
-    const QList<DiffRow> rows = colorFile(QStringLiteral("src/app.cpp"), {QStringLiteral("/* start"), QStringLiteral(" still"), QStringLiteral(" end */ int x;")}).files.at(0).rows;
-    CHECK(hasText(rows.at(1).rightSyn, SynKind::Comment, rows.at(1).rightText, QStringLiteral(" still")));
-    CHECK(hasText(rows.at(2).rightSyn, SynKind::Keyword, rows.at(2).rightText, QStringLiteral("int")));
+    const QList<DiffRow> rows = colorFile("src/app.cpp", {"/* start", " still", " end */ int x;"}).files.at(0).rows;
+    CHECK(rightHas(rows.at(1), SynKind::Comment, " still"));
+    CHECK(rightHas(rows.at(2), SynKind::Keyword, "int"));
 }
 
 void testPlain()
@@ -149,6 +149,7 @@ void testRename()
 
 int mdTests();
 int emphTests();
+int envTests();
 
 int main(int argc, char **argv)
 {
@@ -165,6 +166,7 @@ int main(int argc, char **argv)
     g_fails += mdTests();
     g_fails += emphTests();
     testApos();
+    g_fails += envTests();
     testRename();
     Q_UNUSED(app);
     return g_fails == 0 ? 0 : 1;

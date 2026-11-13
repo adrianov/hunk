@@ -285,6 +285,14 @@ Feature: Diff view
     And "ids" is colored as a variable
     And division such as "total / 2", "x /= 2", and tags such as "<Foo />" or "</p>" are not regexes
 
+  Scenario: An env file colors keys and values
+    Given a diff of ".env.test"
+    When a line adds "MANZANA_URL=http://manzana-api # local"
+    Then "MANZANA_URL" is colored like a constant
+    And "http://manzana-api" is colored as a string
+    And "# local" is colored as a comment
+    And ".env", ".env.production", and "app.env" files are colored the same way
+
   Scenario: Hover a Ruby method
     Given a diff of a Ruby file
     When I hover a call to a method
@@ -308,6 +316,9 @@ Feature: Diff view
     When I Command-click a call to a method on macOS, or Control-click it on Linux
     Then the diff shows the file where that method is defined, at that line
     And that file stays listed even when it has no added or removed lines
+    When I Command-click ":check_api_token" in "before_action :check_api_token"
+    Then the diff shows "def check_api_token", not that before_action line
+    And the same holds for other callbacks such as after_save, around_action, skip_before_action, validate, and helper_method
     When I Command-click a method name on its def on macOS, or Control-click it on Linux
     Then the diff shows a call to that method
     And that call is in the application when one exists, not a spec
