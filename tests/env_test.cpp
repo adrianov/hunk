@@ -48,6 +48,7 @@ void testEnv()
     CHECK(has(row, SynKind::String, "http://manzana-api"));
     CHECK(has(row, SynKind::Comment, "# local"));
     CHECK(has(rowOf(".env", "# Manzana API"), SynKind::Comment, "# Manzana API"));
+    CHECK(rowOf(".env", "DIXY_API_TOKEN=token").rightSyn.size() == 2);
 }
 
 void testEnvExport()
