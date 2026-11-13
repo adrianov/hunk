@@ -3,17 +3,17 @@
 
 #include "RubyDetail.hpp"
 
+#include <QRegularExpression>
+
 namespace {
 
-bool hiddenWord(const QString &word)
+// Visibility and callbacks such as before_action :name point at a method; they do not declare one.
+bool callWord(const QString &word)
 {
-    static const char *words[] = {"private", "protected", "public", "private_constant", "public_constant",
-                                  "private_class_method", "public_class_method", "module_function", nullptr};
-    for (const char *const *item = words; *item; ++item) {
-        if (word == QLatin1String(*item))
-            return true;
-    }
-    return false;
+    static const QRegularExpression words(QStringLiteral(
+        "^(((skip|prepend|append)_)?(before|after|around)_\\w+|validate|helper_method|module_function"
+        "|private|protected|public|(private|public)_(constant|class_method))$"));
+    return words.match(word).hasMatch();
 }
 
 bool symbolArg(const QString &line, int at, QString *name)
@@ -58,7 +58,7 @@ bool rubyDsl(const QString &line, QString *name)
 {
     int next = 0;
     QString word;
-    if (!rubyWord(line, rubySkip(line, 0), &word, &next) || hiddenWord(word))
+    if (!rubyWord(line, rubySkip(line, 0), &word, &next) || callWord(word))
         return false;
     return dslArg(line, next, name);
 }

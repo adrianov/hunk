@@ -111,6 +111,17 @@ void testRubyAmbiguous()
     CHECK(!lookupName(root, "c.rb", "shared").found());
 }
 
+void testRubyHook()
+{
+    QTemporaryDir dir;
+    CHECK(dir.isValid());
+    CHECK(putFile(dir.path(), "api.rb", "class Api\n  before_action :check\n  validate :sane\n  def check\n  end\n"
+                                        "  def sane\n  end\nend\n"));
+    warmLang(dir.path());
+    CHECK(lookupName(dir.path(), "api.rb", "check").line == 4);
+    CHECK(lookupName(dir.path(), "api.rb", "sane").line == 6);
+}
+
 } // namespace
 
 int rubyNameTests();
@@ -123,5 +134,6 @@ int rubyPickTests()
     testRubySetter();
     testRubyEndless();
     testRubyOrder();
+    testRubyHook();
     return g_fails + rubyNameTests();
 }
