@@ -28,7 +28,8 @@ void takeIgnored(QStringList *dirs, const QString &root, QString row)
 
 QString joinStamp(const QString &head, const QString &base, const QString &status, const QString &root)
 {
-    return head + QLatin1Char('\n') + base + QLatin1Char('\n') + status + QLatin1Char('\n') + mainStamp(root);
+    return head + QLatin1Char('\n') + base + QLatin1Char('\n') + status + QLatin1Char('\n') + mainStamp(root)
+        + QLatin1Char('\n') + refState(root);
 }
 
 QStringList listFresh(const QString &root)

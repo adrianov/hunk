@@ -153,14 +153,9 @@ void MainWindow::showLoadedTitle()
     emit loaded(true);
 }
 
-bool MainWindow::keepQuiet(const GitResult &result)
+bool MainWindow::sameDiff(const GitResult &result) const
 {
-    if (result.unchanged)
-        return true;
-    if (!m_quiet || !result.error.isEmpty() || result.diffText != m_appliedDiff || result.title != m_title)
-        return false;
-    m_appliedStamp = result.stamp;
-    return true;
+    return m_quiet && result.error.isEmpty() && result.diffText == m_appliedDiff && result.title == m_title;
 }
 
 bool MainWindow::stopForError(const GitResult &result)
@@ -187,15 +182,24 @@ void MainWindow::onReady(const GitResult &result)
     m_loading = false;
     if (!result.root.isEmpty())
         m_seenLoad = true;
-    if (!keepQuiet(result)) {
-        if (stopForError(result))
-            return;
-        if (!result.root.isEmpty())
-            rememberRoot(result.root);
-        applyBases(result);
-        m_appliedBase = result.baseRef;
-        m_appliedHead = result.headRef;
-        m_appliedStamp = result.stamp;
+    if (result.unchanged) {
+        applyWatch(result);
+        finishWatch();
+        return;
+    }
+    if (stopForError(result))
+        return;
+    if (!result.root.isEmpty())
+        rememberRoot(result.root);
+    applyBases(result);
+    m_appliedBase = result.baseRef;
+    m_appliedHead = result.headRef;
+    m_appliedStamp = result.stamp;
+    if (sameDiff(result)) {
+        m_drift = result.drift;
+        m_conflict = result.conflict;
+        updateStatus();
+    } else {
         m_appliedDiff = result.diffText;
         showLoadedDiff(result);
     }

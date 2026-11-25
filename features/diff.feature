@@ -53,6 +53,9 @@ Feature: Diff view
     And the context menu on either box, or on a branch in its list, copies that branch name
     And the diff is a merge request between them
     And uncommitted changes on the current branch are included
+    When a new branch appears after hunk opened
+    And I refresh, or switch back to hunk
+    Then that branch is in the Base and Branch lists
 
   Scenario: Uncommitted, staged, and last commit diffs
     Given a repository is on screen

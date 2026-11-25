@@ -116,7 +116,7 @@ private:
     void rememberRecent(const QString &root);
     void openRecent();
     void onReady(const GitResult &result);
-    bool keepQuiet(const GitResult &result);
+    bool sameDiff(const GitResult &result) const;
     bool stopForError(const GitResult &result);
     void rememberRoot(const QString &root);
     void applyBases(const GitResult &result);
