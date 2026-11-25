@@ -51,6 +51,29 @@ void drawTitle(QPainter &painter, const QRect &rect, const QFontMetrics &metrics
                      metrics.elidedText(title, Qt::ElideMiddle, qMax(20, rect.width() - statsW - kTitleX - 4)));
 }
 
+int modifiedWidth(const QFont &font, const QString &when)
+{
+    if (when.isEmpty())
+        return 0;
+    QFont timeFont = font;
+    timeFont.setBold(false);
+    return QFontMetrics(timeFont).horizontalAdvance(when) + 16;
+}
+
+void drawModified(QPainter &painter, const QRect &rect, int baseline, const QFont &font, const QString &when,
+                  int statsW)
+{
+    if (when.isEmpty())
+        return;
+    QFont timeFont = font;
+    timeFont.setBold(false);
+    painter.setFont(timeFont);
+    painter.setPen(kMuted);
+    const int width = QFontMetrics(timeFont).horizontalAdvance(when);
+    painter.drawText(rect.right() - statsW - 12 - width, baseline, when);
+    painter.setFont(font);
+}
+
 void paintLabelBar(QPainter &painter, int y, int height, int viewW)
 {
     painter.fillRect(0, y, viewW, height, kGutter);
@@ -82,9 +105,14 @@ void DiffCanvas::paintFileHeader(QPainter &painter, const QRect &rect, const Fil
     painter.setFont(font);
     const QFontMetrics metrics(font);
     const StatText stat = measureStats(metrics, file);
-    drawStats(painter, rect, headerBaseline(rect, metrics), stat);
+    const QString when = file.modifiedText();
+    const int whenW = modifiedWidth(font, when);
+    const int statsW = stat.plusW + stat.minusW + 28;
+    const int baseline = headerBaseline(rect, metrics);
+    drawStats(painter, rect, baseline, stat);
+    drawModified(painter, rect, baseline, font, when, statsW);
     paintReviewCheck(&painter, titleCheck(rect), hot, false, kText);
-    drawTitle(painter, rect, metrics, file.title(), stat.plusW + stat.minusW + 28);
+    drawTitle(painter, rect, metrics, file.title(), statsW + whenW);
 }
 
 void DiffCanvas::paintHeaderBand(QPainter &painter, const Band &band, const FileDiff &file, int viewW)

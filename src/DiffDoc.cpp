@@ -5,7 +5,11 @@
 
 #include "DiffDetail.hpp"
 
+#include <QDateTime>
+#include <QDir>
+#include <QFileInfo>
 #include <QHash>
+#include <QLocale>
 
 #include <algorithm>
 
@@ -74,6 +78,30 @@ QString FileDiff::title() const
     if (slash >= 0 && newPath.startsWith(oldPath.left(slash + 1)))
         return oldPath + QStringLiteral(" → ") + newPath.mid(slash + 1);
     return oldPath + QStringLiteral(" → ") + newPath;
+}
+
+QString FileDiff::modifiedText() const
+{
+    if (modified <= 0)
+        return {};
+    return QLocale::system().toString(QDateTime::fromMSecsSinceEpoch(modified), QLocale::ShortFormat);
+}
+
+void seedModified(FileDiff *file, const QString &root)
+{
+    if (!file || file->removed || root.isEmpty())
+        return;
+    const QFileInfo info(QDir(root).filePath(file->path()));
+    if (info.exists())
+        file->modified = info.lastModified().toMSecsSinceEpoch();
+}
+
+void seedModified(DiffDoc *doc, const QString &root)
+{
+    if (!doc || root.isEmpty())
+        return;
+    for (FileDiff &file : doc->files)
+        seedModified(&file, root);
 }
 
 FileDiff unchangedFile(const QString &path, const QStringList &lines)

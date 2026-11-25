@@ -98,7 +98,10 @@ void MdView::apply()
 void MdView::showTitle(const FileDiff &file)
 {
     m_title->setText(file.title());
-    m_title->setToolTip(file.title());
+    QString tip = file.title();
+    if (const QString when = file.modifiedText(); !when.isEmpty())
+        tip += QLatin1Char('\n') + when;
+    m_title->setToolTip(tip);
     m_counts->setText(QStringLiteral("<span style=\"color:%1\">+%2</span>  <span style=\"color:%3\">−%4</span>")
                           .arg(kAddFg.name(), QString::number(file.adds), kDelFg.name(), QString::number(file.dels)));
 }

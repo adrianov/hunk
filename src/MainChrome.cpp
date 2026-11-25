@@ -96,11 +96,28 @@ void MainWindow::buildReviews()
     addAbout(view);
 }
 
-void MainWindow::openTreeItem(QTreeWidgetItem *item)
+namespace {
+
+int firstFileIndex(const QTreeWidgetItem *item)
 {
     if (!item)
-        return;
+        return -1;
     const int index = item->data(0, Qt::UserRole).toInt();
+    if (index >= 0)
+        return index;
+    for (int child = 0; child < item->childCount(); ++child) {
+        const int found = firstFileIndex(item->child(child));
+        if (found >= 0)
+            return found;
+    }
+    return -1;
+}
+
+} // namespace
+
+void MainWindow::openTreeItem(QTreeWidgetItem *item)
+{
+    const int index = firstFileIndex(item);
     if (index < 0)
         return;
     markSeenFile(index);

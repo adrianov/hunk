@@ -36,6 +36,14 @@ void DiffCanvas::copyMarked()
     QGuiApplication::clipboard()->setText(text);
 }
 
+void DiffCanvas::copyDiff()
+{
+    const QString text = markedDiff();
+    if (text.isEmpty())
+        return;
+    QGuiApplication::clipboard()->setText(text);
+}
+
 bool DiffCanvas::paneFocus() const
 {
     const QWidget *focus = QApplication::focusWidget();
@@ -73,7 +81,12 @@ void DiffCanvas::contextMenuEvent(QContextMenuEvent *event)
     QAction *copy = menu.addAction(QStringLiteral("Copy"));
     copy->setShortcut(QKeySequence::Copy);
     copy->setEnabled(!markedText().isEmpty());
-    if (menu.exec(event->globalPos()) == copy)
+    QAction *diff = menu.addAction(QStringLiteral("Copy Diff"));
+    diff->setEnabled(!markedDiff().isEmpty());
+    const QAction *picked = menu.exec(event->globalPos());
+    if (picked == copy)
         copyMarked();
+    else if (picked == diff)
+        copyDiff();
     event->accept();
 }

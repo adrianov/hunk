@@ -16,9 +16,12 @@ QString MainWindow::fileTip(const QTreeWidgetItem *item) const
     if (file < 0 || file >= m_doc.files.size())
         return item->toolTip(0);
     const FileDiff &diff = m_doc.files.at(file);
-    if (!staleFile(diff, m_seen))
-        return diff.title();
-    return diff.title() + QStringLiteral("\nChanged since you reviewed it");
+    QString tip = diff.title();
+    if (const QString when = diff.modifiedText(); !when.isEmpty())
+        tip += QLatin1Char('\n') + when;
+    if (staleFile(diff, m_seen))
+        tip += QStringLiteral("\nChanged since you reviewed it");
+    return tip;
 }
 
 namespace {

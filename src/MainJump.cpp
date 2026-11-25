@@ -29,6 +29,7 @@ bool readPlain(const QString &root, const QString &path, FileDiff *file)
     if (bytes.contains('\0'))
         return false;
     *file = unchangedFile(path, plainLines(bytes));
+    seedModified(file, root);
     return true;
 }
 

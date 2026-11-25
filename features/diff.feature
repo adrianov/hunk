@@ -76,6 +76,8 @@ Feature: Diff view
     And each file's added count is green and its removed count is red
     And under the file list the total added lines are green and the total removed lines are red
     And that total stays visible while the file list scrolls
+    When I select a folder in the file list
+    Then the diff scrolls to the first file under that folder
 
   Scenario: Copy a file path from the list
     Given a diff of "src/app.rb"
@@ -221,6 +223,11 @@ Feature: Diff view
     When I scroll inside that file
     Then its name stays at the top of the diff
 
+  Scenario: The file header shows when the file was modified
+    Given a diff is on screen
+    Then each file title shows when that file was last modified on disk
+    And the file list tip includes that time too
+
   Scenario: The file list follows the pointer
     Given a diff of several files
     When I move the pointer over a file that is not at the top of the diff
@@ -238,9 +245,13 @@ Feature: Diff view
     And the selection crosses a gap where that pane has no line
     And I open the pane menu
     Then Copy is there, with the shortcut Ctrl+C
+    And Copy Diff is there
     When I press Ctrl+C
     Then the clipboard contains that text
     And the gap is not an empty line
+    When I choose Copy Diff
+    Then the clipboard has those rows as a unified diff with - and +
+    And a selection in either pane covers both sides of each row
     When I drag a selection past the top or the bottom of the diff
     Then the diff scrolls that way
     And the selection continues into the lines that come into view

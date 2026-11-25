@@ -105,6 +105,7 @@ bool runDiff(GitResult &result, const QStringList &args)
     result.doc = parseDiff(result.diffText);
     joinIndexRenames(&result);
     fillDocGaps(&result.doc, result);
+    seedModified(&result.doc, result.root);
     return true;
 }
 

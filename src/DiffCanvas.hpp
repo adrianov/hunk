@@ -236,7 +236,9 @@ private:
     bool markEnds(TextMark *from, TextMark *to) const;
     bool markSpan(int file, int row, bool oldSide, int size, int *start, int *end) const;
     QString markedText() const;
+    QString markedDiff() const;
     void copyMarked();
+    void copyDiff();
     bool copyPress(const QKeyEvent *key);
     void clearHover();
     const Band *bandAt(int y) const;

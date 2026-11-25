@@ -94,6 +94,23 @@ void appendMarked(QStringList *lines, const FileDiff &file, const QList<FoldSpan
     lines->append(lineSlice(line, old, row, fromRow, fromPos, toRow, toPos));
 }
 
+void appendDiff(QStringList *lines, const DiffRow &row)
+{
+    if (row.kind == RowKind::Del || row.kind == RowKind::Mod) {
+        if (row.leftNum > 0 || !row.leftText.isEmpty())
+            lines->append(QLatin1Char('-') + row.leftText);
+    }
+    if (row.kind == RowKind::Add || row.kind == RowKind::Mod) {
+        if (row.rightNum > 0 || !row.rightText.isEmpty())
+            lines->append(QLatin1Char('+') + row.rightText);
+    }
+    if (row.kind != RowKind::Context)
+        return;
+    const QString text = !row.rightText.isEmpty() ? row.rightText : row.leftText;
+    if (row.leftNum > 0 || row.rightNum > 0 || !text.isEmpty())
+        lines->append(QLatin1Char(' ') + text);
+}
+
 } // namespace
 
 void DiffCanvas::takeWord(const TextMark &hit)
@@ -160,6 +177,23 @@ QString DiffCanvas::markedText() const
     QStringList lines;
     for (int row = from.row; row <= to.row; ++row)
         appendMarked(&lines, file, hidden, row, from.old, from.row, from.pos, to.row, to.pos);
+    return lines.join(QLatin1Char('\n'));
+}
+
+QString DiffCanvas::markedDiff() const
+{
+    TextMark from;
+    TextMark to;
+    if (!markEnds(&from, &to))
+        return {};
+    const FileDiff &file = m_doc.files.at(from.file);
+    const QList<FoldSpan> hidden = fullMark(from, to) ? QList<FoldSpan>() : foldSpans(file.rows, pinnedRows(from.file));
+    QStringList lines;
+    for (int row = from.row; row <= to.row; ++row) {
+        if (insideFold(hidden, row))
+            continue;
+        appendDiff(&lines, file.rows.at(row));
+    }
     return lines.join(QLatin1Char('\n'));
 }
 

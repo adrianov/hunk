@@ -56,7 +56,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/DiffHover.cpp` / `DiffName.cpp` / `DiffJump.cpp` / `DiffPopup.hpp` / `DiffPopup.cpp` / `DefCode.hpp` / `DefCode.cpp` — definition popup on a hovered method, class, or constant, colored and wrapped like the diff, with the shared indent removed. Same file when the definition is in the file under the cursor. Command-click or Control-click opens that file at the line, even with no diff. A hash key, a local variable, or a call on a local such as io.write stays quiet
 - `src/DiffLink.cpp` — Command-click or Control-click on a markdown link, or a path such as config/initializers/http.rb in any file, opens that repository file in the diff
 - `src/DiffColors.cpp` / `DiffColors.hpp` — diff colors and the reviewed check
-- `src/DiffDoc.cpp` / `DiffDoc.hpp` — file and row model
+- `src/DiffDoc.cpp` / `DiffDoc.hpp` — file and row model, and each file's worktree modified time
 - `src/DiffParse.cpp` / `DiffParse.hpp` — unified diff walk
 - `src/DiffGap.cpp` — unchanged lines the diff skipped
 - `src/DiffPath.cpp` / `DiffDetail.hpp` / `Dedent.cpp` — paths and headers, and the shared indent removed from a definition

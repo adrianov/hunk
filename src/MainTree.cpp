@@ -89,15 +89,18 @@ void addFileItem(QTreeWidgetItem *folderItem, const FileDiff &file, int fileInde
     auto *item = new QTreeWidgetItem(folderItem, {file.shortName()});
     item->setData(0, Qt::UserRole, fileIndex);
     tagCounts(item, file);
-    item->setToolTip(0, file.title());
+    QString tip = file.title();
+    if (const QString when = file.modifiedText(); !when.isEmpty())
+        tip += QLatin1Char('\n') + when;
     if (file.added)
         item->setForeground(0, kAddFg);
     else if (file.removed)
         item->setForeground(0, kDelFg);
-    if (!staleFile(file, seen))
-        return;
-    item->setBackground(0, staleBg(tree));
-    item->setToolTip(0, file.title() + QStringLiteral("\nChanged since you reviewed it"));
+    if (staleFile(file, seen)) {
+        item->setBackground(0, staleBg(tree));
+        tip += QStringLiteral("\nChanged since you reviewed it");
+    }
+    item->setToolTip(0, tip);
 }
 
 void addFolder(QTreeWidget *tree, const Group &group, const DiffDoc &doc, const QHash<QString, QString> &seen)

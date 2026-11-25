@@ -69,6 +69,7 @@ struct FileDiff {
     bool binary = false;
     int adds = 0;
     int dels = 0;
+    qint64 modified = 0;
     QList<DiffRow> rows;
 
     QString path() const
@@ -80,6 +81,7 @@ struct FileDiff {
 
     QString title() const;
     QString shortName() const;
+    QString modifiedText() const;
 
     QString folder() const
     {
@@ -108,6 +110,9 @@ struct DiffDoc {
 
 // File indexes in the same order as the file list: root first, then folders.
 QList<int> listedOrder(const DiffDoc &doc);
+// Worktree last-modified time for each file that still exists on disk.
+void seedModified(DiffDoc *doc, const QString &root);
+void seedModified(FileDiff *file, const QString &root);
 // Both sides of `path`, unchanged. Line numbers match the file.
 FileDiff unchangedFile(const QString &path, const QStringList &lines);
 int fileNamed(const DiffDoc &doc, const QString &path);
