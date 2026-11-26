@@ -37,3 +37,5 @@ void fillLast(GitResult &result, const QString &headShort, QStringList *args);
 void fillDocGaps(DiffDoc *doc, const GitResult &result);
 // Tracked and untracked worktree files whose text contains `query`. Binary files are skipped.
 QStringList grepFiles(const QString &root, const QString &query);
+// Tracked and untracked files directly under `folder` (empty for the repository root).
+QStringList dirFiles(const QString &root, const QString &folder);

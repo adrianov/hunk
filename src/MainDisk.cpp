@@ -113,6 +113,8 @@ void MainWindow::noteDisk(const QString &path)
         if (!growDisk(path, watchSkip(m_gitDir, path)))
             markGap();
     }
+    if (!m_fullDirs.isEmpty())
+        fillDirFiles();
     scheduleWatch();
 }
 

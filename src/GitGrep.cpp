@@ -19,6 +19,40 @@ QStringList grepFiles(const QString &root, const QString &query)
     return found.out.split(QLatin1Char('\n'), Qt::SkipEmptyParts);
 }
 
+namespace {
+
+QStringList nullPaths(const QString &out)
+{
+    QStringList paths = out.split(QChar(u'\0'), Qt::SkipEmptyParts);
+    paths.removeIf([](const QString &path) { return path.endsWith(QLatin1Char('/')); });
+    return paths;
+}
+
+bool nestedUnder(const QString &path, const QString &folder)
+{
+    if (folder.isEmpty())
+        return path.contains(QLatin1Char('/'));
+    const QString prefix = folder + QLatin1Char('/');
+    return !path.startsWith(prefix) || path.mid(prefix.size()).contains(QLatin1Char('/'));
+}
+
+} // namespace
+
+QStringList dirFiles(const QString &root, const QString &folder)
+{
+    if (root.isEmpty())
+        return {};
+    const QString glob = folder.isEmpty() ? QStringLiteral("*") : folder + QStringLiteral("/*");
+    const GitCmd listed = runGit(root, {QStringLiteral("ls-files"), QStringLiteral("-z"), QStringLiteral("--cached"),
+                                        QStringLiteral("--others"), QStringLiteral("--exclude-standard"),
+                                        QStringLiteral("--"), glob});
+    if (listed.code != 0)
+        return {};
+    QStringList paths = nullPaths(listed.out);
+    paths.removeIf([&](const QString &path) { return nestedUnder(path, folder); });
+    return paths;
+}
+
 void MainWindow::armHits(const QString &search)
 {
     ++m_grepGen;

@@ -7,12 +7,9 @@
 #include "MainSeen.hpp"
 
 #include <QAbstractItemView>
-#include <QClipboard>
-#include <QGuiApplication>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QMenu>
 #include <QPushButton>
 #include <QTreeWidget>
 #include <QVBoxLayout>
@@ -74,44 +71,6 @@ QWidget *statBar(QWidget *parent, QLabel *stat, QPushButton *unhide)
     return bar;
 }
 
-QString itemPath(const QTreeWidgetItem *item, const DiffDoc &doc)
-{
-    const int file = item->data(0, Qt::UserRole).toInt();
-    if (file >= 0 && file < doc.files.size())
-        return doc.files.at(file).path();
-    const QString hit = item->data(0, Qt::UserRole + 3).toString();
-    if (!hit.isEmpty())
-        return hit;
-    if (item->parent())
-        return {};
-    const QString folder = item->text(0);
-    return folder == QLatin1String("(root)") ? QStringLiteral(".") : folder;
-}
-
-void collectPicked(QStringList *paths, const QTreeWidgetItem *item, const DiffDoc &doc)
-{
-    if (item->isSelected()) {
-        const QString path = itemPath(item, doc);
-        if (!path.isEmpty())
-            paths->append(path);
-    }
-    for (int index = 0; index < item->childCount(); ++index)
-        collectPicked(paths, item->child(index), doc);
-}
-
-QString listedPath(const QTreeWidget *tree, const DiffDoc &doc, const QPoint &pos)
-{
-    QTreeWidgetItem *hit = tree->itemAt(pos);
-    if (!hit)
-        return {};
-    if (!hit->isSelected() || tree->selectedItems().size() < 2)
-        return itemPath(hit, doc);
-    QStringList paths;
-    for (int index = 0; index < tree->topLevelItemCount(); ++index)
-        collectPicked(&paths, tree->topLevelItem(index), doc);
-    return paths.join(QLatin1Char('\n'));
-}
-
 } // namespace
 
 QWidget *MainWindow::makeFilePane()
@@ -155,16 +114,4 @@ int MainWindow::showLineStat()
         m_unhide->setVisible(hidden > 0);
     }
     return visible;
-}
-
-void MainWindow::filePathMenu(const QPoint &pos)
-{
-    const QString path = listedPath(m_tree, m_doc, pos);
-    if (path.isEmpty())
-        return;
-    QMenu menu(m_tree);
-    menu.addAction(QStringLiteral("Copy Relative Path"));
-    if (menu.exec(m_tree->viewport()->mapToGlobal(pos)) != menu.actions().constFirst())
-        return;
-    QGuiApplication::clipboard()->setText(path);
 }

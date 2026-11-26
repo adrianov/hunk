@@ -35,7 +35,7 @@ void MainWindow::rememberRoot(const QString &root)
     rememberRecent(m_root);
     m_store->setRepo(m_root);
     if (switched) {
-        m_opened.clear();
+        dropOpened();
         loadSeen();
         dropHits();
     }
