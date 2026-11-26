@@ -13,17 +13,19 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/MainRecent.cpp` — File menu recent repositories
 - `src/MainChrome.cpp` — splitter, review dock, and wiring
 - `src/MainAbout.cpp` — About dialog
-- `src/MainFilePane.cpp` — file list, name filter, content search, the totals bar, and copying one or more relative paths
+- `src/MainFilePane.cpp` — file list, name filter, content search, and the totals bar
+- `src/MainPathMenu.cpp` — copy relative paths, and show or hide every file in a folder
+- `src/MainDir.cpp` — open or close all files under a folder; lists those paths in the background (same pattern as repository search hits) and keeps a per-folder cache invalidated on reload and watch events
 - `src/MainTree.cpp` — folder tree, and a repository search when the changeset has no match
 - `src/MainHits.cpp` — repository files listed when a search misses the changeset
-- `src/MainHide.cpp` — hide a reviewed file until it changes, and show it again
+- `src/MainHide.cpp` — hide a reviewed file until it changes, show it again, or close a file that is not in the changeset
 - `src/MainNext.cpp` — after that check, select the next file in the list
 - `src/MainSeen.cpp` / `MainSeen.hpp` / `MainHeat.cpp` — files and lines changed since review, and files hidden until they change
 - `src/MainFileRow.cpp` — file-list added and removed counts, and the reviewed check
 - `src/MainNotes.cpp` / `MainNoteList.cpp` / `MainNoteKeep.cpp` — review list, double-click jumps to the line, per-line delete, and which comment stays selected
 - `src/MainReview.cpp` — comment and copy
 - `src/MainLoad.cpp` — git result applied to the window
-- `src/MainJump.cpp` — open a definition or a project search hit in the diff, including a file with no changes
+- `src/MainJump.cpp` — open a definition or a project search hit in the diff, including a file with no changes, and close that opened file
 - `src/MainPath.cpp` — project path on the toolbar
 - `src/MainRef.cpp` / `MainRef.hpp` — mode, base, and branch dropdowns
 - `src/MainRefFilter.cpp` — typing in a base or branch field lists matching branches under it
@@ -33,7 +35,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/MainDetail.hpp` — theme and note label
 - `src/Theme.cpp` — system, dark, and light palettes
 - `src/MainTheme.cpp` — theme menu and live system theme
-- `src/DiffCanvas.cpp` / `DiffCanvas.hpp` — diff view state
+- `src/DiffCanvas.cpp` / `DiffCanvas.hpp` — diff view state; new and unchanged opened files use one pane
 - `src/MdView.cpp` / `MdView.hpp` / `MdChrome.cpp` / `MdRead.cpp` / `MdHtml.cpp` / `third_party/markdown/` — GitHub markdown preview with Mermaid diagrams, and the switch back to the diff
 - `src/MdMark.cpp` — changed blocks in that preview tinted red and green
 - `src/DiffScroll.cpp` — scroll, sticky file tracking, and the file list follows the pointer
@@ -53,11 +55,11 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/DiffSyntax.cpp` / `DiffSyntax.hpp` — paint syntax colors
 - `src/Syntax.hpp` / `SyntaxRule.hpp` / `SyntaxLang.cpp` / `SyntaxScan.cpp` / `SyntaxText.cpp` / `SyntaxRegex.cpp` / `SyntaxInterp.cpp` / `SyntaxWord.cpp` / `SyntaxMd.cpp` / `SyntaxEmph.cpp` / `SyntaxEnv.cpp` — language tokens; a `.env` key is a constant and its value a string; Ruby `#{...}` inside a string is colored as code; a Ruby or JavaScript regex is one string
 - `src/LangDef.hpp` / `LangDef.cpp` / `LangTune.hpp` / `LangTune.cpp` / `LangIndex.cpp` / `LangWalk.cpp` — shared hover lookup. One walk stores every queued name, dropped on Refresh or when a reload brings a changed diff. Each language is a layer of names, exclusions, and ranking
-- `src/RubyDef.hpp` / `RubyDef.cpp` / `RubyDetail.hpp` / `RubyDetail.cpp` / `RubyTune.cpp` / `RubyScan.cpp` / `RubySig.cpp` / `RubyConst.cpp` / `RubyParent.cpp` / `RubySchema.cpp` / `RubyColumn.cpp` / `RubyTable.cpp` / `RubySuper.cpp` / `RubyMix.cpp` / `RubyHost.cpp` / `RubyScope.cpp` / `RubyNest.cpp` / `RubyLocal.cpp` / `RubyAssign.cpp` / `RubyDsl.cpp` / `RubyArg.cpp` / `RubyGroup.cpp` / `RubyChain.cpp` / `RubyLead.cpp` / `RubyType.cpp` / `RubyReturn.cpp` / `RubyFollow.cpp` / `RubyForward.cpp` / `RubyOwner.cpp` / `RubyFactory.cpp` / `RubyBuilt.cpp` / `RubyReceiver.cpp` / `RubyBody.cpp` / `RubyUse.cpp` / `RubyCite.cpp` — Ruby layer. A call on a class opens that class's method, or a DSL declaration such as has_many or counter. A callback such as before_action :check_api_token opens the method it names. include_context, include_examples, it_behaves_like, and it_should_behave_like open the shared context or shared examples they name. A model such as User opens app/models/user.rb when other files reopen the class. A nested class such as Telemetry::KarafkaMonitor shows the wrapping module around that class. A column such as product_gold_erp_id shows its schema line. Hovering super shows the parent method. http.active_requests can open up_down(:active_requests). A chain such as VirtualProducts.errors.add opens the method on the class that declaration builds. A method that returns the class, such as metrics.generate_duration.measure, opens it too. An endless method that only forwards, such as def self.price(...) = new(...).price, also shows that shortcut and the body of the method it calls. A method written as memoize def cart_items opens that method. A local assigned from that, such as parent = order_trigger.tpsl_exchanger then parent.store_leg_quantity!, opens that method too, as does scope = user.exchanger_triggers.active then scope.public_find through has_many and a scope. A same-file method such as settings.precision_for, where settings returns MarketSettings.for and that returns a subclass of Base, opens precision_for on Base. Command-click on the class or def opens a usage in the app when one exists, including a bare call in the same module. A field of that name on another class does not
+- `src/RubyDef.hpp` / `RubyDef.cpp` / `RubyDetail.hpp` / `RubyDetail.cpp` / `RubyTune.cpp` / `RubyScan.cpp` / `RubySig.cpp` / `RubyConst.cpp` / `RubyParent.cpp` / `RubySchema.cpp` / `RubyColumn.cpp` / `RubyTable.cpp` / `RubySuper.cpp` / `RubyMix.cpp` / `RubyHost.cpp` / `RubyScope.cpp` / `RubyNest.cpp` / `RubyLocal.cpp` / `RubyAssign.cpp` / `RubyDsl.cpp` / `RubyArg.cpp` / `RubyGroup.cpp` / `RubyParams.cpp` / `RubyGrape.cpp` / `RubyHelpers.cpp` / `RubyChain.cpp` / `RubyLead.cpp` / `RubyType.cpp` / `RubyReturn.cpp` / `RubyFollow.cpp` / `RubyForward.cpp` / `RubyOwner.cpp` / `RubyFactory.cpp` / `RubyBuilt.cpp` / `RubyReceiver.cpp` / `RubyBody.cpp` / `RubyUse.cpp` / `RubyCite.cpp` — Ruby layer. A call on a class opens that class's method, or a DSL declaration such as has_many or counter. A callback such as before_action :check_api_token opens the method it names. include_context, include_examples, it_behaves_like, and it_should_behave_like open the shared context or shared examples they name. Grape use :group opens that params :group in named_params, not Rack middleware use. helpers ::Module opens that module, same as include. A model such as User opens app/models/user.rb when other files reopen the class. A nested class such as Telemetry::KarafkaMonitor shows the wrapping module around that class. A column such as product_gold_erp_id shows its schema line. Hovering super shows the parent method. http.active_requests can open up_down(:active_requests). A chain such as VirtualProducts.errors.add opens the method on the class that declaration builds. A method that returns the class, such as metrics.generate_duration.measure, opens it too. An endless method that only forwards, such as def self.price(...) = new(...).price, also shows that shortcut and the body of the method it calls. A method written as memoize def cart_items opens that method. A local assigned from that, such as parent = order_trigger.tpsl_exchanger then parent.store_leg_quantity!, opens that method too, as does scope = user.exchanger_triggers.active then scope.public_find through has_many and a scope. A same-file method such as settings.precision_for, where settings returns MarketSettings.for and that returns a subclass of Base, opens precision_for on Base. Command-click on the class or def opens a usage in the app when one exists, including a bare call in the same module. A field of that name on another class does not
 - `src/DiffHover.cpp` / `DiffName.cpp` / `DiffJump.cpp` / `DiffPopup.hpp` / `DiffPopup.cpp` / `DefCode.hpp` / `DefCode.cpp` — definition popup on a hovered method, class, or constant, colored and wrapped like the diff, with the shared indent removed. Same file when the definition is in the file under the cursor. Command-click or Control-click opens that file at the line, even with no diff. A hash key, a local variable, or a call on a local such as io.write stays quiet
 - `src/DiffLink.cpp` — Command-click or Control-click on a markdown link, or a path such as config/initializers/http.rb in any file, opens that repository file in the diff
 - `src/DiffColors.cpp` / `DiffColors.hpp` — diff colors and the reviewed check
-- `src/DiffDoc.cpp` / `DiffDoc.hpp` — file and row model, and each file's worktree modified time
+- `src/DiffDoc.cpp` / `DiffDoc.hpp` — file and row model, each file's worktree modified time, and one pane for new or unchanged opened files
 - `src/DiffParse.cpp` / `DiffParse.hpp` — unified diff walk
 - `src/DiffGap.cpp` — unchanged lines the diff skipped
 - `src/DiffPath.cpp` / `DiffDetail.hpp` / `Dedent.cpp` — paths and headers, and the shared indent removed from a definition
@@ -69,7 +71,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/GitRepo.cpp` / `GitRepo.hpp` / `GitRename.cpp` — background git load for merge request, uncommitted, staged, and last commit; a staged rename stays one file; an untracked file is listed with uncommitted changes
 - `src/GitBlob.cpp` — file text for each side of a diff
 - `src/GitCmd.cpp` / `GitDetail.hpp` — git process, base and branch refs
-- `src/GitGrep.cpp` — background search for repository files whose text matches
+- `src/GitGrep.cpp` — background search for repository files whose text matches, and listing files in a folder
 - `src/GitStamp.cpp` — head, worktree status, refs state, one list of untracked paths and their times, resolved base, and ignored directories
 - `src/GitFresh.cpp` — a new file that is not committed yet, listed with uncommitted changes
 - `src/GitDrift.cpp` — whether local main or master is ahead or behind origin
@@ -81,7 +83,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/ReviewShift.cpp` / `ReviewShift.hpp` / `ReviewSpan.cpp` / `ReviewMatch.hpp` — moved comment line or span
 - `src/ReviewNote.hpp` — one comment
 - `src/ReviewExport.cpp` / `ReviewExport.hpp` — agent markdown
-- `tests/parse_test.cpp` / `file_test.cpp` / `fold_test.cpp` / `gap_test.cpp` / `review_test.cpp` / `shift_test.cpp` / `ruby_test.cpp` / `ruby_pick.cpp` / `ruby_forward.cpp` / `ruby_name.cpp` / `ruby_group.cpp` / `ruby_like.cpp` / `ruby_recv.cpp` / `ruby_type.cpp` / `ruby_prec.cpp` / `ruby_scope.cpp` / `ruby_use.cpp` — parser, fold, gap, review, and Ruby hover checks
+- `tests/parse_test.cpp` / `file_test.cpp` / `fold_test.cpp` / `gap_test.cpp` / `review_test.cpp` / `shift_test.cpp` / `ruby_test.cpp` / `ruby_pick.cpp` / `ruby_forward.cpp` / `ruby_name.cpp` / `ruby_group.cpp` / `ruby_like.cpp` / `ruby_grape.cpp` / `ruby_helpers.cpp` / `ruby_recv.cpp` / `ruby_type.cpp` / `ruby_prec.cpp` / `ruby_scope.cpp` / `ruby_use.cpp` — parser, fold, gap, review, and Ruby hover checks
 - `tests/syntax_test.cpp` / `md_test.cpp` / `emph_test.cpp` / `env_test.cpp` — syntax color checks
 - `CMakeLists.txt` — Qt 6 Widgets app and test
 - `README.md` — build and review format

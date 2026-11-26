@@ -94,6 +94,15 @@ Feature: Diff view
     And I copy their relative paths
     Then the clipboard contains each path on its own line
 
+  Scenario: Show all files in a folder
+    Given a diff with files under "src"
+    When I open the context menu on the "src" folder in the file list
+    Then I can choose "Show All Files in the Directory"
+    And the list includes unchanged files in that folder
+    When I open the context menu on that folder again
+    Then I can choose "Hide Unchanged Files"
+    And those unchanged files leave the list
+
   Scenario: Filter the file list
     Given a diff is on screen
     When I type in Filter files
@@ -122,9 +131,14 @@ Feature: Diff view
     Given a diff of a file that was added
     Then that file is shown in one pane
 
+  Scenario: An unchanged file uses one pane
+    Given a file opened beside the changeset with no line changes
+    Then that file is shown in one pane
+    And its label is the branch name without a new-file marker
+
   Scenario: Mark a file reviewed hides it until it changes
     Given a diff is on screen
-    Then each file has a check mark on the right, labeled Mark as reviewed
+    Then each file in the changeset has a check mark on the right, labeled "Mark as Reviewed"
     And the diff file title has that check on the left of the name
     When I mark a file reviewed
     Then that file leaves the list and the diff
@@ -141,6 +155,16 @@ Feature: Diff view
     Then the totals bar has a button to unhide those reviewed files, on the right
     When I unhide them
     Then the full diff is on screen again
+
+  Scenario: Close a file that is not in the changeset
+    Given a file is listed that is not part of the changeset
+    Then its check mark is labeled Close
+    And the check on its title is labeled Close
+    When I close that file
+    Then that file leaves the list and the diff
+    And the next file in the list is selected
+    And when that file was the last one, the file before it is selected
+    And the totals bar does not offer to unhide it
 
   Scenario: The main branch differs from its origin
     Given local main or master is ahead of or behind its origin
@@ -323,7 +347,7 @@ Feature: Diff view
     When I hover a call to a method
     Then a popup shows the file and line where that method is defined
     And a definition in this file is labeled "Same file" and the line
-    And the popup shows the comment above it, its signature, and its whole body, scrolled when it is long
+    And the popup shows the comment above it, its signature, and its whole body, using the free screen space and scrolling only when it still does not fit
     And that code is colored like the diff, and long lines wrap
     And shared leading spaces are removed
     When I hover that method's definition
@@ -351,6 +375,15 @@ Feature: Diff view
     And a call split over lines, such as it_behaves_like with the name on the next line, opens it too
     And a later argument, such as the path, does not
     And those open shared_examples and shared_examples_for the same way
+    When I Command-click ":bot_task" in "use :pagination_filters, :bot_task"
+    Then the diff shows "params :bot_task" from named_params
+    And hovering that name, or use itself, shows that params group, its comment, and its body
+    And ":pagination_filters" on the same line opens its own params group
+    And Rack middleware such as "use BotServiceMiddleware" does not
+    When I Command-click "BotOrderAccess" in "helpers ::APIv1::BotOrderAccess"
+    Then the diff shows that module
+    And hovering that name, or helpers itself, shows the module, its comment, and its body
+    And "helpers do" does not open a module
     When I Command-click a method name on its def on macOS, or Control-click it on Linux
     Then the diff shows a call to that method
     And that call is in the application when one exists, not a spec
@@ -406,7 +439,7 @@ Feature: Diff view
     Given a diff of a Ruby file
     When I hover a class or module name, including one nested in a module such as "Telemetry::KarafkaMonitor"
     Then a popup shows the file and line where it is defined
-    And the popup shows the comment above it, the class or module line, and the whole body, scrolled when it is long
+    And the popup shows the comment above it, the class or module line, and the whole body, using the free screen space and scrolling only when it still does not fit
     And a nested class also shows the module around it
     When I hover User and another file also reopens class User
     Then the popup shows app/models/user.rb
@@ -515,7 +548,7 @@ Feature: Diff view
     And the View menu can switch to dark or light
     And buttons, fields, and menus have rounded corners
     And the toolbar buttons have a filled background
-    And Open, Refresh, and Copy reviews each show a matching icon
+    And Open, Refresh, and Copy Reviews each show a matching icon
     And tooltips use the window background and the normal text color
 
   Scenario: Text sizes follow the theme
