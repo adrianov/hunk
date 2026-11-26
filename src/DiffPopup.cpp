@@ -48,6 +48,24 @@ QPoint fitPoint(const QPoint &global, const QSize &size, const QRect &area)
                   fitAxis(global.y(), size.height(), area.top(), area.bottom(), 18));
 }
 
+// Room for the path label and layout margins around the code pane.
+constexpr int kChromeH = 48;
+
+QRect screenArea(const QPoint &global)
+{
+    const QScreen *screen = QGuiApplication::screenAt(global);
+    return screen ? screen->availableGeometry() : QRect();
+}
+
+int codeMaxH(const QPoint &global, const QRect &area)
+{
+    if (area.isNull())
+        return 480;
+    const int below = area.bottom() - global.y() - 18 - kChromeH;
+    const int above = global.y() - area.top() - 18 - kChromeH;
+    return qMax(160, qMax(below, above));
+}
+
 QScrollArea *codeScroll(DefCode *code, QWidget *parent)
 {
     auto *scroll = new QScrollArea(parent);
@@ -88,21 +106,21 @@ void DefPopup::present(const LangDef &def, const QFont &font, const QPoint &glob
     const QString line = QString::number(def.line);
     m_path->setText(here ? QStringLiteral("Same file:") + line : def.path + QLatin1Char(':') + line);
     m_path->setStyleSheet(QStringLiteral("color: %1; background: transparent;").arg((here ? kText : kMuted).name()));
-    fitCode(font, defText(def), def.path);
+    fitCode(font, defText(def), def.path, global);
     place(global);
     show();
 }
 
-void DefPopup::fitCode(const QFont &font, const QString &code, const QString &path)
+void DefPopup::fitCode(const QFont &font, const QString &code, const QString &path, const QPoint &global)
 {
-    m_scroll->setFixedSize(m_code->showText(code, path, font, m_scroll->verticalScrollBar()->sizeHint().width()));
+    m_scroll->setFixedSize(m_code->showText(code, path, font, m_scroll->verticalScrollBar()->sizeHint().width(),
+                                            codeMaxH(global, screenArea(global))));
     adjustSize();
 }
 
 void DefPopup::place(const QPoint &global)
 {
-    const QScreen *screen = QGuiApplication::screenAt(global);
-    move(fitPoint(global, size(), screen ? screen->availableGeometry() : QRect()));
+    move(fitPoint(global, size(), screenArea(global)));
 }
 
 void DefPopup::leaveEvent(QEvent *event)

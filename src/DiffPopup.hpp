@@ -14,6 +14,7 @@ class QScrollArea;
 class DefCode;
 
 // Floating definition: file and line, then the comment, signature, and body.
+// Grows to the free screen space near the cursor; scrolls only when taller than that.
 // The code uses the diff colors, and long lines wrap the same way.
 // A definition in the hovered file is labeled Same file.
 class DefPopup : public QFrame {
@@ -26,7 +27,7 @@ protected:
     void leaveEvent(QEvent *event) override;
 
 private:
-    void fitCode(const QFont &font, const QString &code, const QString &path);
+    void fitCode(const QFont &font, const QString &code, const QString &path, const QPoint &global);
     void place(const QPoint &global);
 
     QLabel *m_path = nullptr;

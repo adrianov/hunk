@@ -11,7 +11,7 @@
 class DefCode : public QWidget {
 public:
     explicit DefCode(QWidget *parent = nullptr);
-    QSize showText(const QString &text, const QString &path, const QFont &font, int barW);
+    QSize showText(const QString &text, const QString &path, const QFont &font, int barW, int maxH);
 
 protected:
     void paintEvent(QPaintEvent *event) override;

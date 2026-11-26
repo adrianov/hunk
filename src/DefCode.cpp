@@ -46,9 +46,9 @@ int pieceRows(const QList<Piece> &pieces)
     return qMax(rows, 1);
 }
 
-int wrapWidth(int textW, int rows, int lineH, int barW)
+int wrapWidth(int textW, int rows, int lineH, int barW, int maxH)
 {
-    if (rows * lineH > 320 && barW > 0)
+    if (rows * lineH > maxH && barW > 0)
         return qMax(80, textW - barW);
     return textW;
 }
@@ -79,16 +79,17 @@ int DefCode::showLines(const FileDiff &file, const QFont &font, int textW)
     return rows;
 }
 
-QSize DefCode::showText(const QString &text, const QString &path, const QFont &font, int barW)
+QSize DefCode::showText(const QString &text, const QString &path, const QFont &font, int barW, int maxH)
 {
     const FileDiff file = colorDef(text, path);
     const int lineH = QFontMetrics(font).height() + 4;
     const int textW = textWidth(font, text);
-    const int narrowed = wrapWidth(textW, showLines(file, font, textW), lineH, barW);
+    const int cap = qMax(lineH, maxH);
+    const int narrowed = wrapWidth(textW, showLines(file, font, textW), lineH, barW, cap);
     if (narrowed != textW)
         showLines(file, font, narrowed);
-    const int paneW = QWidget::width() + (QWidget::height() > 320 ? barW : 0);
-    return QSize(paneW, qMin(QWidget::height(), 320));
+    const int paneW = QWidget::width() + (QWidget::height() > cap ? barW : 0);
+    return QSize(paneW, qMin(QWidget::height(), cap));
 }
 
 void DefCode::paintEvent(QPaintEvent *)
