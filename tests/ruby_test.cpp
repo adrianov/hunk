@@ -93,15 +93,15 @@ void testMemoize()
     QTemporaryDir dir;
     const QString root = dir.path();
     writeAt(QDir(root).filePath("build.rb"),
-            "class Build\nmemoize def cart_items\nitems\nend\ndef build\ncart_items\nend\n");
+            "class Build\nuse def things\nmemoize def cart_items\nitems\nend\ndef build\ncart_items\nend\n");
     warmLang(root);
     LangSpot spot;
     spot.root = root;
     spot.path = "build.rb";
-    spot.line = 6;
+    spot.line = 7;
     spot.name = "cart_items";
     const LangDef def = lookupDef(spot);
-    CHECK(def.line == 2 && def.signature.contains("memoize") && def.body.contains("items"));
+    CHECK(def.line == 3 && def.body.contains("items") && !lookupName(root, "build.rb", "things").found());
 }
 
 } // namespace

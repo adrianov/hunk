@@ -357,6 +357,8 @@ Feature: Diff view
     And a short class name such as CatalogSource.model counts
     And a bare call in the same module counts
     And a method written as "memoize def cart_items" opens from "cart_items.filter_map"
+    And "private def", "public def", and "protected def" open the same way
+    And a line such as "use def things" does not
     And a field of that name on another class, such as Current.status_change_context, does not
     And for initialize that call is .new on the class
 

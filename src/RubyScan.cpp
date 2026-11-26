@@ -30,7 +30,17 @@ bool defKey(const QString &line, int at, int *next)
     return true;
 }
 
-// Index of "def", including a modifier such as "memoize def cart_items". -1 when the line is not a method.
+bool modifier(const QString &word)
+{
+    static const char *names[] = {"memoize", "private", "public", "protected", nullptr};
+    for (const char *const *name = names; *name; ++name) {
+        if (word == QLatin1String(*name))
+            return true;
+    }
+    return false;
+}
+
+// Index of "def", including "memoize def" and a visibility modifier. -1 when the line is not a method.
 int defAt(const QString &line)
 {
     int at = rubySkip(line, 0);
@@ -38,7 +48,7 @@ int defAt(const QString &line)
     if (defKey(line, at, &next))
         return at;
     QString word;
-    if (!rubyWord(line, at, &word, &next))
+    if (!rubyWord(line, at, &word, &next) || !modifier(word))
         return -1;
     at = rubySkip(line, next);
     return defKey(line, at, &next) ? at : -1;
