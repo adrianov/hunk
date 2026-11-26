@@ -48,6 +48,21 @@ QStringList pathTargets(const QString &text, int column)
     return {};
 }
 
+// require_relative 'name' or "name" (optional parens): paths beside the doc, with .rb when omitted.
+QStringList relativeTargets(const QString &text, int column)
+{
+    static const QRegularExpression re(QStringLiteral(R"(require_relative\s*\(?\s*(['"])([^'"]+)\1)"));
+    for (auto it = re.globalMatch(text); it.hasNext();) {
+        const QRegularExpressionMatch match = it.next();
+        if (column < match.capturedStart(2) || column >= match.capturedEnd(2))
+            continue;
+        const QString word = match.captured(2);
+        return word.endsWith(QLatin1String(".rb")) ? QStringList{word}
+                                                   : QStringList{word + QLatin1String(".rb"), word};
+    }
+    return {};
+}
+
 // The first of those targets, read from the doc, that is a file under the root.
 QString firstFile(const QString &root, const QString &doc, const QStringList &targets)
 {
@@ -57,9 +72,20 @@ QString firstFile(const QString &root, const QString &doc, const QStringList &ta
     return {};
 }
 
+// require_relative stays beside the file. Other hits use a markdown link or a plain path.
+QStringList linkTargets(Lang lang, const QString &text, const QList<SynSpan> &spans, int column)
+{
+    if (lang == Lang::Ruby) {
+        if (const QStringList relative = relativeTargets(text, column); !relative.isEmpty())
+            return relative;
+    }
+    const QString target = lang == Lang::Markdown ? linkTarget(text, spans, column) : QString();
+    return QStringList{target} + pathTargets(text, column);
+}
+
 } // namespace
 
-// The repository file named by the markdown link or the path under the pointer.
+// The repository file named by the markdown link, require_relative, or the path under the pointer.
 QString DiffCanvas::linkPath(const TextMark &hit) const
 {
     if (!hit.code || m_root.isEmpty())
@@ -68,7 +94,5 @@ QString DiffCanvas::linkPath(const TextMark &hit) const
     const QString path = sidePath(file, hit.old);
     const DiffRow &row = file.rows.at(hit.row);
     const QString &text = hit.old ? row.leftText : row.rightText;
-    const QString target =
-        langFor(path) == Lang::Markdown ? linkTarget(text, hit.old ? row.leftSyn : row.rightSyn, hit.pos) : QString();
-    return firstFile(m_root, path, QStringList{target} + pathTargets(text, hit.pos));
+    return firstFile(m_root, path, linkTargets(langFor(path), text, hit.old ? row.leftSyn : row.rightSyn, hit.pos));
 }

@@ -517,6 +517,17 @@ Feature: Diff view
     And a path that starts with "./" or "../" is read only beside that file
     And a path to a missing file, or the blank space after a path, keeps the text cursor
 
+  Scenario: Open a file require_relative names
+    Given a diff of "app/api/api_v1/validations.rb"
+    And a line reads "require_relative 'bot_task_id'"
+    When I hold Command on macOS, or Control on Linux, over "bot_task_id"
+    Then the pointer is a hand
+    When I Command-click that name on macOS, or Control-click it on Linux
+    Then the diff shows "app/api/api_v1/bot_task_id.rb" from its first line
+    And require_relative with double quotes or parentheses opens the same way
+    And a path with ".rb", or with "./" or "../", is read beside that file
+    And a missing file keeps the text cursor
+
   Scenario: A markdown file can be read rendered
     Given a diff of "README.md"
     Then Source and Rendered sit on that file's title, beside its added and removed counts
