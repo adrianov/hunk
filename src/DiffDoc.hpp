@@ -67,6 +67,8 @@ struct FileDiff {
     bool added = false;
     bool removed = false;
     bool binary = false;
+    // Open beside the changeset. Its check closes it instead of marking it reviewed.
+    bool opened = false;
     int adds = 0;
     int dels = 0;
     qint64 modified = 0;
@@ -82,6 +84,8 @@ struct FileDiff {
     QString title() const;
     QString shortName() const;
     QString modifiedText() const;
+    QString markTip() const;
+    QString paneLabel(const QString &branch) const;
 
     QString folder() const
     {
@@ -90,11 +94,13 @@ struct FileDiff {
         return slash >= 0 ? p.left(slash) : QString();
     }
 
+    // One pane when there is nothing to compare: a new file, or an unchanged
+    // file opened beside the changeset.
     bool singlePane() const
     {
         if (removed || binary || rows.isEmpty())
             return false;
-        if (added)
+        if (added || (adds == 0 && dels == 0))
             return true;
         for (const DiffRow &row : rows) {
             if (row.kind != RowKind::Add)

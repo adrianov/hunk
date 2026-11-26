@@ -42,8 +42,8 @@ void paintMessage(QPainter &painter, const QRect &rect, const QFont &font, const
 void DiffCanvas::paintSingle(QPainter &painter, const Band &band, const FileDiff &file, const DiffRow &row, int viewW)
 {
     const bool note = row.rightNum > 0 && m_notes.contains(noteKey(file.path(), false, row.rightNum));
-    paintOneSide(painter, 0, viewW, SideStyle::Add, row.heat, row.rightText, row.rightNum, row.rightPiece, note, band.y,
-                 band.h, band.file, band.row, false);
+    paintOneSide(painter, 0, viewW, rightStyle(row.kind), row.heat, row.rightText, row.rightNum, row.rightPiece, note,
+                 band.y, band.h, band.file, band.row, false);
 }
 
 void DiffCanvas::paintPair(QPainter &painter, const Band &band, const FileDiff &file, const DiffRow &row, int viewW)

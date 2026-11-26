@@ -38,6 +38,7 @@ private:
     void choose(int id);
     void apply();
     void showTitle(const FileDiff &file);
+    void setMarkTip(const QString &tip);
     void showDocs(const FileDiff &file);
     const FileDiff *currentFile() const;
 

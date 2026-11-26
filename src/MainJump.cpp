@@ -6,7 +6,9 @@
 #include "DiffCanvas.hpp"
 #include "MainSeen.hpp"
 #include "MdView.hpp"
+#include "ReviewStore.hpp"
 
+#include <QCheckBox>
 #include <QDir>
 #include <QFile>
 #include <QLineEdit>
@@ -30,6 +32,7 @@ bool readPlain(const QString &root, const QString &path, FileDiff *file)
     if (bytes.contains('\0'))
         return false;
     *file = unchangedFile(path, plainLines(bytes));
+    file->opened = true;
     seedModified(file, root);
     return true;
 }
@@ -68,6 +71,7 @@ void MainWindow::keepOpened()
         still.append(path);
     }
     m_opened = still;
+    fillDirFiles();
 }
 
 int MainWindow::plainIndex(const QString &path)
@@ -84,6 +88,26 @@ int MainWindow::plainIndex(const QString &path)
         m_opened.append(path);
     m_doc.files.append(plain);
     return m_doc.files.size() - 1;
+}
+
+void MainWindow::finishClose(int listed)
+{
+    showPlain();
+    if (m_doc.files.isEmpty())
+        m_diff->setMessage(QStringLiteral("No changes."));
+    showListed(listed);
+    m_store->sync(m_doc, m_cleanup->isChecked());
+    updateStatus();
+}
+
+void MainWindow::closeOpened(int file)
+{
+    const QString folder = m_doc.files.at(file).folder();
+    const int next = nextListed(file);
+    m_opened.removeAll(m_doc.files.at(file).path());
+    m_doc.files.removeAt(file);
+    forgetDir(folder);
+    finishClose(next - (next > file));
 }
 
 void MainWindow::showPlain()

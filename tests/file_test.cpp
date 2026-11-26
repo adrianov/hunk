@@ -97,9 +97,7 @@ FileDiff samplePlain()
 void testUnchangedFile()
 {
     const FileDiff file = samplePlain();
-    CHECK(file.adds == 0);
-    CHECK(file.dels == 0);
-    CHECK(file.rows.size() == 2);
+    CHECK(file.adds == 0 && file.dels == 0 && file.singlePane() && file.rows.size() == 2);
     CHECK(file.rows.at(0).kind == RowKind::Context);
     CHECK(file.rows.at(0).rightNum == 1);
     CHECK(file.rows.at(0).leftText == file.rows.at(0).rightText);

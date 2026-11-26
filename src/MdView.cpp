@@ -84,8 +84,10 @@ void MdView::apply()
     const FileDiff *file = currentFile();
     const bool md = file && markdownFile(*file);
     m_bar->setVisible(md);
-    if (md)
+    if (md) {
         showTitle(*file);
+        setMarkTip(file->markTip());
+    }
     if (md && m_on) {
         showDocs(*file);
         m_stack->setCurrentWidget(m_page);

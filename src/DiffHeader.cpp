@@ -129,7 +129,7 @@ void DiffCanvas::paintLabels(QPainter &painter, const Band &band, const FileDiff
     painter.setFont(font());
     if (file.singlePane()) {
         painter.drawText(QRect(12, band.y, viewW - 16, band.h), Qt::AlignVCenter | Qt::AlignLeft,
-                         m_rightLabel + QStringLiteral(" (new file)"));
+                         file.paneLabel(m_rightLabel));
         return;
     }
     paintPairLabels(painter, band.y, band.h, pairSplit(viewW), viewW, m_leftLabel, m_rightLabel);

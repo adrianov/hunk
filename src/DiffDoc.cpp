@@ -87,6 +87,18 @@ QString FileDiff::modifiedText() const
     return QLocale::system().toString(QDateTime::fromMSecsSinceEpoch(modified), QLocale::ShortFormat);
 }
 
+QString FileDiff::markTip() const
+{
+    return opened ? QStringLiteral("Close") : QStringLiteral("Mark as Reviewed");
+}
+
+QString FileDiff::paneLabel(const QString &branch) const
+{
+    if (added)
+        return branch + QStringLiteral(" (new file)");
+    return branch;
+}
+
 void seedModified(FileDiff *file, const QString &root)
 {
     if (!file || file->removed || root.isEmpty())

@@ -35,6 +35,7 @@ public:
     }
 
     std::function<void()> review;
+    QString label = QStringLiteral("Mark as Reviewed");
 
 protected:
     void paintEvent(QPaintEvent *) override
@@ -60,7 +61,7 @@ protected:
             return;
         m_hot = hot;
         setCursor(hot ? Qt::PointingHandCursor : Qt::ArrowCursor);
-        setToolTip(hot ? QStringLiteral("Mark as reviewed") : QString());
+        setToolTip(hot ? label : QString());
         update();
     }
 
@@ -116,6 +117,11 @@ void placeBar(QWidget *bar, int height, QLabel *title, QLabel *counts, QPushButt
 }
 
 } // namespace
+
+void MdView::setMarkTip(const QString &tip)
+{
+    static_cast<MdBar *>(m_bar)->label = tip;
+}
 
 void MdView::buildBar()
 {

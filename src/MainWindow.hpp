@@ -127,6 +127,16 @@ private:
     void keepOpened();
     void openDefinition(const QString &path, int line);
     void openHit(const QString &path);
+    void dropOpened();
+    void dropDirCache();
+    void fillDirFiles();
+    void forgetDir(const QString &folder);
+    void showDirFiles(const QString &folder);
+    void hideDirFiles(const QString &folder);
+    void toggleDirFiles(const QString &folder);
+    void launchDir(const QString &folder, bool focus);
+    void applyDir(int token, const QString &folder, const QStringList &paths, bool focus);
+    void applyDirPaths(const QStringList &paths, bool focus);
     int plainIndex(const QString &path);
     void showPlain();
     void showAt(int file, int line);
@@ -148,6 +158,8 @@ private:
     void loadSeen();
     void markSeenFile(int file);
     void hideReviewed(int file);
+    void closeOpened(int file);
+    void finishClose(int listed);
     void noteReviewed(const FileDiff &diff);
     int nextListed(int file) const;
     void showListed(int file);
@@ -210,6 +222,9 @@ private:
     QString m_leftLabel;
     QString m_rightLabel;
     QStringList m_opened;
+    QSet<QString> m_fullDirs;
+    QHash<QString, QStringList> m_dirPaths;
+    int m_dirGen = 0;
     QString m_startPath;
     QString m_title;
     QString m_conflict;

@@ -34,6 +34,12 @@ QTreeWidgetItem *checkItem(QTreeWidget *tree, const QPoint &pos)
     return fileCheckRect(tree->visualItemRect(item)).contains(pos) ? item : nullptr;
 }
 
+QString markTipAt(const DiffDoc &doc, const QTreeWidgetItem *item)
+{
+    const int file = item->data(0, Qt::UserRole).toInt();
+    return file >= 0 && file < doc.files.size() ? doc.files.at(file).markTip() : QString();
+}
+
 } // namespace
 
 void MainWindow::hoverCheck(const QPoint &pos)
@@ -47,7 +53,7 @@ void MainWindow::hoverCheck(const QPoint &pos)
     if (auto *prior = reinterpret_cast<QTreeWidgetItem *>(was))
         prior->setToolTip(0, fileTip(prior));
     if (item)
-        item->setToolTip(0, QStringLiteral("Mark as reviewed"));
+        item->setToolTip(0, markTipAt(m_doc, item));
     m_tree->setProperty("checkHot", now);
     m_tree->viewport()->update();
 }
@@ -113,6 +119,10 @@ void MainWindow::hideReviewed(int file)
 {
     if (m_smoke || m_root.isEmpty() || file < 0 || file >= m_doc.files.size())
         return;
+    if (m_doc.files.at(file).opened) {
+        closeOpened(file);
+        return;
+    }
     const int next = nextListed(file);
     noteReviewed(m_doc.files.at(file));
     applyHidden();

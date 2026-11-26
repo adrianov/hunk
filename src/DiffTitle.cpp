@@ -55,7 +55,7 @@ bool DiffCanvas::hoverTitle(int x, int viewY)
     if (hot == m_checkFile)
         return hot >= 0;
     m_checkFile = hot;
-    setToolTip(hot >= 0 ? QStringLiteral("Mark as reviewed") : QString());
+    setToolTip(hot >= 0 && hot < m_doc.files.size() ? m_doc.files.at(hot).markTip() : QString());
     if (hot >= 0) {
         m_hoverFile = m_hoverRow = -1;
         viewport()->setCursor(Qt::PointingHandCursor);
