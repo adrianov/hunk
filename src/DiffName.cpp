@@ -48,7 +48,9 @@ QString DiffCanvas::methodName(int file, int row, bool old, int column, int *lin
     const QString text = old ? lineRow.leftText : lineRow.rightText;
     const QList<SynSpan> spans = old ? lineRow.leftSyn : lineRow.rightSyn;
     *line = old ? lineRow.leftNum : lineRow.rightNum;
-    const QString name = spanName(text, spans, column, path);
+    QString name = spanName(text, spans, column, path);
+    if (name.isEmpty())
+        name = rubyGroupName(m_root, path, *line, column);
     if (receiver)
         *receiver = ledReceiver(m_root, path, *line, column, name, text, dotReceiver(text, spans, column));
     return name;

@@ -333,6 +333,13 @@ Feature: Diff view
     When I Command-click ":check_api_token" in "before_action :check_api_token"
     Then the diff shows "def check_api_token", not that before_action line
     And the same holds for other callbacks such as after_save, around_action, skip_before_action, validate, and helper_method
+    When I Command-click the name in "include_context 'when the instance processes bot orders'"
+    Then the diff shows that shared context
+    And hovering that name, or include_context itself, shows the shared context, its comment, and its body
+    And the same holds for include_examples, it_behaves_like, and it_should_behave_like
+    And a call split over lines, such as it_behaves_like with the name on the next line, opens it too
+    And a later argument, such as the path, does not
+    And those open shared_examples and shared_examples_for the same way
     When I Command-click a method name on its def on macOS, or Control-click it on Linux
     Then the diff shows a call to that method
     And that call is in the application when one exists, not a spec

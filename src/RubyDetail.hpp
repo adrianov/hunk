@@ -61,6 +61,31 @@ QString rubyJoin(const QStringList &lines, int first, int last);
 LangDef rubyAt(const QStringList &lines, int line, const QString &path);
 bool rubyClosed(const QString &line);
 bool rubyDsl(const QString &line, QString *name);
+// Shared example groups: include_context and it_behaves_like open shared_context and shared_examples.
+struct RubyArg {
+    QString word;
+    QString name;
+    int call = 0;
+    int line = 0;
+    int start = 0;
+    int end = 0;
+};
+
+enum class RubyKind { None, Wait, Found };
+
+bool rubyHead(const QString &line, QString *word, int *next);
+bool rubySharedWord(const QString &word);
+RubyKind rubyTake(const QString &text, int at, RubyArg *arg);
+bool rubySharedStart(const QString &line);
+bool rubyShared(const QString &text, QString *name);
+bool rubyOnWord(const QString &line, int column, const QString &word);
+QStringList rubyFileLines(const QString &root, const QString &path, int line);
+bool rubyIncludeWord(const QString &word);
+QString rubyGroupName(const QString &root, const QString &path, int line, int column);
+QString rubyGroupSeek(const QString &root, const QString &path, int line, const QString &name);
+bool rubyGroupExtra(const LangSpot &spot, LangDef *out);
+LangDef rubyGroupChoose(const QList<LangDef> &hits, const LangSpot &spot);
+void rubyGroupNote(const QStringList &lines, const QString &path, QHash<QString, QList<LangDef>> *out);
 void rubyWrap(LangDef *def, const QStringList &opens);
 void noteRuby(const QStringList &lines, const QString &path, QHash<QString, QList<LangDef>> *out);
 void rubyUses(const QStringList &lines, const QString &path, const QStringList &names,

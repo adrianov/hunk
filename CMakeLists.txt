@@ -72,6 +72,8 @@ add_library(hunk_core STATIC
   src/RubyLocal.cpp
   src/RubyAssign.cpp
   src/RubyDsl.cpp
+  src/RubyArg.cpp
+  src/RubyGroup.cpp
   src/RubyChain.cpp
   src/RubyLead.cpp
   src/RubyDetail.cpp
@@ -236,6 +238,8 @@ add_executable(hunk_test
   tests/ruby_test.cpp
   tests/ruby_pick.cpp
   tests/ruby_name.cpp
+  tests/ruby_group.cpp
+  tests/ruby_like.cpp
   tests/ruby_recv.cpp
   tests/ruby_type.cpp
   tests/ruby_prec.cpp

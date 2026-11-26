@@ -45,7 +45,8 @@ void rubyReset(int ticket)
 const LangTune *rubyLayer()
 {
     static const LangTune tune = {
-        Lang::Ruby, true, true, true, true, rubySpan, rubySeek, rubyExtra, rubyChoose, noteRuby, rubyUses, rubyReset,
+        Lang::Ruby, true, true, true, true, rubySpan, rubyGroupSeek, rubyGroupExtra, rubyGroupChoose, rubyGroupNote,
+        rubyUses, rubyReset,
     };
     return &tune;
 }

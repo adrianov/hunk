@@ -145,6 +145,7 @@ int fileTests();
 int reviewTests();
 int shiftTests();
 int rubyTests();
+int rubyGroupTests();
 
 int main(int argc, char **argv)
 {
@@ -156,6 +157,7 @@ int main(int argc, char **argv)
     g_fails += reviewTests();
     g_fails += shiftTests();
     g_fails += rubyTests();
+    g_fails += rubyGroupTests();
     Q_UNUSED(app);
     return g_fails == 0 ? 0 : 1;
 }
