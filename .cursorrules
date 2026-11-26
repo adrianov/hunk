@@ -15,7 +15,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/MainAbout.cpp` — About dialog
 - `src/MainFilePane.cpp` — file list, name filter, content search, and the totals bar
 - `src/MainPathMenu.cpp` — copy relative paths, and show or hide every file in a folder
-- `src/MainDir.cpp` — open or close all files under a folder; lists those paths in the background (same pattern as repository search hits) and keeps a per-folder cache invalidated on reload and watch events
+- `src/MainDir.cpp` — open or close all files under a folder; lists and reads those files in the background (coalesced on watch like repository search hits) and keeps a per-folder cache invalidated on reload and watch events
 - `src/MainTree.cpp` — folder tree, and a repository search when the changeset has no match
 - `src/MainHits.cpp` — repository files listed when a search misses the changeset
 - `src/MainHide.cpp` — hide a reviewed file until it changes, show it again, or close a file that is not in the changeset

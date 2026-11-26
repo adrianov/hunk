@@ -49,6 +49,7 @@ void MainWindow::wireStore()
     m_watch.setInterval(400);
     connect(&m_watch, &QTimer::timeout, this, &MainWindow::reloadQuiet);
     armGrepTimer();
+    armDirTimer();
     connect(&m_disk, &QFileSystemWatcher::directoryChanged, this, &MainWindow::noteDisk);
     connect(qApp, &QGuiApplication::applicationStateChanged, this, &MainWindow::watchApp);
     connect(m_git, &GitRepo::ready, this, &MainWindow::onReady);

@@ -129,14 +129,17 @@ private:
     void openHit(const QString &path);
     void dropOpened();
     void dropDirCache();
+    void armDirTimer();
+    void armDirs();
+    void launchDirs();
     void fillDirFiles();
     void forgetDir(const QString &folder);
     void showDirFiles(const QString &folder);
     void hideDirFiles(const QString &folder);
     void toggleDirFiles(const QString &folder);
     void launchDir(const QString &folder, bool focus);
-    void applyDir(int token, const QString &folder, const QStringList &paths, bool focus);
-    void applyDirPaths(const QStringList &paths, bool focus);
+    void applyDir(int token, const QString &folder, const QList<FileDiff> &files, bool focus);
+    void applyDirFiles(const QList<FileDiff> &files, bool focus);
     int plainIndex(const QString &path);
     void showPlain();
     void showAt(int file, int line);
@@ -223,7 +226,7 @@ private:
     QString m_rightLabel;
     QStringList m_opened;
     QSet<QString> m_fullDirs;
-    QHash<QString, QStringList> m_dirPaths;
+    QHash<QString, QList<FileDiff>> m_dirFiles;
     int m_dirGen = 0;
     QString m_startPath;
     QString m_title;
@@ -235,6 +238,7 @@ private:
     QString m_appliedDiff;
     QTimer m_watch;
     QTimer m_grep;
+    QTimer m_dir;
     QFileSystemWatcher m_disk;
     QString m_gitDir;
     QString m_watchRoot;

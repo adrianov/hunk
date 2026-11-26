@@ -114,7 +114,7 @@ void MainWindow::noteDisk(const QString &path)
             markGap();
     }
     if (!m_fullDirs.isEmpty())
-        fillDirFiles();
+        armDirs();
     scheduleWatch();
 }
 

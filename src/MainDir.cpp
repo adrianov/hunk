@@ -56,6 +56,18 @@ bool dirStillOpen(const DiffDoc &doc, const QString &folder)
     return false;
 }
 
+int takePlain(DiffDoc *doc, QStringList *opened, const FileDiff &plain)
+{
+    const QString path = plain.path();
+    const int found = fileNamed(*doc, path);
+    if (found >= 0)
+        return found;
+    if (!opened->contains(path))
+        opened->append(path);
+    doc->files.append(plain);
+    return doc->files.size() - 1;
+}
+
 } // namespace
 
 void MainWindow::dropOpened()
@@ -68,7 +80,28 @@ void MainWindow::dropOpened()
 void MainWindow::dropDirCache()
 {
     ++m_dirGen;
-    m_dirPaths.clear();
+    m_dirFiles.clear();
+    m_dir.stop();
+}
+
+void MainWindow::armDirTimer()
+{
+    m_dir.setSingleShot(true);
+    m_dir.setInterval(250);
+    connect(&m_dir, &QTimer::timeout, this, &MainWindow::launchDirs);
+}
+
+void MainWindow::armDirs()
+{
+    dropDirCache();
+    if (!m_root.isEmpty() && !m_fullDirs.isEmpty())
+        m_dir.start();
+}
+
+void MainWindow::launchDirs()
+{
+    for (const QString &folder : m_fullDirs)
+        launchDir(folder, false);
 }
 
 void MainWindow::fillDirFiles()
@@ -84,20 +117,17 @@ void MainWindow::forgetDir(const QString &folder)
         m_fullDirs.remove(folder);
 }
 
-void MainWindow::applyDirPaths(const QStringList &paths, bool focus)
+void MainWindow::applyDirFiles(const QList<FileDiff> &files, bool focus)
 {
     const int before = m_doc.files.size();
-    int first = -1;
-    for (const QString &path : paths) {
-        const int file = plainIndex(path);
-        if (file < 0)
-            continue;
-        if (first < 0)
-            first = file;
-    }
+    for (const FileDiff &plain : files)
+        takePlain(&m_doc, &m_opened, plain);
     if (m_doc.files.size() != before)
         showPlain();
-    if (!focus || first < 0)
+    if (!focus || files.isEmpty())
+        return;
+    const int first = fileNamed(m_doc, files.constFirst().path());
+    if (first < 0)
         return;
     m_diff->showFile(first);
     selectTreeFile(first);
@@ -107,9 +137,9 @@ void MainWindow::applyDirPaths(const QStringList &paths, bool focus)
 void MainWindow::showDirFiles(const QString &folder)
 {
     m_fullDirs.insert(folder);
-    const auto found = m_dirPaths.constFind(folder);
-    if (found != m_dirPaths.cend())
-        applyDirPaths(found.value(), true);
+    const auto found = m_dirFiles.constFind(folder);
+    if (found != m_dirFiles.cend())
+        applyDirFiles(found.value(), true);
     else
         launchDir(folder, true);
 }
@@ -131,12 +161,12 @@ void MainWindow::toggleDirFiles(const QString &folder)
         showDirFiles(folder);
 }
 
-void MainWindow::applyDir(int token, const QString &folder, const QStringList &paths, bool focus)
+void MainWindow::applyDir(int token, const QString &folder, const QList<FileDiff> &files, bool focus)
 {
     if (token != m_dirGen || !m_fullDirs.contains(folder))
         return;
-    m_dirPaths.insert(folder, paths);
-    applyDirPaths(paths, focus);
+    m_dirFiles.insert(folder, files);
+    applyDirFiles(files, focus);
 }
 
 void MainWindow::launchDir(const QString &folder, bool focus)
@@ -145,10 +175,10 @@ void MainWindow::launchDir(const QString &folder, bool focus)
     const int token = m_dirGen;
     if (root.isEmpty())
         return;
-    auto *watcher = new QFutureWatcher<QStringList>(this);
-    connect(watcher, &QFutureWatcher<QStringList>::finished, this, [this, watcher, token, folder, focus]() {
+    auto *watcher = new QFutureWatcher<QList<FileDiff>>(this);
+    connect(watcher, &QFutureWatcher<QList<FileDiff>>::finished, this, [this, watcher, token, folder, focus]() {
         applyDir(token, folder, watcher->result(), focus);
         watcher->deleteLater();
     });
-    watcher->setFuture(QtConcurrent::run([root, folder]() { return dirFiles(root, folder); }));
+    watcher->setFuture(QtConcurrent::run([root, folder]() { return dirPlain(root, folder); }));
 }

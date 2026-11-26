@@ -3,8 +3,10 @@
 
 #pragma once
 
+#include "DiffDoc.hpp"
 #include "GitRepo.hpp"
 
+#include <QList>
 #include <QString>
 #include <QStringList>
 
@@ -39,3 +41,5 @@ void fillDocGaps(DiffDoc *doc, const GitResult &result);
 QStringList grepFiles(const QString &root, const QString &query);
 // Tracked and untracked files directly under `folder` (empty for the repository root).
 QStringList dirFiles(const QString &root, const QString &folder);
+// Those paths with each readable file loaded as an opened unchanged FileDiff.
+QList<FileDiff> dirPlain(const QString &root, const QString &folder);

@@ -53,6 +53,17 @@ QStringList dirFiles(const QString &root, const QString &folder)
     return paths;
 }
 
+QList<FileDiff> dirPlain(const QString &root, const QString &folder)
+{
+    QList<FileDiff> files;
+    for (const QString &path : dirFiles(root, folder)) {
+        FileDiff plain;
+        if (loadPlain(root, path, &plain))
+            files.append(plain);
+    }
+    return files;
+}
+
 void MainWindow::armHits(const QString &search)
 {
     ++m_grepGen;
