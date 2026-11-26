@@ -5,50 +5,9 @@
 
 #include "DiffFold.hpp"
 
-#include <QDateTime>
 #include <QStringList>
 
 namespace {
-
-bool wordChar(QChar ch)
-{
-    return ch.isLetterOrNumber() || ch == QLatin1Char('_');
-}
-
-int wordStart(const QString &text, int at)
-{
-    while (at > 0 && wordChar(text.at(at - 1)))
-        --at;
-    return at;
-}
-
-int wordEnd(const QString &text, int at)
-{
-    int end = at + 1;
-    while (end < text.size() && wordChar(text.at(end)))
-        ++end;
-    return end;
-}
-
-int wordPos(const QString &text, int pos)
-{
-    int at = qBound(0, pos, int(text.size()));
-    if (at > 0 && (at == text.size() || !wordChar(text.at(at))))
-        --at;
-    return at;
-}
-
-void widenWord(const QString &text, int pos, int *from, int *to)
-{
-    const int at = wordPos(text, pos);
-    if (text.isEmpty() || !wordChar(text.at(at))) {
-        *from = at;
-        *to = qMin(at + 1, int(text.size()));
-        return;
-    }
-    *from = wordStart(text, at);
-    *to = wordEnd(text, at);
-}
 
 QString sideLine(const DiffRow &row, bool old)
 {
@@ -112,23 +71,6 @@ void appendDiff(QStringList *lines, const DiffRow &row)
 }
 
 } // namespace
-
-void DiffCanvas::takeWord(const TextMark &hit)
-{
-    int from = 0;
-    int to = 0;
-    widenWord(sideLine(m_doc.files.at(hit.file).rows.at(hit.row), hit.old), hit.pos, &from, &to);
-    m_anchor = hit;
-    m_caret = hit;
-    m_anchor.pos = from;
-    m_caret.pos = to;
-    m_selFile = hit.file;
-    m_selRow = hit.row;
-    m_selOld = hit.old;
-    m_goal = -1;
-    m_wordMs = QDateTime::currentMSecsSinceEpoch();
-    viewport()->update();
-}
 
 bool DiffCanvas::markEnds(TextMark *from, TextMark *to) const
 {

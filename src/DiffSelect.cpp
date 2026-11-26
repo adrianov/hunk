@@ -106,6 +106,13 @@ DiffCanvas::TextMark DiffCanvas::textAt(int x, int y) const
     return codeAt(mark, file.rows.at(band->row), x - origin - m_gutterW - 8, y - band->y);
 }
 
+void DiffCanvas::holdText()
+{
+    m_dragText = true;
+    viewport()->grabMouse();
+    viewport()->setCursor(Qt::IBeamCursor);
+}
+
 void DiffCanvas::beginText(int x, int y, bool extend)
 {
     m_wordMs = 0;
@@ -119,17 +126,17 @@ void DiffCanvas::beginText(int x, int y, bool extend)
         m_anchor = hit;
     m_caret = hit;
     m_goal = -1;
-    m_dragText = true;
-    viewport()->grabMouse();
-    viewport()->setCursor(Qt::IBeamCursor);
+    holdText();
     viewport()->update();
 }
 
 void DiffCanvas::dragText(int x, int y)
 {
-    const TextMark hit = textAt(x, y);
+    TextMark hit = textAt(x, y);
     if (!hit.code || hit.file != m_anchor.file || hit.old != m_anchor.old)
         return;
+    if (m_wordMs > 0)
+        stretchWord(&hit);
     if (hit.row == m_caret.row && hit.pos == m_caret.pos)
         return;
     m_caret = hit;

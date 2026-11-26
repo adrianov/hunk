@@ -182,12 +182,14 @@ private:
     void beginText(int x, int y, bool extend);
     TextMark codeAt(TextMark mark, const DiffRow &row, int localX, int localY) const;
     void takeWord(const TextMark &hit);
+    void stretchWord(TextMark *hit);
     bool wordFresh() const;
     bool onWord(const TextMark &hit) const;
     bool lineMarked(const TextMark &hit) const;
     void markLine(const TextMark &hit, int size);
     TextMark clickMark(const QMouseEvent *mouse) const;
     bool takeLine(int x, int y);
+    void holdText();
     void dragText(int x, int y);
     void moveDrag(int x, int y);
     void armDrag();
@@ -282,6 +284,8 @@ private:
     TextMark m_caret;
     int m_goal = -1;
     qint64 m_wordMs = 0;
+    int m_wordFrom = 0;
+    int m_wordTo = 0;
     bool m_dragText = false;
     QTimer m_dragTimer;
     int m_hoverFile = -1;
