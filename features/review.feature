@@ -16,7 +16,7 @@ Feature: Review comments
   Scenario: Copy a line comment for an agent
     Given a diff of "src/app.rb"
     When I comment on line 1
-    And I copy reviews
+    And I choose Copy Reviews
     Then the clipboard contains "`src/app.rb:1`"
     And the clipboard contains that line's text
 
@@ -25,7 +25,7 @@ Feature: Review comments
     When I select the text of lines 2 through 4
     And I click a line number beside that selection
     Then the review comment refers to lines 2 through 4
-    When I copy reviews
+    When I choose Copy Reviews
     Then the clipboard contains "`src/app.rb:2-4`"
 
   Scenario: Comments stay with the app
@@ -47,9 +47,9 @@ Feature: Review comments
     Then the main toolbar does not show Comment
     And the Review menu still has Comment
 
-  Scenario: Copy reviews explains old lines only when one is commented
+  Scenario: Copy Reviews explains old lines only when one is commented
     Given every review comment is on the new side
-    When I copy reviews
+    When I choose Copy Reviews
     Then the clipboard does not explain what `(old)` means
 
   Scenario: Double-click a comment shows that line
@@ -67,14 +67,14 @@ Feature: Review comments
 
   Scenario: Clear all reviews
     Given the review list has comments
-    When I choose Clear reviews
+    When I choose Clear Reviews
     Then the review list is empty
     And those comments are gone from the diff
 
   Scenario: Auto cleanup starts on
     Given the review list is open
     Then auto cleanup of changed lines is on
-    And it sits near Copy reviews
+    And it sits near Copy Reviews
 
   Scenario: A changed line drops its review
     Given auto cleanup is on

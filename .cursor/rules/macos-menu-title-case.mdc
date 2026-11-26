@@ -1,0 +1,37 @@
+---
+description: Title-style capitalization for menu entries (macOS HIG)
+alwaysApply: true
+---
+
+# Menu title case
+
+Menu bar items, menu commands, and context-menu actions use macOS title-style
+capitalization (Apple HIG).
+
+## Rules
+
+- Capitalize the first and last word
+- Capitalize nouns, pronouns, adjectives, verbs, and adverbs
+- Do not capitalize articles (`a`, `an`, `the`), coordinating conjunctions
+  (`and`, `or`, `but`), or short prepositions (`in`, `of`, `to`, `for`, `on`,
+  `at`, `by`, `as`, …) unless they are the first or last word
+- Keep the same title when the same command also appears on a toolbar or button
+
+## Examples
+
+| Use | Avoid |
+| --- | --- |
+| Show All Files in the Directory | Show all files in the directory |
+| Hide Unchanged Files | Hide unchanged files |
+| Copy Relative Path | Copy relative path |
+| Copy Reviews | Copy reviews |
+| Clear Reviews | Clear reviews |
+| Copy Branch Name | Copy branch name |
+| Mark as Reviewed | Mark as reviewed |
+| No Recent Projects | No recent projects |
+
+## Not menus
+
+Field placeholders, status text, tooltips, and prose stay sentence case
+(`Filter files`, `Loading…`). When Gherkin or README names a menu command,
+quote the title-cased label.

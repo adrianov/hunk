@@ -30,7 +30,7 @@ void clickGutter(DiffCanvas *canvas)
 void triggerCopy(MainWindow &window)
 {
     for (QAction *action : window.actions()) {
-        if (action->text() == QLatin1String("Copy reviews"))
+        if (action->text() == QLatin1String("Copy Reviews"))
             action->trigger();
     }
 }

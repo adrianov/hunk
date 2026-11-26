@@ -55,9 +55,9 @@ QCheckBox *makeCleanup(QWidget *parent, bool smoke)
 
 QHBoxLayout *reviewButtons(QWidget *parent, QPushButton *&copy, QPushButton *&clear, QCheckBox *cleanup)
 {
-    copy = new QPushButton(QStringLiteral("Copy reviews"), parent);
+    copy = new QPushButton(QStringLiteral("Copy Reviews"), parent);
     setButtonIcon(copy, buttonIcon(ButtonIcon::Copy));
-    clear = new QPushButton(QStringLiteral("Clear reviews"), parent);
+    clear = new QPushButton(QStringLiteral("Clear Reviews"), parent);
     auto *buttons = new QHBoxLayout();
     buttons->addWidget(copy);
     buttons->addWidget(clear);

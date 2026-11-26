@@ -94,7 +94,7 @@ void MainWindow::fillRecent()
     const QStringList kept = keptRecent(storedRecent());
     saveRecent(m_smoke, kept);
     if (kept.isEmpty()) {
-        m_recent->addAction(QStringLiteral("No recent projects"))->setEnabled(false);
+        m_recent->addAction(QStringLiteral("No Recent Projects"))->setEnabled(false);
         return;
     }
     for (const QString &path : kept)

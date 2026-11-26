@@ -41,7 +41,7 @@ QAction *MainWindow::makeComment()
 
 QAction *MainWindow::makeCopy()
 {
-    auto *action = new QAction(buttonIcon(ButtonIcon::Copy), QStringLiteral("Copy reviews"), this);
+    auto *action = new QAction(buttonIcon(ButtonIcon::Copy), QStringLiteral("Copy Reviews"), this);
     action->setShortcut(Qt::CTRL | Qt::SHIFT | Qt::Key_C);
     action->setShortcutContext(Qt::WindowShortcut);
     action->setToolTip(QStringLiteral("Copy review comments for an LLM agent"));

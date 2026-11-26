@@ -24,6 +24,6 @@ Feature: Review comments
   Scenario: Copy a line comment for an agent
     Given a diff of "src/app.rb"
     When I comment on line 1
-    And I copy reviews
+    And I choose Copy Reviews
     Then the clipboard contains "`src/app.rb:1`"
 ```
