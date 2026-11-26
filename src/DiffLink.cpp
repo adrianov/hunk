@@ -48,17 +48,35 @@ QStringList pathTargets(const QString &text, int column)
     return {};
 }
 
-// require_relative 'name' or "name" (optional parens): paths beside the doc, with .rb when omitted.
-QStringList relativeTargets(const QString &text, int column)
+QStringList rubyNames(const QString &word)
 {
-    static const QRegularExpression re(QStringLiteral(R"(require_relative\s*\(?\s*(['"])([^'"]+)\1)"));
-    for (auto it = re.globalMatch(text); it.hasNext();) {
+    return word.endsWith(QLatin1String(".rb")) ? QStringList{word}
+                                               : QStringList{word + QLatin1String(".rb"), word};
+}
+
+QStringList loadTargets(const QString &word)
+{
+    if (word.startsWith(QLatin1Char('.')))
+        return rubyNames(word);
+    static const char *dirs[] = {"", "spec/", "test/", "lib/", "app/", nullptr};
+    QStringList targets;
+    for (const char *const *dir = dirs; *dir; ++dir) {
+        for (const QString &name : rubyNames(word))
+            targets.append(QLatin1Char('/') + QLatin1String(*dir) + name);
+    }
+    return targets;
+}
+
+// require_relative beside the doc; require from the root and common load paths. .rb when omitted.
+QStringList requireTargets(const QString &text, int column, bool relative)
+{
+    static const QRegularExpression rel(QStringLiteral(R"((?<!\w)require_relative\s*\(?\s*(['"])([^'"]+)\1)"));
+    static const QRegularExpression abs(QStringLiteral(R"((?<!\w)require(?!_relative)\s*\(?\s*(['"])([^'"]+)\1)"));
+    for (auto it = (relative ? rel : abs).globalMatch(text); it.hasNext();) {
         const QRegularExpressionMatch match = it.next();
         if (column < match.capturedStart(2) || column >= match.capturedEnd(2))
             continue;
-        const QString word = match.captured(2);
-        return word.endsWith(QLatin1String(".rb")) ? QStringList{word}
-                                                   : QStringList{word + QLatin1String(".rb"), word};
+        return relative ? rubyNames(match.captured(2)) : loadTargets(match.captured(2));
     }
     return {};
 }
@@ -72,12 +90,15 @@ QString firstFile(const QString &root, const QString &doc, const QStringList &ta
     return {};
 }
 
-// require_relative stays beside the file. Other hits use a markdown link or a plain path.
+// require_relative stays beside the file; require uses the root and load paths. Other hits use a
+// markdown link or a plain path.
 QStringList linkTargets(Lang lang, const QString &text, const QList<SynSpan> &spans, int column)
 {
     if (lang == Lang::Ruby) {
-        if (const QStringList relative = relativeTargets(text, column); !relative.isEmpty())
+        if (const QStringList relative = requireTargets(text, column, true); !relative.isEmpty())
             return relative;
+        if (const QStringList required = requireTargets(text, column, false); !required.isEmpty())
+            return required;
     }
     const QString target = lang == Lang::Markdown ? linkTarget(text, spans, column) : QString();
     return QStringList{target} + pathTargets(text, column);
@@ -85,7 +106,7 @@ QStringList linkTargets(Lang lang, const QString &text, const QList<SynSpan> &sp
 
 } // namespace
 
-// The repository file named by the markdown link, require_relative, or the path under the pointer.
+// The repository file named by the markdown link, require, require_relative, or the path under the pointer.
 QString DiffCanvas::linkPath(const TextMark &hit) const
 {
     if (!hit.code || m_root.isEmpty())
