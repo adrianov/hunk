@@ -144,6 +144,8 @@ void testContext()
 } // namespace
 
 void rubyLikeTests();
+void rubyGrapeTests();
+void rubyHelpersTests();
 
 int rubyGroupTests()
 {
@@ -152,5 +154,7 @@ int rubyGroupTests()
     testParseExamples();
     testContext();
     rubyLikeTests();
+    rubyGrapeTests();
+    rubyHelpersTests();
     return g_groupFails;
 }

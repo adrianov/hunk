@@ -63,7 +63,7 @@ QString rubyJoin(const QStringList &lines, int first, int last);
 LangDef rubyAt(const QStringList &lines, int line, const QString &path);
 bool rubyClosed(const QString &line);
 bool rubyDsl(const QString &line, QString *name);
-// Shared example groups: include_context and it_behaves_like open shared_context and shared_examples.
+// Named groups: include_context opens shared_context; Grape use :group opens params :group.
 struct RubyArg {
     QString word;
     QString name;
@@ -75,11 +75,31 @@ struct RubyArg {
 
 enum class RubyKind { None, Wait, Found };
 
+// Shared call+argument walk for include_context and Grape use (lookahead window and ownership).
+constexpr int kRubyArgLook = 8;
+bool rubyReadFirst(const QStringList &lines, int call, int at, RubyArg *group);
+bool rubyArgOwns(const RubyArg &group, int line, int at);
+QString rubySymAt(const QList<RubyArg> &syms, int line, int column, const QString &name = {});
+
 bool rubyHead(const QString &line, QString *word, int *next);
 bool rubySharedWord(const QString &word);
+bool rubyParamsWord(const QString &word);
+bool rubyUseWord(const QString &word);
 RubyKind rubyTake(const QString &text, int at, RubyArg *arg);
 bool rubySharedStart(const QString &line);
 bool rubyShared(const QString &text, QString *name);
+bool rubyParamsStart(const QString &line);
+bool rubyParams(const QString &text, QString *name);
+bool rubyNamedStart(const QString &signature);
+QString rubyUseKey(const LangSpot &spot, const QStringList &lines);
+QString rubyUseArgName(const QStringList &lines, int line, int column);
+QString rubyUseSought(const QStringList &lines, int line);
+void noteParamsGroups(const QStringList &lines, const QString &path, QHash<QString, QList<LangDef>> *out);
+bool rubyHelpersMix(const QString &line, QString *name);
+QString rubyHelpersSeek(const QString &root, const QString &path, int line, const QString &name);
+bool rubyHelpersExtra(const LangSpot &spot, LangDef *out);
+QString rubyGrapeSeek(const QString &root, const QString &path, int line, const QString &name);
+bool rubyGrapeExtra(const LangSpot &spot, LangDef *out);
 bool rubyOnWord(const QString &line, int column, const QString &word);
 QStringList rubyFileLines(const QString &root, const QString &path, int line);
 bool rubyIncludeWord(const QString &word);

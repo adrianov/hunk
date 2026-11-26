@@ -58,7 +58,10 @@ bool rubyDsl(const QString &line, QString *name)
 {
     int next = 0;
     QString word;
-    if (!rubyWord(line, rubySkip(line, 0), &word, &next) || callWord(word))
+    // Grape `use :group` copies a params group; it does not declare one. Rack `use Middleware` is not DSL.
+    // `params :group` is a named group, not a has_many-style declaration.
+    if (!rubyWord(line, rubySkip(line, 0), &word, &next) || callWord(word) || rubyUseWord(word)
+        || rubyParamsWord(word))
         return false;
     return dslArg(line, next, name);
 }

@@ -16,7 +16,9 @@ bool hashKey(const QString &text, int end)
 
 QString typeAt(const QString &text, int start, int end)
 {
-    const QString constant = rubyConst(text, start, end);
+    QString constant = rubyConst(text, start, end);
+    while (constant.startsWith(QLatin1String("::")))
+        constant.remove(0, 2);
     if (!constant.isEmpty() || start >= end || text.at(start) != QLatin1Char(':'))
         return constant;
     return text.mid(start + 1, end - start - 1);
@@ -45,7 +47,7 @@ void rubyReset(int ticket)
 const LangTune *rubyLayer()
 {
     static const LangTune tune = {
-        Lang::Ruby, true, true, true, true, rubySpan, rubyGroupSeek, rubyGroupExtra, rubyGroupChoose, rubyGroupNote,
+        Lang::Ruby, true, true, true, true, rubySpan, rubyGrapeSeek, rubyGrapeExtra, rubyGroupChoose, rubyGroupNote,
         rubyUses, rubyReset, rubyForward,
     };
     return &tune;

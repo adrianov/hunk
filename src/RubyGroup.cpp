@@ -8,43 +8,22 @@
 
 namespace {
 
-constexpr int kLook = 8;
-
-bool readFirst(const QStringList &lines, int call, int at, RubyArg *group)
-{
-    for (int line = call; line <= lines.size() && line < call + kLook; ++line) {
-        const RubyKind kind = rubyTake(lines.at(line - 1), line == call ? at : 0, group);
-        if (kind == RubyKind::Wait)
-            continue;
-        if (kind != RubyKind::Found)
-            return false;
-        group->line = line;
-        return true;
-    }
-    return false;
-}
-
-bool fillGroup(const QStringList &lines, int at, RubyArg *group)
+bool fillInclude(const QStringList &lines, int at, RubyArg *group)
 {
     int next = 0;
     if (!rubyHead(lines.at(at - 1), &group->word, &next) || next <= 0 || !rubyIncludeWord(group->word))
         return false;
     group->call = at;
-    return readFirst(lines, at, next, group);
+    return rubyReadFirst(lines, at, next, group);
 }
 
-bool owns(const RubyArg &group, int line, int at)
-{
-    return group.line == line || at == line;
-}
-
-RubyArg argAt(const QStringList &lines, int line)
+RubyArg includeAt(const QStringList &lines, int line)
 {
     RubyArg group;
-    for (int at = line; at >= 1 && line - at < kLook; --at) {
-        if (!fillGroup(lines, at, &group))
+    for (int at = line; at >= 1 && line - at < kRubyArgLook; --at) {
+        if (!fillInclude(lines, at, &group))
             continue;
-        if (owns(group, line, at))
+        if (rubyArgOwns(group, line, at))
             return group;
         return {};
     }
@@ -62,9 +41,9 @@ bool onArg(const RubyArg &group, const LangSpot &spot)
         && spot.column < group.end;
 }
 
-QString groupKey(const LangSpot &spot, const QStringList &lines)
+QString includeKey(const LangSpot &spot, const QStringList &lines)
 {
-    const RubyArg group = argAt(lines, spot.line);
+    const RubyArg group = includeAt(lines, spot.line);
     if (group.name.isEmpty())
         return {};
     if (onCall(group, spot, lines.at(spot.line - 1)) || onArg(group, spot))
@@ -72,11 +51,17 @@ QString groupKey(const LangSpot &spot, const QStringList &lines)
     return {};
 }
 
+QString groupKey(const LangSpot &spot, const QStringList &lines)
+{
+    const QString include = includeKey(spot, lines);
+    return include.isEmpty() ? rubyUseKey(spot, lines) : include;
+}
+
 QList<LangDef> codeHits(const QList<LangDef> &hits)
 {
     QList<LangDef> code;
     for (const LangDef &def : hits) {
-        if (!rubySharedStart(def.signature))
+        if (!rubyNamedStart(def.signature))
             code.append(def);
     }
     return code;
@@ -87,31 +72,21 @@ LangDef groupFind(const QString &root, const QString &key, const QString &path)
     langEnsure(root, key);
     QList<LangDef> groups;
     for (const LangDef &def : langHits(root, key, Lang::Ruby)) {
-        if (rubySharedStart(def.signature))
+        if (rubyNamedStart(def.signature))
             groups.append(def);
     }
     return langPick(groups, path);
 }
 
-void noteOne(const QStringList &lines, int line, const QString &path, const QString &name,
-             QHash<QString, QList<LangDef>> *out)
+void noteSharedGroups(const QStringList &lines, const QString &path, QHash<QString, QList<LangDef>> *out)
 {
-    (*out)[name].push_back(rubyAt(lines, line, path));
-}
-
-void noteShared(const QStringList &lines, int line, const QString &path, QHash<QString, QList<LangDef>> *out)
-{
-    QString name;
-    if (!rubySharedStart(lines.at(line - 1)))
-        return;
-    if (rubyShared(rubyJoin(lines, line, rubySigEnd(lines, line)), &name))
-        noteOne(lines, line, path, name, out);
-}
-
-void noteGroups(const QStringList &lines, const QString &path, QHash<QString, QList<LangDef>> *out)
-{
-    for (int line = 1; line <= lines.size(); ++line)
-        noteShared(lines, line, path, out);
+    for (int line = 1; line <= lines.size(); ++line) {
+        QString name;
+        if (!rubySharedStart(lines.at(line - 1)))
+            continue;
+        if (rubyShared(rubyJoin(lines, line, rubySigEnd(lines, line)), &name))
+            (*out)[name].push_back(rubyAt(lines, line, path));
+    }
 }
 
 QString soughtName(const QStringList &lines, int line, const QString &word)
@@ -121,7 +96,9 @@ QString soughtName(const QStringList &lines, int line, const QString &word)
     RubyArg group;
     if (line < 1 || line > lines.size() || !rubyHead(lines.at(line - 1), &call, &next) || next <= 0 || call != word)
         return {};
-    return readFirst(lines, line, next, &group) ? group.name : QString();
+    if (rubyUseWord(word))
+        return rubyUseSought(lines, line);
+    return rubyReadFirst(lines, line, next, &group) ? group.name : QString();
 }
 
 } // namespace
@@ -151,16 +128,18 @@ bool rubyShared(const QString &text, QString *name)
 QString rubyGroupName(const QString &root, const QString &path, int line, int column)
 {
     const QStringList lines = rubyFileLines(root, path, line);
-    const RubyArg group = lines.isEmpty() ? RubyArg() : argAt(lines, line);
-    if (group.line != line || column < group.start || column >= group.end)
+    if (lines.isEmpty())
         return {};
-    return group.name;
+    const RubyArg include = includeAt(lines, line);
+    if (include.line == line && column >= include.start && column < include.end)
+        return include.name;
+    return rubyUseArgName(lines, line, column);
 }
 
 QString rubyGroupSeek(const QString &root, const QString &path, int line, const QString &name)
 {
     const QStringList lines = rubyFileLines(root, path, line);
-    if (!rubyIncludeWord(name) || lines.isEmpty())
+    if (lines.isEmpty() || (!rubyIncludeWord(name) && !rubyUseWord(name)))
         return rubySeek(root, path, line, name);
     const QString key = soughtName(lines, line, name);
     return key.isEmpty() ? rubySeek(root, path, line, name) : key;
@@ -184,5 +163,6 @@ LangDef rubyGroupChoose(const QList<LangDef> &hits, const LangSpot &spot)
 void rubyGroupNote(const QStringList &lines, const QString &path, QHash<QString, QList<LangDef>> *out)
 {
     noteRuby(lines, path, out);
-    noteGroups(lines, path, out);
+    noteSharedGroups(lines, path, out);
+    noteParamsGroups(lines, path, out);
 }

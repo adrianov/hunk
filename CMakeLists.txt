@@ -74,6 +74,9 @@ add_library(hunk_core STATIC
   src/RubyDsl.cpp
   src/RubyArg.cpp
   src/RubyGroup.cpp
+  src/RubyParams.cpp
+  src/RubyGrape.cpp
+  src/RubyHelpers.cpp
   src/RubyChain.cpp
   src/RubyLead.cpp
   src/RubyDetail.cpp
@@ -104,6 +107,8 @@ add_executable(hunk
   src/MainChrome.cpp
   src/MainAbout.cpp
   src/MainFilePane.cpp
+  src/MainDir.cpp
+  src/MainPathMenu.cpp
   src/MainTree.cpp
   src/MainHits.cpp
   src/MainHide.cpp
@@ -244,6 +249,8 @@ add_executable(hunk_test
   tests/ruby_name.cpp
   tests/ruby_group.cpp
   tests/ruby_like.cpp
+  tests/ruby_grape.cpp
+  tests/ruby_helpers.cpp
   tests/ruby_recv.cpp
   tests/ruby_type.cpp
   tests/ruby_prec.cpp

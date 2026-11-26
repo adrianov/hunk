@@ -76,6 +76,37 @@ bool rubyIncludeWord(const QString &word)
         || word == QLatin1String("it_behaves_like") || word == QLatin1String("it_should_behave_like");
 }
 
+bool rubyReadFirst(const QStringList &lines, int call, int at, RubyArg *group)
+{
+    for (int line = call; line <= lines.size() && line < call + kRubyArgLook; ++line) {
+        const RubyKind kind = rubyTake(lines.at(line - 1), line == call ? at : 0, group);
+        if (kind == RubyKind::Wait)
+            continue;
+        if (kind != RubyKind::Found)
+            return false;
+        group->line = line;
+        return true;
+    }
+    return false;
+}
+
+bool rubyArgOwns(const RubyArg &group, int line, int at)
+{
+    return group.line == line || at == line;
+}
+
+QString rubySymAt(const QList<RubyArg> &syms, int line, int column, const QString &name)
+{
+    for (const RubyArg &sym : syms) {
+        if (sym.line != line || column < sym.start || column >= sym.end)
+            continue;
+        if (!name.isEmpty() && sym.name != name)
+            continue;
+        return sym.name;
+    }
+    return {};
+}
+
 bool rubyHead(const QString &line, QString *word, int *next)
 {
     int at = rubySkip(line, 0);
