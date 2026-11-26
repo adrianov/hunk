@@ -113,7 +113,7 @@ QString defType(const LangDef &def, const QString &name)
     const QString assoc = assocType(def.signature, name);
     if (!assoc.isEmpty())
         return assoc;
-    if (!def.signature.trimmed().startsWith(QLatin1String("def ")))
+    if (!defSig(def))
         return {};
     const QString body = bodyConst(def.body);
     return body.isEmpty() ? finderType(def.signature + QLatin1Char('\n') + def.body) : body;

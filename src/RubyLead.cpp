@@ -101,7 +101,7 @@ QString bodyConst(const QString &body)
 
 bool methodDef(const LangDef &def, const QString &path)
 {
-    return def.path == path && def.signature.trimmed().startsWith(QLatin1String("def "));
+    return def.path == path && defSig(def);
 }
 
 QString methodConst(const LangSpot &spot, const QString &name)

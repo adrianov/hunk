@@ -18,6 +18,32 @@ bool afterDot(const QString &line, int at, QString *name)
     return rubyWord(line, rubySkip(line, at + 1), name, &at);
 }
 
+// "def" as its own word, not the start of a longer name such as "default".
+bool defKey(const QString &line, int at, int *next)
+{
+    if (!line.mid(at).startsWith(QLatin1String("def")))
+        return false;
+    const int end = at + 3;
+    if (end < line.size() && (line.at(end).isLetterOrNumber() || line.at(end) == QLatin1Char('_')))
+        return false;
+    *next = end;
+    return true;
+}
+
+// Index of "def", including a modifier such as "memoize def cart_items". -1 when the line is not a method.
+int defAt(const QString &line)
+{
+    int at = rubySkip(line, 0);
+    int next = 0;
+    if (defKey(line, at, &next))
+        return at;
+    QString word;
+    if (!rubyWord(line, at, &word, &next))
+        return -1;
+    at = rubySkip(line, next);
+    return defKey(line, at, &next) ? at : -1;
+}
+
 } // namespace
 
 int rubySkip(const QString &line, int at)
@@ -81,14 +107,11 @@ bool rubyWord(const QString &line, int at, QString *word, int *next)
 
 bool rubyDefName(const QString &line, QString *name)
 {
-    int at = rubySkip(line, 0);
-    if (!line.mid(at).startsWith(QLatin1String("def")))
-        return false;
-    at += 3;
-    if (at < line.size() && (line.at(at).isLetterOrNumber() || line.at(at) == QLatin1Char('_')))
+    const int at = defAt(line);
+    if (at < 0)
         return false;
     int next = 0;
-    if (!rubyWord(line, rubySkip(line, at), name, &next))
+    if (!rubyWord(line, rubySkip(line, at + 3), name, &next))
         return false;
     return afterDot(line, next, name);
 }

@@ -12,14 +12,16 @@ namespace {
 bool declLine(const QString &signature)
 {
     const QString line = signature.trimmed();
-    if (line.startsWith(QLatin1String("def ")) || line.contains(QLatin1String(" def ")))
+    QString name;
+    if (rubyDefName(line, &name) || line.contains(QLatin1String(" def ")))
         return false;
     return !line.startsWith(QLatin1String("class ")) && !line.startsWith(QLatin1String("module "));
 }
 
 bool defLine(const QString &signature)
 {
-    return signature.trimmed().startsWith(QLatin1String("def "));
+    QString name;
+    return rubyDefName(signature.section(QLatin1Char('\n'), 0, 0), &name);
 }
 
 LangDef ownedKind(const QString &root, const QString &owner, const QString &name, bool decl)

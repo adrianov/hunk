@@ -356,6 +356,7 @@ Feature: Diff view
     And that call is in the application when one exists, not a spec
     And a short class name such as CatalogSource.model counts
     And a bare call in the same module counts
+    And a method written as "memoize def cart_items" opens from "cart_items.filter_map"
     And a field of that name on another class, such as Current.status_change_context, does not
     And for initialize that call is .new on the class
 

@@ -103,7 +103,8 @@ int methodLast(const QStringList &lines, int opened)
 
 bool defSig(const LangDef &def)
 {
-    return def.signature.trimmed().startsWith(QLatin1String("def "));
+    QString name;
+    return rubyDefName(def.signature.section(QLatin1Char('\n'), 0, 0), &name);
 }
 
 QString constBefore(const QString &text, int dot)

@@ -36,7 +36,8 @@ bool oneDef(const QString &signature)
 {
     int count = 0;
     for (const QString &line : signature.split(QLatin1Char('\n'))) {
-        if (line.trimmed().startsWith(QLatin1String("def ")))
+        QString name;
+        if (rubyDefName(line, &name))
             ++count;
     }
     return count == 1;
@@ -75,8 +76,7 @@ bool parseHop(const QString &rhs, const QString &owner, Hop *hop)
 
 bool wantDef(const LangDef &def, bool instance)
 {
-    return def.signature.trimmed().startsWith(QLatin1String("def "))
-        && def.signature.contains(QLatin1String("def self.")) != instance;
+    return defSig(def) && def.signature.contains(QLatin1String("def self.")) != instance;
 }
 
 LangDef ownedMethod(const QString &root, const Hop &hop)
