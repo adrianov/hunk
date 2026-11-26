@@ -378,6 +378,11 @@ Feature: Diff view
     And a call split over lines, such as it_behaves_like with the name on the next line, opens it too
     And a later argument, such as the path, does not
     And those open shared_examples and shared_examples_for the same way
+    When I hover a use such as "older_trade" or "request_params"
+    Then a popup shows that let or let!, its comment, and its body
+    And Command-click opens that let
+    And a let from an included shared context opens the same way
+    And hovering the let line itself stays quiet
     When I Command-click ":bot_task" in "use :pagination_filters, :bot_task"
     Then the diff shows "params :bot_task" from named_params
     And hovering that name, or use itself, shows that params group, its comment, and its body
@@ -532,6 +537,19 @@ Feature: Diff view
     And require_relative with double quotes or parentheses opens the same way
     And a path with ".rb", or with "./" or "../", is read beside that file
     And a missing file keeps the text cursor
+
+  Scenario: Open a file require names
+    Given a diff of "spec/api/my_trades_spec.rb"
+    And a line reads "require 'rails_helper'"
+    When I hold Command on macOS, or Control on Linux, over "rails_helper"
+    Then the pointer is a hand
+    When I Command-click that name on macOS, or Control-click it on Linux
+    Then the diff shows "spec/rails_helper.rb" from its first line
+    And require with double quotes or parentheses opens the same way
+    And a name is read from the repository root, then under spec, test, lib, and app
+    And a path with ".rb", or with "./" or "../", follows the same rules as require_relative
+    And a word such as my_require does not open a file
+    And a missing file, such as a gem, keeps the text cursor
 
   Scenario: A markdown file can be read rendered
     Given a diff of "README.md"
