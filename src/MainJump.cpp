@@ -9,33 +9,9 @@
 #include "ReviewStore.hpp"
 
 #include <QCheckBox>
-#include <QDir>
-#include <QFile>
 #include <QLineEdit>
 
 namespace {
-
-QStringList plainLines(const QByteArray &bytes)
-{
-    QStringList lines = QString::fromUtf8(bytes).split(QLatin1Char('\n'));
-    if (!lines.isEmpty() && lines.last().isEmpty())
-        lines.removeLast();
-    return lines;
-}
-
-bool readPlain(const QString &root, const QString &path, FileDiff *file)
-{
-    QFile input(QDir(root).filePath(path));
-    if (!input.open(QIODevice::ReadOnly))
-        return false;
-    const QByteArray bytes = input.readAll();
-    if (bytes.contains('\0'))
-        return false;
-    *file = unchangedFile(path, plainLines(bytes));
-    file->opened = true;
-    seedModified(file, root);
-    return true;
-}
 
 int matchRow(const FileDiff &file, const QString &query, bool *oldSide)
 {
@@ -65,7 +41,7 @@ void MainWindow::keepOpened()
             continue;
         }
         FileDiff plain;
-        if (!readPlain(m_root, path, &plain))
+        if (!loadPlain(m_root, path, &plain))
             continue;
         m_doc.files.append(plain);
         still.append(path);
@@ -82,7 +58,7 @@ int MainWindow::plainIndex(const QString &path)
     if (found >= 0)
         return found;
     FileDiff plain;
-    if (!readPlain(m_root, path, &plain))
+    if (!loadPlain(m_root, path, &plain))
         return -1;
     if (!m_opened.contains(path))
         m_opened.append(path);

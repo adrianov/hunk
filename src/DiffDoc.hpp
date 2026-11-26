@@ -121,6 +121,8 @@ void seedModified(DiffDoc *doc, const QString &root);
 void seedModified(FileDiff *file, const QString &root);
 // Both sides of `path`, unchanged. Line numbers match the file.
 FileDiff unchangedFile(const QString &path, const QStringList &lines);
+// Worktree text for an opened unchanged file. False when missing or binary.
+bool loadPlain(const QString &root, const QString &path, FileDiff *file);
 int fileNamed(const DiffDoc &doc, const QString &path);
 int rowForLine(const FileDiff &file, int line, bool *oldSide);
 

@@ -7,6 +7,7 @@
 
 #include <QDateTime>
 #include <QDir>
+#include <QFile>
 #include <QFileInfo>
 #include <QHash>
 #include <QLocale>
@@ -19,6 +20,14 @@ QString baseName(const QString &path)
 {
     const int slash = path.lastIndexOf(QLatin1Char('/'));
     return slash < 0 ? path : path.mid(slash + 1);
+}
+
+QStringList plainLines(const QByteArray &bytes)
+{
+    QStringList lines = QString::fromUtf8(bytes).split(QLatin1Char('\n'));
+    if (!lines.isEmpty() && lines.last().isEmpty())
+        lines.removeLast();
+    return lines;
 }
 
 bool isRename(const FileDiff &file)
@@ -131,6 +140,22 @@ FileDiff unchangedFile(const QString &path, const QStringList &lines)
         file.rows.append(row);
     }
     return file;
+}
+
+bool loadPlain(const QString &root, const QString &path, FileDiff *file)
+{
+    if (!file || root.isEmpty() || path.isEmpty())
+        return false;
+    QFile input(QDir(root).filePath(path));
+    if (!input.open(QIODevice::ReadOnly))
+        return false;
+    const QByteArray bytes = input.readAll();
+    if (bytes.contains('\0'))
+        return false;
+    *file = unchangedFile(path, plainLines(bytes));
+    file->opened = true;
+    seedModified(file, root);
+    return true;
 }
 
 int fileNamed(const DiffDoc &doc, const QString &path)
