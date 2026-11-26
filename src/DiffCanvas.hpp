@@ -166,7 +166,9 @@ private:
     void holdJump(const QString &name, const QString &path, int line, int column, const QString &receiver);
     void finishJump();
     bool mouseEvent(QEvent *event);
+    void clearDef();
     void dropDef();
+    void hideDef();
     void stopDef();
     bool overDef() const;
     DefPopup *ensurePopup();
@@ -285,6 +287,7 @@ private:
     int m_hoverFile = -1;
     int m_hoverRow = -1;
     QTimer m_defTimer;
+    QTimer m_defHide;
     QString m_defName;
     QSet<QString> m_seeking;
     QString m_defPath;

@@ -7,6 +7,7 @@
 #include "DiffColors.hpp"
 #include "DiffDetail.hpp"
 
+#include <QEnterEvent>
 #include <QGuiApplication>
 #include <QLabel>
 #include <QScreen>
@@ -121,6 +122,13 @@ void DefPopup::fitCode(const QFont &font, const QString &code, const QString &pa
 void DefPopup::place(const QPoint &global)
 {
     move(fitPoint(global, size(), screenArea(global)));
+}
+
+void DefPopup::enterEvent(QEnterEvent *event)
+{
+    QFrame::enterEvent(event);
+    if (onEnter)
+        onEnter();
 }
 
 void DefPopup::leaveEvent(QEvent *event)

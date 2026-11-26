@@ -16,6 +16,9 @@ void DiffCanvas::armHover()
     m_defTimer.setSingleShot(true);
     m_defTimer.setInterval(280);
     connect(&m_defTimer, &QTimer::timeout, this, &DiffCanvas::showDef);
+    m_defHide.setSingleShot(true);
+    m_defHide.setInterval(500);
+    connect(&m_defHide, &QTimer::timeout, this, &DiffCanvas::hideDef);
 }
 
 void DiffCanvas::onScroll()
@@ -86,29 +89,44 @@ bool DiffCanvas::overDef() const
     return m_defPopup && m_defPopup->isVisible() && m_defPopup->rect().contains(m_defPopup->mapFromGlobal(QCursor::pos()));
 }
 
-void DiffCanvas::dropDef()
+void DiffCanvas::clearDef()
 {
     m_defName.clear();
     m_defPath.clear();
     m_defLine = 0;
+    m_defColumn = 0;
     m_defReceiver.clear();
+    m_defWait = false;
+}
+
+void DiffCanvas::dropDef()
+{
+    m_defTimer.stop();
     m_defWait = false;
     if (overDef())
         return;
-    if (m_defPopup && m_defPopup->isVisible())
-        m_defTimer.start();
-    else
-        m_defTimer.stop();
+    if (m_defPopup && m_defPopup->isVisible()) {
+        m_defHide.start();
+        return;
+    }
+    m_defHide.stop();
+    clearDef();
+}
+
+void DiffCanvas::hideDef()
+{
+    if (overDef())
+        return;
+    clearDef();
+    if (m_defPopup)
+        m_defPopup->hide();
 }
 
 void DiffCanvas::stopDef()
 {
     m_defTimer.stop();
-    m_defName.clear();
-    m_defPath.clear();
-    m_defLine = 0;
-    m_defReceiver.clear();
-    m_defWait = false;
+    m_defHide.stop();
+    clearDef();
     m_link.clear();
     m_jumpName.clear();
     m_jumpReceiver.clear();
@@ -118,8 +136,11 @@ void DiffCanvas::stopDef()
 
 void DiffCanvas::keepDef(const QString &name, const QString &path, int line, int column, const QString &receiver)
 {
-    if (name == m_defName && path == m_defPath && line == m_defLine && receiver == m_defReceiver)
+    if (name == m_defName && path == m_defPath && line == m_defLine && receiver == m_defReceiver) {
+        m_defHide.stop();
         return;
+    }
+    m_defHide.stop();
     m_defName = name;
     m_defPath = path;
     m_defLine = line;
@@ -149,9 +170,12 @@ DefPopup *DiffCanvas::ensurePopup()
     if (m_defPopup)
         return static_cast<DefPopup *>(m_defPopup);
     auto *popup = new DefPopup(this);
+    popup->onEnter = [this] { m_defHide.stop(); };
     popup->onLeave = [this] {
         if (!rect().contains(mapFromGlobal(QCursor::pos())))
             stopDef();
+        else
+            dropDef();
     };
     m_defPopup = popup;
     return popup;
@@ -163,8 +187,6 @@ void DiffCanvas::showDef()
         return;
     if (m_defName.isEmpty() || m_root.isEmpty()) {
         m_defWait = false;
-        if (m_defPopup)
-            m_defPopup->hide();
         return;
     }
     if (awaitSeek())

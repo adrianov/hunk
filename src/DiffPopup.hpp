@@ -20,10 +20,12 @@ class DefCode;
 class DefPopup : public QFrame {
 public:
     explicit DefPopup(QWidget *parent);
+    std::function<void()> onEnter;
     std::function<void()> onLeave;
     void present(const LangDef &def, const QFont &font, const QPoint &global, const QString &from);
 
 protected:
+    void enterEvent(QEnterEvent *event) override;
     void leaveEvent(QEvent *event) override;
 
 private:

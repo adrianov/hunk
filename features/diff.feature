@@ -350,6 +350,7 @@ Feature: Diff view
     And the popup shows the comment above it, its signature, and its whole body, using the free screen space and scrolling only when it still does not fit
     And that code is colored like the diff, and long lines wrap
     And shared leading spaces are removed
+    And when I move the pointer off that name, the popup stays for a moment so I can reach it and scroll
     When I hover that method's definition
     Then no definition popup appears
     When I hover a call such as ".zero_out" before its method is written
