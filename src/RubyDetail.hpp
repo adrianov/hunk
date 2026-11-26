@@ -46,6 +46,8 @@ QString rubyFollow(const LangSpot &spot, const RubyBound &bound);
 QStringList linesFor(const QString &root, const QString &path);
 void rubyForgetLines();
 LangDef rubyChain(const QList<LangDef> &hits, const LangSpot &spot);
+// An endless method that only calls another method also shows that method.
+LangDef rubyForward(const QString &root, const LangDef &def);
 bool rubyDefName(const QString &line, QString *name);
 QString rubyConst(const QString &text, int start, int end);
 QString rubyParentName(const QString &line);

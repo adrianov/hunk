@@ -24,6 +24,8 @@ struct LangTune {
     void (*use)(const QStringList &lines, const QString &path, const QStringList &names,
                 QHash<QString, QList<LangDef>> *out) = nullptr;
     void (*reset)(int ticket) = nullptr;
+    // Adds the body of a method an endless definition only calls.
+    LangDef (*open)(const QString &root, const LangDef &def) = nullptr;
 };
 
 const LangTune *langTune(Lang lang);

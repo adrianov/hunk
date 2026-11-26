@@ -16,6 +16,11 @@ bool hereDef(const QList<LangDef> &hits, const LangSpot &spot)
     return false;
 }
 
+LangDef showDef(const LangTune *tune, const LangSpot &spot, const LangDef &def)
+{
+    return tune->open ? tune->open(spot.root, def) : def;
+}
+
 } // namespace
 
 bool langReady(const QString &root, const QString &path)
@@ -46,12 +51,12 @@ LangDef lookupDef(const LangSpot &spot)
         return {};
     LangDef extra;
     if (tune->extra && tune->extra(spot, &extra))
-        return extra;
+        return showDef(tune, spot, extra);
     langEnsure(spot.root, spot.name);
     const QList<LangDef> hits = langHits(spot.root, spot.name, tune->lang);
     if (hereDef(hits, spot))
         return {};
     if (tune->choose)
-        return tune->choose(hits, spot);
-    return langPick(hits, spot.path);
+        return showDef(tune, spot, tune->choose(hits, spot));
+    return showDef(tune, spot, langPick(hits, spot.path));
 }

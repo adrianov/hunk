@@ -91,6 +91,7 @@ void testRubyMiss(const QString &root)
 } // namespace
 
 int rubyPickTests();
+int rubyForwardTests();
 int rubyUseTests();
 
 QString sampleRuby()
@@ -135,5 +136,5 @@ int rubyTests()
     CHECK(dir.isValid());
     writeSample(dir.path());
     rubySample(dir.path());
-    return g_fails + rubyPickTests() + rubyUseTests();
+    return g_fails + rubyPickTests() + rubyForwardTests() + rubyUseTests();
 }
