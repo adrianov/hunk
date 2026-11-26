@@ -48,7 +48,7 @@ Qt 6 side-by-side git diff with review comments copied as `path:line` or `path:f
 - `src/DiffAll.cpp` — Ctrl+A selects that pane's file
 - `src/DiffMove.cpp` — arrow keys move and extend the selection
 - `src/DiffStep.cpp` — caret steps by character, word, and line
-- `src/DiffLine.cpp` — a second double-click selects that whole line
+- `src/DiffLine.cpp` — double-click selects a word and drag grows by words; a second double-click selects that whole line
 - `src/DiffHeader.cpp` — file header and labels
 - `src/DiffPaint.cpp` — row paint
 - `src/DiffSide.cpp` — one pane, word highlights, search highlights, selected text

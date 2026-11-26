@@ -277,6 +277,8 @@ Feature: Diff view
     Given a diff is on screen
     When I double-click a word in the left or the right pane
     Then that word is selected
+    When I drag while still holding
+    Then the selection grows by whole words
     When I double-click that word again without pausing
     Then the whole line is selected
     When I select text in the left or the right pane
@@ -434,7 +436,10 @@ Feature: Diff view
   Scenario: Hover an ambiguous Ruby name
     Given a diff of a Ruby file
     When I hover a name that is defined in more than one file
+    And no definition sits under a closer folder
     Then no definition popup appears
+    When one definition sits under a closer folder, such as api_v1/helpers beside api_v1/endpoints
+    Then that definition opens
 
   Scenario: Hover a Ruby class
     Given a diff of a Ruby file
