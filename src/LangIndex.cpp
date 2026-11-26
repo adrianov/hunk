@@ -10,6 +10,8 @@
 #include <QSet>
 #include <QWaitCondition>
 
+#include <limits>
+
 namespace {
 
 QMutex g_mutex;
@@ -77,6 +79,25 @@ bool storePending(const QString &root, int ticket, const QStringList &names, con
     }
     g_done.wakeAll();
     return true;
+}
+
+QStringList folderParts(const QString &path)
+{
+    const QString folder = QFileInfo(path).path();
+    if (folder.isEmpty() || folder == QLatin1String("."))
+        return {};
+    return folder.split(QLatin1Char('/'), Qt::SkipEmptyParts);
+}
+
+// Longer shared folder wins; among those, fewer extra folders on the definition.
+int nearScore(const QString &from, const QString &to)
+{
+    const QStringList here = folderParts(from);
+    const QStringList there = folderParts(to);
+    int shared = 0;
+    while (shared < here.size() && shared < there.size() && here.at(shared) == there.at(shared))
+        ++shared;
+    return shared * 1000 - (there.size() - shared);
 }
 
 } // namespace
@@ -180,20 +201,26 @@ void langEnsure(const QString &root, const QString &name)
 
 LangDef langPick(const QList<LangDef> &defs, const QString &path)
 {
-    const QString folder = QFileInfo(path).path();
-    LangDef near;
-    int count = 0;
+    if (defs.isEmpty())
+        return {};
+    if (defs.size() == 1)
+        return defs.constFirst();
+    LangDef best;
+    int bestScore = std::numeric_limits<int>::min();
+    int ties = 0;
     for (const LangDef &def : defs) {
         if (def.path == path)
             return def;
-        if (QFileInfo(def.path).path() != folder)
+        const int score = nearScore(path, def.path);
+        if (score < bestScore)
             continue;
-        near = def;
-        ++count;
+        if (score == bestScore) {
+            ++ties;
+            continue;
+        }
+        best = def;
+        bestScore = score;
+        ties = 1;
     }
-    if (count == 1)
-        return near;
-    if (defs.size() == 1)
-        return defs.constFirst();
-    return {};
+    return ties == 1 ? best : LangDef();
 }

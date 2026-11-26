@@ -48,10 +48,10 @@ void testRubyNear()
     QTemporaryDir dir;
     CHECK(dir.isValid());
     const QString root = dir.path();
-    CHECK(putFile(root, "a/one.rb", "def near\n  1\nend\n") && putFile(root, "b/two.rb", "def near\n  2\nend\n")
-        && putFile(root, "a/call.rb", "near\n"));
+    CHECK(putFile(root, "a/one.rb", "def near\n  1\nend\n") && putFile(root, "x/y/two.rb", "def near\n  2\nend\n")
+        && putFile(root, "c/call.rb", "near\n"));
     warmLang(root);
-    CHECK(lookupName(root, "a/call.rb", "near").path == QLatin1String("a/one.rb"));
+    CHECK(lookupName(root, "c/call.rb", "near").path == QLatin1String("a/one.rb"));
 }
 
 LangDef bodyAt(const char *text, int line)
