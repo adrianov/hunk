@@ -106,6 +106,15 @@ void testParseContext()
     CHECK(!rubyShared(QStringLiteral("include_context 'when the instance processes bot orders'"), &name));
 }
 
+void testParseEscaped()
+{
+    QString name;
+    CHECK(rubyShared(QStringLiteral("shared_examples 'it\\'s done' do"), &name));
+    CHECK(name == QLatin1String("it\\'s done"));
+    CHECK(rubyShared(QStringLiteral("shared_examples 'foo\\\\' do"), &name));
+    CHECK(name == QLatin1String("foo\\\\"));
+}
+
 void testParseExamples()
 {
     QString name;
@@ -139,6 +148,7 @@ void rubyLikeTests();
 int rubyGroupTests()
 {
     testParseContext();
+    testParseEscaped();
     testParseExamples();
     testContext();
     rubyLikeTests();

@@ -5,9 +5,22 @@
 
 namespace {
 
+int quoteEnd(const QString &text, int at)
+{
+    for (int i = at + 1; i < text.size(); ++i) {
+        if (text.at(i) == QLatin1Char('\\') && i + 1 < text.size()) {
+            ++i;
+            continue;
+        }
+        if (text.at(i) == text.at(at))
+            return i;
+    }
+    return -1;
+}
+
 bool readQuote(const QString &text, int at, RubyArg *group)
 {
-    const int end = text.indexOf(text.at(at), at + 1);
+    const int end = quoteEnd(text, at);
     if (end <= at + 1)
         return false;
     group->name = text.mid(at + 1, end - at - 1);
