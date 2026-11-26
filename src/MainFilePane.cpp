@@ -79,6 +79,9 @@ QString itemPath(const QTreeWidgetItem *item, const DiffDoc &doc)
     const int file = item->data(0, Qt::UserRole).toInt();
     if (file >= 0 && file < doc.files.size())
         return doc.files.at(file).path();
+    const QString hit = item->data(0, Qt::UserRole + 3).toString();
+    if (!hit.isEmpty())
+        return hit;
     if (item->parent())
         return {};
     const QString folder = item->text(0);

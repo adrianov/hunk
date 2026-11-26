@@ -14,6 +14,8 @@
 #include <QStringList>
 #include <QTreeWidget>
 
+bool bodyMatches(const FileDiff &file, const QString &query, QHash<QString, QString> *cache);
+
 namespace {
 
 struct Group {
@@ -37,30 +39,6 @@ void addFile(QList<Group> *groups, QHash<QString, int> *index, int fileIndex, co
     (*groups)[index->value(folder)].files.push_back(fileIndex);
 }
 
-QString diffText(const FileDiff &file)
-{
-    QStringList lines;
-    for (const DiffRow &row : file.rows) {
-        if (row.leftNum > 0)
-            lines.append(row.leftText);
-        if (row.rightNum > 0 && row.rightText != row.leftText)
-            lines.append(row.rightText);
-    }
-    return lines.join(QLatin1Char('\n'));
-}
-
-bool matchesBody(const FileDiff &file, const QString &query, QHash<QString, QString> *cache)
-{
-    if (query.isEmpty())
-        return true;
-    if (file.binary)
-        return false;
-    auto found = cache->find(file.path());
-    if (found == cache->end())
-        found = cache->insert(file.path(), diffText(file));
-    return found->contains(query, Qt::CaseInsensitive);
-}
-
 QList<Group> collectGroups(const DiffDoc &doc, const QString &query, const QString &search,
                            const QHash<QString, QString> &hidden, QHash<QString, QString> *cache)
 {
@@ -68,7 +46,7 @@ QList<Group> collectGroups(const DiffDoc &doc, const QString &query, const QStri
     QHash<QString, int> index;
     for (int fileIndex : listedOrder(doc)) {
         const FileDiff &file = doc.files.at(fileIndex);
-        if (fileHidden(file, hidden) || !matchesQuery(file, query) || !matchesBody(file, search, cache))
+        if (fileHidden(file, hidden) || !matchesQuery(file, query) || !bodyMatches(file, search, cache))
             continue;
         addFile(&groups, &index, fileIndex, file.folder());
     }
@@ -135,17 +113,26 @@ void MainWindow::markSeenFile(int file)
     clearSeenMark(m_tree, file);
 }
 
-void MainWindow::rebuildTree()
+void MainWindow::fillTree(bool project)
 {
     m_diff->setSearch(m_search->text().trimmed());
     m_navLock = true;
     m_tree->setProperty("checkHot", 0);
     m_tree->clear();
-    for (const Group &group :
-         collectGroups(m_doc, m_filter->text().trimmed(), m_search->text().trimmed(), m_hidden, &m_bodies))
-        addFolder(m_tree, group, m_doc, m_seen);
+    if (project)
+        addHits();
+    else {
+        for (const Group &group :
+             collectGroups(m_doc, m_filter->text().trimmed(), m_search->text().trimmed(), m_hidden, &m_bodies))
+            addFolder(m_tree, group, m_doc, m_seen);
+    }
     m_tree->expandAll();
     m_navLock = false;
+}
+
+void MainWindow::rebuildTree()
+{
+    fillTree(projectSearch());
 }
 
 void MainWindow::selectTreeFile(int file)

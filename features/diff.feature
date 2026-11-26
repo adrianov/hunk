@@ -107,6 +107,17 @@ Feature: Diff view
     And matched lines are shown, not folded
     And Filter files still limits that list by name
 
+  Scenario: Search the whole project when the changeset has no match
+    Given a diff is on screen
+    When I type in Search in files
+    And no file in the changeset contains that text
+    Then the list shows files from the repository whose content matches
+    And Filter files still limits that list by name
+    When I choose one of those files
+    Then the diff shows that file at the matching line
+    And the diff highlights that text
+    And matched lines are shown, not folded
+
   Scenario: A new file uses one pane
     Given a diff of a file that was added
     Then that file is shown in one pane
@@ -368,6 +379,10 @@ Feature: Diff view
     When I hover a call such as "MarketSettings.precision"
     Then a popup shows precision on MarketSettings
     And it does not show a schema column of the same name
+    When I hover a call such as "Carts::Items.price" and that method is "def self.price(...) = new(...).price"
+    Then the popup shows that shortcut and the body of "def price"
+    When an endless method only calls another endless method, the popup follows it to the method that has a body
+    And an endless method that is the whole implementation, such as "def bag = items.bag unless packed", stays that one line
 
   Scenario: Hover a class DSL declaration
     Given a diff of a Ruby file

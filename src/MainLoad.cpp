@@ -37,6 +37,7 @@ void MainWindow::rememberRoot(const QString &root)
     if (switched) {
         m_opened.clear();
         loadSeen();
+        dropHits();
     }
 }
 
@@ -94,6 +95,7 @@ void MainWindow::applyBases(const GitResult &result)
 void MainWindow::showLoadError(const GitResult &result)
 {
     m_doc = {};
+    dropLoad();
     m_bodies.clear();
     m_title.clear();
     m_conflict.clear();
@@ -121,6 +123,7 @@ void MainWindow::showLoadedDiff(const GitResult &result)
     m_leftLabel = result.leftLabel;
     m_rightLabel = result.rightLabel;
     m_doc = result.doc;
+    takeChangeset();
     forgetLang();
     keepOpened();
     m_bodies.clear();

@@ -117,6 +117,10 @@ int firstFileIndex(const QTreeWidgetItem *item)
 
 void MainWindow::openTreeItem(QTreeWidgetItem *item)
 {
+    if (const QString path = hitPath(item); !path.isEmpty()) {
+        openHit(path);
+        return;
+    }
     const int index = firstFileIndex(item);
     if (index < 0)
         return;

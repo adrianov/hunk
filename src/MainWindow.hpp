@@ -126,6 +126,7 @@ private:
     void showLoadedTitle();
     void keepOpened();
     void openDefinition(const QString &path, int line);
+    void openHit(const QString &path);
     int plainIndex(const QString &path);
     void showPlain();
     void showAt(int file, int line);
@@ -133,6 +134,17 @@ private:
     void showRepoPath();
     void tintRepoLabel();
     void rebuildTree();
+    void fillTree(bool project);
+    bool projectSearch();
+    void addHits();
+    void dropHits();
+    void dropLoad();
+    void takeChangeset();
+    void armHits(const QString &search);
+    void armGrepTimer();
+    void launchHits();
+    void applyHits(int token, const QStringList &hits);
+    QString hitPath(const QTreeWidgetItem *item) const;
     void loadSeen();
     void markSeenFile(int file);
     void hideReviewed(int file);
@@ -173,6 +185,11 @@ private:
     QLineEdit *m_filter = nullptr;
     QLineEdit *m_search = nullptr;
     QHash<QString, QString> m_bodies;
+    QString m_hitsQuery;
+    QString m_hitsRoot;
+    QStringList m_hits;
+    QSet<QString> m_changeset;
+    int m_grepGen = 0;
     QComboBox *m_mode = nullptr;
     QComboBox *m_base = nullptr;
     QComboBox *m_head = nullptr;
@@ -202,6 +219,7 @@ private:
     QString m_appliedStamp;
     QString m_appliedDiff;
     QTimer m_watch;
+    QTimer m_grep;
     QFileSystemWatcher m_disk;
     QString m_gitDir;
     QString m_watchRoot;

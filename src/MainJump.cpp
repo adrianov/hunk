@@ -9,6 +9,7 @@
 
 #include <QDir>
 #include <QFile>
+#include <QLineEdit>
 
 namespace {
 
@@ -31,6 +32,23 @@ bool readPlain(const QString &root, const QString &path, FileDiff *file)
     *file = unchangedFile(path, plainLines(bytes));
     seedModified(file, root);
     return true;
+}
+
+int matchRow(const FileDiff &file, const QString &query, bool *oldSide)
+{
+    *oldSide = false;
+    if (query.isEmpty())
+        return -1;
+    for (int index = 0; index < file.rows.size(); ++index) {
+        const DiffRow &row = file.rows.at(index);
+        if (row.rightNum > 0 && row.rightText.contains(query, Qt::CaseInsensitive))
+            return index;
+        if (row.leftNum > 0 && row.leftText.contains(query, Qt::CaseInsensitive)) {
+            *oldSide = true;
+            return index;
+        }
+    }
+    return -1;
 }
 
 } // namespace
@@ -73,6 +91,26 @@ void MainWindow::showPlain()
     rebuildTree();
     m_diff->setDoc(m_doc, m_leftLabel, m_rightLabel, hiddenIndexes(m_doc, m_hidden));
     m_md->reload(m_doc, m_root);
+}
+
+void MainWindow::openHit(const QString &path)
+{
+    const int before = m_doc.files.size();
+    const int file = plainIndex(path);
+    if (file < 0)
+        return;
+    if (file >= before)
+        showPlain();
+    else if (fileHidden(m_doc.files.at(file), m_hidden))
+        revealReviewed(file);
+    bool oldSide = false;
+    const int row = matchRow(m_doc.files.at(file), m_search->text().trimmed(), &oldSide);
+    if (row >= 0)
+        m_diff->showRow(file, row, oldSide);
+    else
+        m_diff->showFile(file);
+    selectTreeFile(file);
+    m_md->track(file, m_doc, m_root);
 }
 
 void MainWindow::showAt(int file, int line)

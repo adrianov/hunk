@@ -80,6 +80,7 @@ add_library(hunk_core STATIC
   src/RubyType.cpp
   src/RubyReturn.cpp
   src/RubyFollow.cpp
+  src/RubyForward.cpp
   src/RubyOwner.cpp
   src/RubyFactory.cpp
   src/RubyReceiver.cpp
@@ -104,6 +105,7 @@ add_executable(hunk
   src/MainAbout.cpp
   src/MainFilePane.cpp
   src/MainTree.cpp
+  src/MainHits.cpp
   src/MainHide.cpp
   src/MainNext.cpp
   src/MainSeen.cpp
@@ -159,6 +161,7 @@ add_executable(hunk
   src/GitRename.cpp
   src/GitBlob.cpp
   src/GitCmd.cpp
+  src/GitGrep.cpp
   src/GitStamp.cpp
   src/GitFresh.cpp
   src/GitDrift.cpp
@@ -237,6 +240,7 @@ add_executable(hunk_test
   tests/shift_test.cpp
   tests/ruby_test.cpp
   tests/ruby_pick.cpp
+  tests/ruby_forward.cpp
   tests/ruby_name.cpp
   tests/ruby_group.cpp
   tests/ruby_like.cpp
