@@ -4,7 +4,10 @@
 #include "GitDetail.hpp"
 #include "MainWindow.hpp"
 
+#include <QDir>
+#include <QFileInfo>
 #include <QFutureWatcher>
+#include <QHash>
 #include <QtConcurrent>
 
 QStringList grepFiles(const QString &root, const QString &query)
@@ -53,12 +56,36 @@ QStringList dirFiles(const QString &root, const QString &folder)
     return paths;
 }
 
-QList<FileDiff> dirPlain(const QString &root, const QString &folder)
+namespace {
+
+bool sameStamp(const QString &root, const FileDiff &prior)
 {
+    if (prior.modified <= 0)
+        return false;
+    const QFileInfo info(QDir(root).filePath(prior.path()));
+    return info.exists() && info.lastModified().toMSecsSinceEpoch() == prior.modified;
+}
+
+FileDiff takePrior(const QHash<QString, FileDiff> &priors, const QString &root, const QString &path)
+{
+    const auto found = priors.constFind(path);
+    if (found != priors.cend() && sameStamp(root, *found))
+        return *found;
+    FileDiff plain;
+    return loadPlain(root, path, &plain) ? plain : FileDiff();
+}
+
+} // namespace
+
+QList<FileDiff> dirPlain(const QString &root, const QString &folder, const QList<FileDiff> &prior)
+{
+    QHash<QString, FileDiff> priors;
+    for (const FileDiff &file : prior)
+        priors.insert(file.path(), file);
     QList<FileDiff> files;
     for (const QString &path : dirFiles(root, folder)) {
-        FileDiff plain;
-        if (loadPlain(root, path, &plain))
+        FileDiff plain = takePrior(priors, root, path);
+        if (!plain.path().isEmpty())
             files.append(plain);
     }
     return files;

@@ -41,5 +41,5 @@ void fillDocGaps(DiffDoc *doc, const GitResult &result);
 QStringList grepFiles(const QString &root, const QString &query);
 // Tracked and untracked files directly under `folder` (empty for the repository root).
 QStringList dirFiles(const QString &root, const QString &folder);
-// Those paths with each readable file loaded as an opened unchanged FileDiff.
-QList<FileDiff> dirPlain(const QString &root, const QString &folder);
+// Those paths as opened unchanged FileDiffs. Reuses `prior` entries whose worktree mtime is unchanged.
+QList<FileDiff> dirPlain(const QString &root, const QString &folder, const QList<FileDiff> &prior = {});
