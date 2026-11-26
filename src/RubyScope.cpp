@@ -78,34 +78,12 @@ void pushMethod(const QString &line, QList<Scope> *stack)
     stack->append(method);
 }
 
-bool doWord(const QString &text)
-{
-    for (int from = 0; from < text.size();) {
-        const int at = text.indexOf(QLatin1String(" do"), from);
-        if (at < 0)
-            return false;
-        const int end = at + 3;
-        if (end >= text.size() || !rubyWordChar(text.at(end)))
-            return true;
-        from = end;
-    }
-    return false;
-}
-
-bool blockOpen(const QString &signature)
-{
-    if (doWord(signature))
-        return true;
-    const QString trimmed = signature.trimmed();
-    return trimmed.endsWith(QLatin1Char('{')) || trimmed.endsWith(QLatin1String("{|"));
-}
-
 void noteMetric(const QStringList &lines, int line, const QString &path, const QString &name, const QString &owner,
                 QHash<QString, QList<LangDef>> *out)
 {
     LangDef def = rubyAt(lines, line, path);
     def.owner = owner;
-    if (!blockOpen(def.signature))
+    if (!rubyBlockOpen(def.signature))
         def.body.clear();
     (*out)[name].push_back(def);
 }

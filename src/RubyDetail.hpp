@@ -62,6 +62,8 @@ int rubySigEnd(const QStringList &lines, int line);
 QString rubyJoin(const QStringList &lines, int first, int last);
 LangDef rubyAt(const QStringList &lines, int line, const QString &path);
 bool rubyClosed(const QString &line);
+bool rubyBlockOpen(const QString &signature);
+bool rubySpecPath(const QString &path);
 bool rubyDsl(const QString &line, QString *name);
 // Named groups: include_context opens shared_context; Grape use :group opens params :group.
 struct RubyArg {
@@ -91,6 +93,10 @@ bool rubyShared(const QString &text, QString *name);
 bool rubyParamsStart(const QString &line);
 bool rubyParams(const QString &text, QString *name);
 bool rubyNamedStart(const QString &signature);
+bool rubyLetStart(const QString &line);
+bool rubyLet(const QString &text, QString *name);
+void noteLetGroups(const QStringList &lines, const QString &path, QHash<QString, QList<LangDef>> *out);
+bool rubyLetExtra(const LangSpot &spot, LangDef *out);
 QString rubyUseKey(const LangSpot &spot, const QStringList &lines);
 QString rubyUseArgName(const QStringList &lines, int line, int column);
 QString rubyUseSought(const QStringList &lines, int line);

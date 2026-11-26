@@ -75,6 +75,7 @@ add_library(hunk_core STATIC
   src/RubyArg.cpp
   src/RubyGroup.cpp
   src/RubyParams.cpp
+  src/RubyLet.cpp
   src/RubyGrape.cpp
   src/RubyHelpers.cpp
   src/RubyChain.cpp
@@ -249,6 +250,7 @@ add_executable(hunk_test
   tests/ruby_name.cpp
   tests/ruby_group.cpp
   tests/ruby_like.cpp
+  tests/ruby_let.cpp
   tests/ruby_grape.cpp
   tests/ruby_helpers.cpp
   tests/ruby_recv.cpp

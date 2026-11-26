@@ -4,6 +4,7 @@
 // Grape use :group opens params :group. Params index and helpers live beside this file.
 
 #include "LangTune.hpp"
+#include "RubyDef.hpp"
 #include "RubyDetail.hpp"
 
 namespace {
@@ -119,5 +120,6 @@ QString rubyGrapeSeek(const QString &root, const QString &path, int line, const 
 
 bool rubyGrapeExtra(const LangSpot &spot, LangDef *out)
 {
-    return rubyHelpersExtra(spot, out) || rubyGroupExtra(spot, out);
+    return rubyHelpersExtra(spot, out) || rubyGroupExtra(spot, out) || rubyLetExtra(spot, out)
+        || rubyExtra(spot, out);
 }

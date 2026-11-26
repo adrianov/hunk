@@ -36,7 +36,7 @@ bool rubyParams(const QString &text, QString *name)
 
 bool rubyNamedStart(const QString &signature)
 {
-    return rubySharedStart(signature) || rubyParamsStart(signature);
+    return rubySharedStart(signature) || rubyParamsStart(signature) || rubyLetStart(signature);
 }
 
 void noteParamsGroups(const QStringList &lines, const QString &path, QHash<QString, QList<LangDef>> *out)

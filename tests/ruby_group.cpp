@@ -146,6 +146,7 @@ void testContext()
 void rubyLikeTests();
 void rubyGrapeTests();
 void rubyHelpersTests();
+void rubyLetTests();
 
 int rubyGroupTests()
 {
@@ -156,5 +157,6 @@ int rubyGroupTests()
     rubyLikeTests();
     rubyGrapeTests();
     rubyHelpersTests();
+    rubyLetTests();
     return g_groupFails;
 }

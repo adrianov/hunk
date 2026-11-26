@@ -107,6 +107,27 @@ bool defSig(const LangDef &def)
     return rubyDefName(def.signature.section(QLatin1Char('\n'), 0, 0), &name);
 }
 
+bool rubyBlockOpen(const QString &signature)
+{
+    for (int from = 0; from < signature.size();) {
+        const int at = signature.indexOf(QLatin1String(" do"), from);
+        if (at < 0)
+            break;
+        const int end = at + 3;
+        if (end >= signature.size() || !rubyWordChar(signature.at(end)))
+            return true;
+        from = end;
+    }
+    const QString trimmed = signature.trimmed();
+    return trimmed.endsWith(QLatin1Char('{')) || trimmed.endsWith(QLatin1String("{|"));
+}
+
+bool rubySpecPath(const QString &path)
+{
+    return path.startsWith(QLatin1String("spec/")) || path.startsWith(QLatin1String("test/"))
+        || path.contains(QLatin1String("/spec/")) || path.contains(QLatin1String("/test/"));
+}
+
 QString constBefore(const QString &text, int dot)
 {
     int at = dot;

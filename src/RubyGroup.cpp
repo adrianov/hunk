@@ -57,6 +57,12 @@ QString groupKey(const LangSpot &spot, const QStringList &lines)
     return include.isEmpty() ? rubyUseKey(spot, lines) : include;
 }
 
+// Shared context / examples and Grape params — not RSpec let.
+bool groupStart(const QString &signature)
+{
+    return rubySharedStart(signature) || rubyParamsStart(signature);
+}
+
 QList<LangDef> codeHits(const QList<LangDef> &hits)
 {
     QList<LangDef> code;
@@ -72,7 +78,7 @@ LangDef groupFind(const QString &root, const QString &key, const QString &path)
     langEnsure(root, key);
     QList<LangDef> groups;
     for (const LangDef &def : langHits(root, key, Lang::Ruby)) {
-        if (rubyNamedStart(def.signature))
+        if (groupStart(def.signature))
             groups.append(def);
     }
     return langPick(groups, path);
@@ -150,7 +156,7 @@ bool rubyGroupExtra(const LangSpot &spot, LangDef *out)
     const QStringList lines = rubyFileLines(spot.root, spot.path, spot.line);
     const QString key = lines.isEmpty() || spot.name.isEmpty() ? QString() : groupKey(spot, lines);
     if (key.isEmpty())
-        return rubyExtra(spot, out);
+        return false;
     *out = groupFind(spot.root, key, spot.path);
     return true;
 }
@@ -165,4 +171,5 @@ void rubyGroupNote(const QStringList &lines, const QString &path, QHash<QString,
     noteRuby(lines, path, out);
     noteSharedGroups(lines, path, out);
     noteParamsGroups(lines, path, out);
+    noteLetGroups(lines, path, out);
 }

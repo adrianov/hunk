@@ -8,12 +8,6 @@
 
 namespace {
 
-bool specPath(const QString &path)
-{
-    return path.startsWith(QLatin1String("spec/")) || path.startsWith(QLatin1String("test/"))
-        || path.contains(QLatin1String("/spec/")) || path.contains(QLatin1String("/test/"));
-}
-
 bool methodName(const QString &name)
 {
     return !name.isEmpty() && !name.at(0).isUpper();
@@ -58,7 +52,7 @@ int useRank(const LangDef &use, const LangDef &def, const QString &name)
         return 0;
     if (!ownedUse(use, def, name))
         return 0;
-    if (specPath(use.path))
+    if (rubySpecPath(use.path))
         return 1;
     int score = use.path == def.path ? 2 : 4;
     if (methodName(name) && use.signature.contains(QStringLiteral(".") + name))
